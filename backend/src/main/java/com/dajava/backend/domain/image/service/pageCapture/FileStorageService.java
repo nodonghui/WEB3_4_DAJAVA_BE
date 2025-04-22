@@ -1,6 +1,7 @@
 package com.dajava.backend.domain.image.service.pageCapture;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.dajava.backend.domain.image.ImageDimensions;
+import com.dajava.backend.domain.image.dto.ImageSaveResponse;
 import com.dajava.backend.domain.image.exception.ImageException;
 import com.dajava.backend.domain.register.entity.PageCaptureData;
 import com.dajava.backend.global.exception.ErrorCode;
@@ -149,22 +151,21 @@ public class FileStorageService {
 	 * @param originalFilename 원본 파일명 (확장자 추출용)
 	 * @return 저장된 파일명
 	 */
-	public String storeBase64Image(String base64Image, String originalFilename) {
+	public ImageSaveResponse storeBase64Image(String base64Image, String originalFilename) {
 		String fileExtension = getExtension(originalFilename);
 		String fileName = UUID.randomUUID().toString() + fileExtension;
 
-		saveBase64ImageToFile(base64Image, fileName);
-		return fileName;
+		return saveBase64ImageToFile(base64Image, fileName);
 	}
 
 	/**
 	 * Base64로 인코딩된 이미지를 기존 PageCaptureData에 업데이트합니다.
 	 * @param base64Image Base64로 인코딩된 이미지 데이터
-	 * @param pageData 업데이트할 PageCaptureData 객체
+	 * @param pageData 기존 파일명을 가져올 PageCaptureData 객체
 	 * @param originalFilename 원본 파일명 (확장자 추출용)
 	 * @return 저장된 파일명
 	 */
-	public String updateBase64Image(String base64Image, PageCaptureData pageData, String originalFilename) {
+	public ImageSaveResponse updateBase64Image(String base64Image, PageCaptureData pageData, String originalFilename) {
 		String fileExtension = getExtension(originalFilename);
 		String fileName = pageData.getCaptureFileName();
 
@@ -178,18 +179,16 @@ public class FileStorageService {
 			}
 		}
 
-		saveBase64ImageToFile(base64Image, fileName);
-		pageData.updateCaptureFileName(fileName);
-
-		return fileName;
+		return saveBase64ImageToFile(base64Image, fileName);
 	}
 
 	/**
 	 * Base64 인코딩된 이미지를 디코딩하여 파일로 저장하는 공통 메서드
 	 * @param base64Image Base64로 인코딩된 이미지 데이터
 	 * @param fileName 저장할 파일명
+	 * @return ImageSaveResponse 사진의 너비 시작 범위, 저장 이름
 	 */
-	private void saveBase64ImageToFile(String base64Image, String fileName) {
+	private ImageSaveResponse saveBase64ImageToFile(String base64Image, String fileName) {
 		try {
 			// data:image/jpeg;base64, 형식 처리
 			if (base64Image.contains(",")) {
@@ -199,6 +198,16 @@ public class FileStorageService {
 			// Base64 디코딩
 			byte[] imageData = java.util.Base64.getDecoder().decode(base64Image);
 
+			ByteArrayInputStream bais = new ByteArrayInputStream(imageData);
+			BufferedImage image = ImageIO.read(bais);
+
+			int width = 0;
+			int widthRange = 0;
+			if (image != null) {
+				width = image.getWidth();
+				widthRange = (width / 100) * 100;
+			}
+
 			// 파일 저장
 			Path targetLocation = this.fileStorageLocation.resolve(fileName).normalize();
 			if (!targetLocation.startsWith(this.fileStorageLocation)) {
@@ -206,6 +215,9 @@ public class FileStorageService {
 			}
 
 			Files.write(targetLocation, imageData);
+
+			return new ImageSaveResponse(widthRange, fileName);
+
 		} catch (IOException ex) {
 			throw new RuntimeException("Base64 이미지 저장에 실패했습니다: " + fileName, ex);
 		}
