@@ -59,7 +59,7 @@ public enum ErrorCode {
 	IMAGE_IO_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 읽기 중 오류가 발생했습니다."),
 
 	// heatmap
-	ELASTICSEARCH_QUERY_FAILED(HttpStatus.BAD_REQUEST,"es 쿼리문이 실패했습니다"),
+	ELASTICSEARCH_QUERY_FAILED(HttpStatus.BAD_REQUEST,"es 쿼리문이 실패했습니다");
 
 	private final HttpStatus httpStatus;
 	private final String description;

@@ -39,7 +39,9 @@ public class EsMoveEventAnalyzer implements EsAnalyzer<PointerMoveEventDocument>
 	@Override
 	public void analyze(List<PointerMoveEventDocument> eventDocuments) {
 		//가져올때 es에서 정렬해 가져옴
+		log.info("무브 이벤트 분석 시작 - 이벤트 수: {}", eventDocuments.size());
 		detectZigzagMovementByAngle(eventDocuments);
+		log.info("무브 이벤트 분석 완료");
 
 	}
 
@@ -79,6 +81,11 @@ public class EsMoveEventAnalyzer implements EsAnalyzer<PointerMoveEventDocument>
 	private int removeOldEvents(PointerMoveEventDocument[] window, int start, int end,
 		PointerMoveEventDocument current) {
 		while (start < end && isOutOfTimeRange(window[start % MAXWINDOWSIZE], current)) {
+
+			log.debug("윈도우 시간 초과: 제거 대상 ID={}, 타임스탬프={}",
+				window[start % MAXWINDOWSIZE].getId(),
+				window[start % MAXWINDOWSIZE].getTimestamp());
+
 			start++;
 		}
 		return start;
@@ -142,6 +149,9 @@ public class EsMoveEventAnalyzer implements EsAnalyzer<PointerMoveEventDocument>
 				outliers.add(e1);
 				outliers.add(e2);
 				turnCount++;
+
+				log.debug("지그재그 감지됨: angle={} (threshold={})", angle, angleThresholdDegrees);
+				log.debug("이상치 후보 이벤트 ID들: {}, {}", e1.getId(), e2.getId());
 			}
 		}
 

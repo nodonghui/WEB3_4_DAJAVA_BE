@@ -47,9 +47,13 @@ public class EsScrollEventAnalyzer implements EsAnalyzer<PointerScrollEventDocum
 	@Override
 	public void analyze(List<PointerScrollEventDocument> documents) {
 		//es 에서 조회시 정렬
+		log.info("스크롤 이벤트 분석 시작 - 이벤트 수: {}", documents.size());
+
 		findRageScrollBursts(documents);
 		findBackAndForthScrollOutliers(documents);
 		findTopRepeatScrollOutliers(documents);
+
+		log.info("스크롤 이벤트 분석 완료");
 	}
 
 	/**
@@ -61,8 +65,11 @@ public class EsScrollEventAnalyzer implements EsAnalyzer<PointerScrollEventDocum
 	 */
 	public void findRageScrollBursts(List<PointerScrollEventDocument> events) {
 		if (events == null || events.size() < minEventCount) {
+			log.debug("이벤트 수 부족으로 Rage Scroll 분석 생략");
 			return;
 		}
+
+		log.info("Rage Scroll 분석 시작");
 
 		PointerScrollEventDocument[] window = new PointerScrollEventDocument[events.size()];
 		int start = 0;
@@ -83,7 +90,7 @@ public class EsScrollEventAnalyzer implements EsAnalyzer<PointerScrollEventDocum
 			int rageWithinWindow = processCurrentWindow(windowList, detectedOutliers);
 
 			if (rageWithinWindow >= rageThresholdPerWindow) {
-
+				log.info("Rage Scroll 이상치 감지 - 이벤트 수: {}, 윈도우 범위: {}~{}", windowList.size(), start, end);
 				start = end; // 윈도우 초기화 (중복 감지 방지)
 			}
 		}
@@ -179,6 +186,8 @@ public class EsScrollEventAnalyzer implements EsAnalyzer<PointerScrollEventDocum
 			subList.add(next);
 
 			if (isRageScrollPattern(subList)) {
+				log.debug("Rage Scroll 조건 만족 - 이벤트 수: {}, 스크롤 변화량: {}",
+					subList.size(), scrollDelta(subList));
 				outliers.addAll(subList);
 				return j;
 			}
@@ -231,12 +240,16 @@ public class EsScrollEventAnalyzer implements EsAnalyzer<PointerScrollEventDocum
 	 */
 	public void findBackAndForthScrollOutliers(List<PointerScrollEventDocument> events) {
 		if (events == null || events.size() < 2) {
+			log.debug("왕복 스크롤 분석 생략 - 이벤트 수 부족");
 			return;
 		}
+
+		log.info("왕복 스크롤 분석 시작");
 
 		Set<PointerScrollEventDocument> outliers = detectDirectionChanges(events);
 
 		if (outliers.size() >= minDirectionChanges) {
+			log.info("왕복 스크롤 이상치 감지 - 변경 횟수: {}", outliers.size());
 			markOutliers(outliers);
 		}
 	}
@@ -286,12 +299,15 @@ public class EsScrollEventAnalyzer implements EsAnalyzer<PointerScrollEventDocum
 	 */
 	public void findTopRepeatScrollOutliers(List<PointerScrollEventDocument> events) {
 		if (events == null || events.isEmpty()) {
+			log.debug("Top Scroll 분석 생략 - 이벤트 없음");
 			return;
 		}
 
 		PointerScrollEventDocument maxScrollEvent = findMaxScrollEvent(events);
 
 		if (maxScrollEvent != null) {
+			log.info("컨텐츠 소모율 낮은 이상치 감지 - ID: {}, 소모율: {}",
+				maxScrollEvent.getId(), calculateConsumedRatio(maxScrollEvent));
 			markAsOutlier(maxScrollEvent);
 		}
 	}
