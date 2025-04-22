@@ -2,10 +2,14 @@ package com.dajava.backend.domain.register.service;
 
 import static com.dajava.backend.domain.register.converter.RegisterConverter.*;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
+
+import javax.imageio.ImageIO;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -159,15 +163,27 @@ public class RegisterService {
 
 		List<PageCaptureData> captureDataList = register.getCaptureData();
 
-		Optional<PageCaptureData> optionalData = captureDataList.stream()
-			.filter(data -> data.getPageUrl().equals(pageUrl))
-			.findFirst();
-
 		ImageSaveResponse response;
 
 		try {
 			// Base64 이미지 처리 및 저장
 			String content = new String(imageFile.getBytes(), StandardCharsets.UTF_8);
+
+			if (content.contains(",")) {
+				content = content.substring(content.indexOf(",") + 1);
+			}
+
+			byte[] imageData = java.util.Base64.getDecoder().decode(content);
+			BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(imageData));
+			if (bufferedImage == null) {
+				throw new RuntimeException("유효하지 않은 이미지 입니다.");
+			}
+			int widthRange = (bufferedImage.getWidth() / 100) * 100;
+
+			Optional<PageCaptureData> optionalData = captureDataList.stream()
+				.filter(data -> data.getPageUrl().equals(pageUrl)
+					&& data.getWidthRange() == widthRange)
+				.findFirst();
 
 			if (optionalData.isPresent()) {
 				PageCaptureData existingData = optionalData.get();
@@ -177,7 +193,7 @@ public class RegisterService {
 				PageCaptureData newData = PageCaptureData.builder()
 					.pageUrl(pageUrl)
 					.captureFileName(response.fileName())
-					.widthRange(response.widthRange())
+					.widthRange(widthRange)
 					.register(register)
 					.build();
 				captureDataList.add(newData);
