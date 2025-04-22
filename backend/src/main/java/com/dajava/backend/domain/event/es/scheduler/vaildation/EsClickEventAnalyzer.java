@@ -95,10 +95,10 @@ public class EsClickEventAnalyzer implements EsAnalyzer<PointerClickEventDocumen
 	@Override
 	public void analyze(List<PointerClickEventDocument> eventDocuments) {
 		//es에서 시계열로 정렬해 가져옴
-
+		log.info("클릭 이벤트 분석 시작 - 이벤트 수: {}", eventDocuments.size());
 		findRageClicks(eventDocuments);
 		findSuspiciousClicks(eventDocuments);
-
+		log.info("무브 이벤트 분석 완료");
 	}
 
 	/**
@@ -109,12 +109,15 @@ public class EsClickEventAnalyzer implements EsAnalyzer<PointerClickEventDocumen
 	 */
 	public void findRageClicks(List<PointerClickEventDocument> clickEvents) {
 		if (clickEvents == null || clickEvents.size() < minClickCount) {
+			log.debug("이벤트 수 부족으로 Rage click 분석 생략");
 			return;
 		}
 
 		PointerClickEventDocument[] window = new PointerClickEventDocument[clickEvents.size()];
 		int start = 0;
 		int end = 0;
+
+		log.info("Rage click 분석 시작");
 
 		for (PointerClickEventDocument current : clickEvents) {
 			window[end++] = current;
@@ -207,8 +210,11 @@ public class EsClickEventAnalyzer implements EsAnalyzer<PointerClickEventDocumen
 	 */
 	public void findSuspiciousClicks(List<PointerClickEventDocument> events) {
 		if (events == null || events.isEmpty()) {
+			log.info("이벤트 수 부족으로 suspiciousClick 실행 ");
 			return;
 		}
+
+		log.info("suspiciousClicks 분석 시작");
 
 		for (PointerClickEventDocument event : events) {
 			int suspiciousScore = calculateSuspiciousScore(event);
@@ -345,7 +351,7 @@ public class EsClickEventAnalyzer implements EsAnalyzer<PointerClickEventDocumen
 		int score = 0;
 		String elementHtml = event.getElement();
 
-		// 텍스트 컨텐츠 확인 (간단한 구현, 실제로는 더 정교한 파싱이 필요)
+		// 텍스트 컨텐츠 확인 (간단한 구현, 실제로는 더 정교한 파싱이 필요) 추후 자식 요소 재귀 분석 추가
 		boolean hasTextContent = hasTextContent(elementHtml);
 
 		if (!hasTextContent) {

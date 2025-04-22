@@ -52,6 +52,7 @@ public class EsMoveEventAnalyzer implements EsAnalyzer<PointerMoveEventDocument>
 	 */
 	public void detectZigzagMovementByAngle(List<PointerMoveEventDocument> events) {
 		if (events == null || events.size() < 3) {
+			log.debug("이벤트 수 부족으로 지그재그 분석 생략");
 			return;
 		}
 
