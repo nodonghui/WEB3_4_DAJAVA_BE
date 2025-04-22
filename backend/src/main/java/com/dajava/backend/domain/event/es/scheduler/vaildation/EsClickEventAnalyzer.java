@@ -95,11 +95,13 @@ public class EsClickEventAnalyzer implements EsAnalyzer<PointerClickEventDocumen
 	@Override
 	public void analyze(List<PointerClickEventDocument> eventDocuments) {
 		//es에서 시계열로 정렬해 가져옴
-		log.info("클릭 이벤트 분석 시작 - 이벤트 수: {}", eventDocuments.size());
+		log.info("클릭 이벤트 분석 시작 - 이벤트 수: {}, sessionId : {}", eventDocuments.size(),
+			eventDocuments.getFirst().getSessionId());
 		findRageClicks(eventDocuments);
 		findSuspiciousClicks(eventDocuments);
 		log.info("무브 이벤트 분석 완료");
 	}
+
 
 	/**
 	 * Rage Click으로 의심되는 클릭 그룹들을 탐지합니다.
@@ -117,7 +119,7 @@ public class EsClickEventAnalyzer implements EsAnalyzer<PointerClickEventDocumen
 		int start = 0;
 		int end = 0;
 
-		log.info("Rage click 분석 시작");
+		log.info("Rage Click 분석 시작");
 
 		for (PointerClickEventDocument current : clickEvents) {
 			window[end++] = current;
@@ -128,14 +130,16 @@ public class EsClickEventAnalyzer implements EsAnalyzer<PointerClickEventDocumen
 			// 현재 윈도우 내에서 근접 클릭 수 계산
 			int proximityCount = countProximityEvents(window, start, end, current);
 
+
 			// 근접 클릭이 임계값 이상이면 이상치로 처리
 			if (proximityCount >= minClickCount) {
+				log.debug("Rage Click 이상치 로그 개수 : {}", (end - start));
 				markProximityEventsAsOutliers(window, start, end, current);
 				start = end; // 중복 방지
 			}
 		}
 
-		log.info("rage click 감지 완료");
+		log.info("Rage Click 이상치 마킹 완료"); // count 로직 추가 시
 	}
 
 	/**
