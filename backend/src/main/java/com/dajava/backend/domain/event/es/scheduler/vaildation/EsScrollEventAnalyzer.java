@@ -1,29 +1,32 @@
 package com.dajava.backend.domain.event.es.scheduler.vaildation;
 
+import static com.dajava.backend.global.exception.ErrorCode.*;
+
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import com.dajava.backend.domain.event.entity.PointerScrollEvent;
-import com.dajava.backend.domain.event.entity.SessionData;
+
 import com.dajava.backend.domain.event.es.entity.PointerScrollEventDocument;
 import com.dajava.backend.domain.event.exception.PointerEventException;
-import com.dajava.backend.domain.event.scheduler.vaildation.Analyzer;
 import com.dajava.backend.global.component.analyzer.ScrollAnalyzerProperties;
-import com.dajava.backend.global.utils.EventsUtils;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 스크롤 이벤트를 분석합니다.
  * 이상 데이터를 반환합니다.
  * @author NohDongHui
  */
+@Slf4j
 @Component
 public class EsScrollEventAnalyzer implements EsAnalyzer<PointerScrollEventDocument> {
+
+
 
 	private final long timeWindowMs;
 	private final int minScrollDelta;
@@ -44,7 +47,6 @@ public class EsScrollEventAnalyzer implements EsAnalyzer<PointerScrollEventDocum
 	@Override
 	public void analyze(List<PointerScrollEventDocument> documents) {
 		//es 에서 조회시 정렬
-
 		findRageScrollBursts(documents);
 		findBackAndForthScrollOutliers(documents);
 		findTopRepeatScrollOutliers(documents);
@@ -63,44 +65,72 @@ public class EsScrollEventAnalyzer implements EsAnalyzer<PointerScrollEventDocum
 		}
 
 		PointerScrollEventDocument[] window = new PointerScrollEventDocument[events.size()];
-		int start = 0, end = 0;
+		int start = 0;
+		int end = 0;
 
-		int rageBurstCount = 0;
+
 		Set<PointerScrollEventDocument> detectedOutliers = new HashSet<>();
 
 		for (PointerScrollEventDocument current : events) {
 			window[end++] = current;
 
 			// 오래된 이벤트 제거
-			while (start < end && isOutOfTimeRange(window[start], current)) {
-				start++;
-			}
+			start = removeOldEvents(window, start, end, current);
 
-			// 슬라이딩 윈도우를 배열의 start~end 범위로 자르기
-			List<PointerScrollEventDocument> windowList = new ArrayList<>(end - start);
-			for (int i = start; i < end; i++) {
-				windowList.add(window[i]);
-			}
+			// 현재 윈도우에서 이상 이벤트 분석
+			List<PointerScrollEventDocument> windowList = extractWindowList(window, start, end);
 
-			List<PointerScrollEventDocument> windowOutliers = new ArrayList<>();
-			int rageWithinWindow = countRageScrolls(windowList, windowOutliers);
+			int rageWithinWindow = processCurrentWindow(windowList, detectedOutliers);
 
 			if (rageWithinWindow >= rageThresholdPerWindow) {
-				rageBurstCount++;
-				detectedOutliers.addAll(windowOutliers);
+
 				start = end; // 윈도우 초기화 (중복 감지 방지)
 			}
 		}
 
 		// 이상치로 판별된 이벤트에 markAsOutlier 호출
-		for (PointerScrollEventDocument outlier : detectedOutliers) {
-			try {
-				outlier.markAsOutlier();
-			} catch (PointerEventException e) {
-				// 이미 이상치로 마킹된 경우 무시하거나 로깅 가능
-				// log.warn("Already marked as outlier: {}", outlier.getId());
-			}
+		markOutliers(detectedOutliers);
+	}
+
+	/**
+	 * 현재 윈도우에서 이벤트 목록을 추출합니다.
+	 */
+	private List<PointerScrollEventDocument> extractWindowList(PointerScrollEventDocument[] window,
+		int start,
+		int end) {
+
+		List<PointerScrollEventDocument> windowList = new ArrayList<>(end - start);
+		for (int i = start; i < end; i++) {
+			windowList.add(window[i]);
 		}
+		return windowList;
+	}
+
+	/**
+	 * 현재 윈도우를 처리하고 rage scroll 수를 반환합니다.
+	 */
+	private int processCurrentWindow(List<PointerScrollEventDocument> windowList,
+		Set<PointerScrollEventDocument> detectedOutliers) {
+
+		List<PointerScrollEventDocument> windowOutliers = new ArrayList<>();
+		int rageWithinWindow = countRageScrolls(windowList, windowOutliers);
+
+		if (rageWithinWindow >= rageThresholdPerWindow) {
+			detectedOutliers.addAll(windowOutliers);
+		}
+
+		return rageWithinWindow;
+	}
+
+	/**
+	 * 오래된 이벤트를 제거하고 새로운 시작 인덱스를 반환합니다.
+	 */
+	private int removeOldEvents(PointerScrollEventDocument[] window, int start, int end,
+		PointerScrollEventDocument current) {
+		while (start < end && isOutOfTimeRange(window[start], current)) {
+			start++;
+		}
+		return start;
 	}
 
 	/**
@@ -114,32 +144,53 @@ public class EsScrollEventAnalyzer implements EsAnalyzer<PointerScrollEventDocum
 		int index = 0;
 
 		while (index < window.size()) {
-			List<PointerScrollEventDocument> subList = new ArrayList<>();
-			PointerScrollEventDocument base = window.get(index);
-			subList.add(base);
+			List<PointerScrollEventDocument> subList = initializeSubList(window, index);
+			int jumpIndex = findMatchingScrollEventsAndGetJumpIndex(window, subList, index, outliers);
 
-			boolean matched = false;
-
-			for (int j = index + 1; j < window.size(); j++) {
-				PointerScrollEventDocument next = window.get(j);
-
-				subList.add(next);
-
-				if (subList.size() >= minEventCount && scrollDelta(subList) >= minScrollDelta) {
-					count++;
-					outliers.addAll(subList);
-					index = j; // 여기서 i 점프 점프 하지 않는 경우 이미 rage_scroll로 판별된 이벤트 데이터를 중복 검사함
-					matched = true;
-					break;
-				}
-			}
-
-			if (!matched) {
-				index++; // 조건 안 맞았으면 그냥 다음으로
+			if (jumpIndex > index) {
+				count++;
+				index = jumpIndex; // 점프 처리
+			} else {
+				index++;
 			}
 		}
 
 		return count;
+	}
+
+	/**
+	 * 초기 subList를 생성합니다.
+	 */
+	private List<PointerScrollEventDocument> initializeSubList(List<PointerScrollEventDocument> window, int index) {
+		List<PointerScrollEventDocument> subList = new ArrayList<>();
+		subList.add(window.get(index));
+		return subList;
+	}
+
+	/**
+	 * 일치하는 스크롤 이벤트를 찾습니다.
+	 */
+	private int findMatchingScrollEventsAndGetJumpIndex(List<PointerScrollEventDocument> window,
+		List<PointerScrollEventDocument> subList,
+		int startIndex,
+		List<PointerScrollEventDocument> outliers) {
+		for (int j = startIndex + 1; j < window.size(); j++) {
+			PointerScrollEventDocument next = window.get(j);
+			subList.add(next);
+
+			if (isRageScrollPattern(subList)) {
+				outliers.addAll(subList);
+				return j;
+			}
+		}
+		return startIndex; // 조건 안 맞으면 점프 안 함
+	}
+
+	/**
+	 * Rage 스크롤 패턴인지 확인합니다.
+	 */
+	private boolean isRageScrollPattern(List<PointerScrollEventDocument> subList) {
+		return subList.size() >= minEventCount && scrollDelta(subList) >= minScrollDelta;
 	}
 
 	private boolean isOutOfTimeRange(PointerScrollEventDocument first, PointerScrollEventDocument current) {
@@ -153,6 +204,26 @@ public class EsScrollEventAnalyzer implements EsAnalyzer<PointerScrollEventDocum
 	}
 
 	/**
+	 * 이상치로 표시된 문서들을 마킹합니다.
+	 */
+	private void markOutliers(Set<PointerScrollEventDocument> outliers) {
+		for (PointerScrollEventDocument outlier : outliers) {
+			markAsOutlier(outlier);
+		}
+	}
+
+	/**
+	 * 단일 문서를 이상치로 마킹합니다.
+	 */
+	private void markAsOutlier(PointerScrollEventDocument outlier) {
+		try {
+			outlier.markAsOutlier();
+		} catch (PointerEventException e) {
+			log.debug("이미 이상치로 처리된 데이터입니다: {}", outlier.getId());
+		}
+	}
+
+	/**
 	 * 왕복 스크롤 여부를 감지합니다.
 	 *
 	 * @param events 시간순으로 정렬된 PointerScrollEvent 리스트
@@ -163,11 +234,20 @@ public class EsScrollEventAnalyzer implements EsAnalyzer<PointerScrollEventDocum
 			return;
 		}
 
-		int directionChanges = 0;
+		Set<PointerScrollEventDocument> outliers = detectDirectionChanges(events);
+
+		if (outliers.size() >= minDirectionChanges) {
+			markOutliers(outliers);
+		}
+	}
+
+	/**
+	 * 방향 변경을 감지하고 관련 이상치를 반환합니다.
+	 */
+	private Set<PointerScrollEventDocument> detectDirectionChanges(List<PointerScrollEventDocument> events) {
+		Set<PointerScrollEventDocument> outliers = new HashSet<>();
 		Integer prevY = null;
 		Integer prevDirection = null; // 1: down, -1: up
-
-		Set<PointerScrollEventDocument> outliers = new HashSet<>();
 
 		for (PointerScrollEventDocument event : events) {
 			int currentY = event.getScrollY();
@@ -176,8 +256,7 @@ public class EsScrollEventAnalyzer implements EsAnalyzer<PointerScrollEventDocum
 				int delta = currentY - prevY;
 				int direction = Integer.compare(delta, 0); // 1: down, -1: up, 0: no move
 
-				if (direction != 0 && prevDirection != null && direction != prevDirection) {
-					directionChanges++;
+				if (isDirectionChange(direction, prevDirection)) {
 					outliers.add(event);
 				}
 
@@ -189,16 +268,14 @@ public class EsScrollEventAnalyzer implements EsAnalyzer<PointerScrollEventDocum
 			prevY = currentY;
 		}
 
-		if (directionChanges >= minDirectionChanges) {
-			for (PointerScrollEventDocument outlier : outliers) {
-				try {
-					outlier.markAsOutlier();
-				} catch (PointerEventException e) {
-					// 이미 마킹된 경우는 무시 또는 로깅 가능
-					// log.warn("Already marked as outlier: {}", outlier.getId());
-				}
-			}
-		}
+		return outliers;
+	}
+
+	/**
+	 * 방향 변경이 발생했는지 확인합니다.
+	 */
+	private boolean isDirectionChange(int direction, Integer prevDirection) {
+		return direction != 0 && prevDirection != null && direction != prevDirection;
 	}
 
 	/**
@@ -212,15 +289,26 @@ public class EsScrollEventAnalyzer implements EsAnalyzer<PointerScrollEventDocum
 			return;
 		}
 
-		// 컨텐츠 소모율 계산
+		PointerScrollEventDocument maxScrollEvent = findMaxScrollEvent(events);
+
+		if (maxScrollEvent != null) {
+			markAsOutlier(maxScrollEvent);
+		}
+	}
+
+	/**
+	 * 가장 스크롤 소모율이 높은 이벤트를 찾습니다.
+	 */
+	private PointerScrollEventDocument findMaxScrollEvent(List<PointerScrollEventDocument> events) {
 		double maxConsumedRatio = -1.0;
 		PointerScrollEventDocument maxScrollEvent = null;
 
 		for (PointerScrollEventDocument e : events) {
-			if (e.getScrollHeight() == null || e.getScrollHeight() == 0) continue;
+			if (e.getScrollHeight() == null || e.getScrollHeight() == 0) {
+				continue;
+			}
 
-			int bottom = e.getScrollY() + e.getViewportHeight();
-			double ratio = (double) bottom / e.getScrollHeight();
+			double ratio = calculateConsumedRatio(e);
 
 			if (ratio > maxConsumedRatio) {
 				maxConsumedRatio = ratio;
@@ -228,15 +316,15 @@ public class EsScrollEventAnalyzer implements EsAnalyzer<PointerScrollEventDocum
 			}
 		}
 
-		// 소모율이 기준 이하라면, 가장 많이 스크롤한 이벤트만 이상치로 마킹
-		if (maxConsumedRatio < contentConsumedThreshold && maxScrollEvent != null) {
-			try {
-				maxScrollEvent.markAsOutlier();
-			} catch (PointerEventException ex) {
-				// 이미 마킹된 경우는 무시하거나 로깅 가능
-				// log.warn("Already marked as outlier: {}", maxScrollEvent.getId());
-			}
-		}
+		// 소모율이 기준 이하인 경우에만 반환
+		return maxConsumedRatio < contentConsumedThreshold ? maxScrollEvent : null;
 	}
 
+	/**
+	 * 컨텐츠 소모율을 계산합니다.
+	 */
+	private double calculateConsumedRatio(PointerScrollEventDocument event) {
+		int bottom = event.getScrollY() + event.getViewportHeight();
+		return (double) bottom / event.getScrollHeight();
+	}
 }

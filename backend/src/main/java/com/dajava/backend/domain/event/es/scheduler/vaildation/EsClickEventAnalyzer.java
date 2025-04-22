@@ -1,5 +1,7 @@
 package com.dajava.backend.domain.event.es.scheduler.vaildation;
 
+
+
 import java.time.Duration;
 import java.util.List;
 import java.util.Set;
@@ -63,43 +65,79 @@ public class EsClickEventAnalyzer implements EsAnalyzer<PointerClickEventDocumen
 	 * @return void
 	 */
 	public void findRageClicks(List<PointerClickEventDocument> clickEvents) {
-
 		if (clickEvents == null || clickEvents.size() < minClickCount) {
 			return;
 		}
 
 		PointerClickEventDocument[] window = new PointerClickEventDocument[clickEvents.size()];
-		int start = 0, end = 0;
+		int start = 0;
+		int end = 0;
 
 		for (PointerClickEventDocument current : clickEvents) {
 			window[end++] = current;
 
-			while (start < end && isOutOfTimeRange(window[start], current)) {
-				start++;
-			}
+			// 시간 범위를 벗어난 이벤트 제거
+			start = removeOldEvents(window, start, end, current);
 
-			int count = 0;
-			for (int i = start; i < end; i++) {
-				if (isInProximity(window[i], current)) {
-					count++;
-				}
-			}
+			// 현재 윈도우 내에서 근접 클릭 수 계산
+			int proximityCount = countProximityEvents(window, start, end, current);
 
-			if (count >= minClickCount) {
-				for (int i = start; i < end; i++) {
-					if (isInProximity(window[i], current)) {
-						try {
-							window[i].markAsOutlier();
-						} catch (PointerEventException ignored) {
-							// 이미 outlier인 경우 무시
-						}
-					}
-				}
+			// 근접 클릭이 임계값 이상이면 이상치로 처리
+			if (proximityCount >= minClickCount) {
+				markProximityEventsAsOutliers(window, start, end, current);
 				start = end; // 중복 방지
 			}
 		}
 
 		log.info("rage click 감지 완료");
+	}
+
+	/**
+	 * 시간 범위를 벗어난 이벤트를 제거하고 새로운 시작 인덱스를 반환합니다.
+	 */
+	private int removeOldEvents(PointerClickEventDocument[] window, int start, int end,
+		PointerClickEventDocument current) {
+		while (start < end && isOutOfTimeRange(window[start], current)) {
+			start++;
+		}
+		return start;
+	}
+
+	/**
+	 * 주어진 이벤트와 근접한 이벤트의 수를 계산합니다.
+	 */
+	private int countProximityEvents(PointerClickEventDocument[] window, int start, int end,
+		PointerClickEventDocument current) {
+		int count = 0;
+		for (int i = start; i < end; i++) {
+			if (isInProximity(window[i], current)) {
+				count++;
+			}
+		}
+		return count;
+	}
+
+	/**
+	 * 근접 이벤트들을 이상치로 표시합니다.
+	 */
+	private void markProximityEventsAsOutliers(PointerClickEventDocument[] window, int start, int end,
+		PointerClickEventDocument current) {
+		for (int i = start; i < end; i++) {
+			if (isInProximity(window[i], current)) {
+				markAsOutlier(window[i]);
+			}
+		}
+	}
+
+	/**
+	 * 단일 이벤트를 이상치로 표시합니다.
+	 */
+	private void markAsOutlier(PointerClickEventDocument event) {
+		try {
+			event.markAsOutlier();
+		} catch (PointerEventException ignored) {
+			log.debug("이미 이상치로 처리된 데이터입니다: {}", event.getId());
+		}
 	}
 
 	private boolean isOutOfTimeRange(PointerClickEventDocument first, PointerClickEventDocument current) {
@@ -154,10 +192,7 @@ public class EsClickEventAnalyzer implements EsAnalyzer<PointerClickEventDocumen
 		boolean hasOnClick = lowerTag.contains("onclick");
 
 		// 클릭 이벤트가 이상치 조건을 만족하면 플래그 설정 및 true 반환
-		if ((tagMatch || classMatch) && !hasOnClick) {
-			return true;
-		}
-
-		return false;
+		return (tagMatch || classMatch) && !hasOnClick;
 	}
 }
+
