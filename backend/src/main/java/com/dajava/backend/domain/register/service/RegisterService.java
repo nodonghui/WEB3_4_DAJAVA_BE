@@ -180,6 +180,11 @@ public class RegisterService {
 			}
 			int widthRange = (bufferedImage.getWidth() / 100) * 100;
 
+			// widthRange 가 799 이하인 경우 (매우 작은 데스크톱 뷰 및 모바일 뷰) 요청을 튕겨냄
+			if (widthRange <= 700) {
+				throw new RegisterException(ErrorCode.MOBILE_VIEW_NOT_SUPPORTED);
+			}
+
 			Optional<PageCaptureData> optionalData = captureDataList.stream()
 				.filter(data -> data.getPageUrl().equals(pageUrl)
 					&& data.getWidthRange() == widthRange)
