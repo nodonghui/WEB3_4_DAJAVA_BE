@@ -79,8 +79,9 @@ class HeatmapControllerTest {
 		String serialNumber = "5_team_testSerial";
 		String password = "password123!";
 		String type = "click";
+		int widthRange = 1200;
 
-		when(heatmapService.getHeatmap(serialNumber, password, type)).thenReturn(mockResponse);
+		when(heatmapService.getHeatmap(serialNumber, password, type, widthRange)).thenReturn(mockResponse);
 
 		// When & Then
 		mockMvc.perform(get("/v1/solution/heatmap/{serialNumber}/{password}", serialNumber, password)
@@ -107,8 +108,9 @@ class HeatmapControllerTest {
 		String serialNumber = "5_team_testSerial";
 		String password = "password123!";
 		String type = "mousemove";
+		int widthRange = 1200;
 
-		when(heatmapService.getHeatmap(serialNumber, password, type)).thenReturn(mockResponse);
+		when(heatmapService.getHeatmap(serialNumber, password, type, widthRange)).thenReturn(mockResponse);
 
 		// When & Then
 		mockMvc.perform(get("/v1/solution/heatmap/{serialNumber}/{password}", serialNumber, password)
@@ -124,8 +126,9 @@ class HeatmapControllerTest {
 		String serialNumber = "5_team_testSerial";
 		String password = "password123!";
 		String type = "scroll";
+		int widthRange = 1200;
 
-		when(heatmapService.getHeatmap(serialNumber, password, type)).thenReturn(mockResponse);
+		when(heatmapService.getHeatmap(serialNumber, password, type, widthRange)).thenReturn(mockResponse);
 
 		// When & Then
 		mockMvc.perform(get("/v1/solution/heatmap/{serialNumber}/{password}", serialNumber, password)
@@ -141,8 +144,9 @@ class HeatmapControllerTest {
 		String serialNumber = "INVALID_SN";
 		String password = "password123!";
 		String type = "click";
+		int widthRange = 1200;
 
-		when(heatmapService.getHeatmap(serialNumber, password, type))
+		when(heatmapService.getHeatmap(serialNumber, password, type, widthRange))
 			.thenThrow(new HeatmapException(ErrorCode.SOLUTION_SERIAL_NUMBER_INVALID));
 
 		// When & Then
@@ -158,8 +162,9 @@ class HeatmapControllerTest {
 		String serialNumber = "5_team_testSerial";
 		String password = "wrong_password";
 		String type = "click";
+		int widthRange = 1200;
 
-		when(heatmapService.getHeatmap(serialNumber, password, type))
+		when(heatmapService.getHeatmap(serialNumber, password, type, widthRange))
 			.thenThrow(new HeatmapException(ErrorCode.SOLUTION_PASSWORD_INVALID));
 
 		// When & Then
@@ -175,8 +180,9 @@ class HeatmapControllerTest {
 		String serialNumber = "5_team_testSerial";
 		String password = "password123!";
 		String type = "invalid_type";
+		int widthRange = 1200;
 
-		when(heatmapService.getHeatmap(serialNumber, password, type))
+		when(heatmapService.getHeatmap(serialNumber, password, type, widthRange))
 			.thenThrow(new HeatmapException(ErrorCode.INVALID_EVENT_TYPE));
 
 		// When & Then
@@ -192,8 +198,9 @@ class HeatmapControllerTest {
 		String serialNumber = "5_team_testSerial";
 		String password = "password123!";
 		String type = "click";
+		int widthRange = 1200;
 
-		when(heatmapService.getHeatmap(serialNumber, password, type))
+		when(heatmapService.getHeatmap(serialNumber, password, type, widthRange))
 			.thenThrow(new HeatmapException(ErrorCode.SOLUTION_DATA_NOT_FOUND));
 
 		// When & Then
@@ -209,8 +216,9 @@ class HeatmapControllerTest {
 		String serialNumber = "5_team_testSerial";
 		String password = "password123!";
 		String type = "click";
+		int widthRange = 1200;
 
-		when(heatmapService.getHeatmap(serialNumber, password, type))
+		when(heatmapService.getHeatmap(serialNumber, password, type, widthRange))
 			.thenThrow(new HeatmapException(ErrorCode.SOLUTION_EVENT_DATA_NOT_FOUND));
 
 		// When & Then
