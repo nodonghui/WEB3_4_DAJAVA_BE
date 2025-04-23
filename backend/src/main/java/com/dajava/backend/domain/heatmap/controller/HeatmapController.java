@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dajava.backend.domain.heatmap.dto.HeatmapResponse;
+import com.dajava.backend.domain.heatmap.dto.HeatmapWidthsResponse;
 import com.dajava.backend.domain.heatmap.service.HeatmapService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,5 +41,18 @@ public class HeatmapController {
 		@RequestParam String type
 	) {
 		return heatmapService.getHeatmap(serialNumber, password, type);
+	}
+
+	@Operation(
+		summary = "히트맵 너비 범위 리스트 조회",
+		description = "pageCaptureData에 존재하는 widthRange 리스트를 반환해 히트맵 조건을 선택할 수 있도록 합니다."
+	)
+	@GetMapping("/heatmap/widths/{serialNumber}/{password}")
+	@ResponseStatus(HttpStatus.OK)
+	public HeatmapWidthsResponse getHeatmapWidths(
+		@PathVariable String serialNumber,
+		@PathVariable String password
+	) {
+		return heatmapService.getWidths(serialNumber, password);
 	}
 }
