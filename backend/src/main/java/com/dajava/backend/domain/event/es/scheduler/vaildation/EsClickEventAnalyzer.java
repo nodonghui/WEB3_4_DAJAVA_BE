@@ -353,7 +353,7 @@ public class EsClickEventAnalyzer implements EsAnalyzer<PointerClickEventDocumen
 	/**
 	 * 컨텐츠 기반 점수를 계산합니다.
 	 */
-	private int calculateContentScore(PointerClickEventDocument event) {
+	public int calculateContentScore(PointerClickEventDocument event) {
 		int score = 0;
 		String elementHtml = event.getElement();
 
