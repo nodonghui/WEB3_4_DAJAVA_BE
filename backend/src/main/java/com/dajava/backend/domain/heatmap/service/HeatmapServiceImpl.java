@@ -24,6 +24,7 @@ import com.dajava.backend.domain.event.es.repository.SolutionEventDocumentReposi
 import com.dajava.backend.domain.heatmap.dto.GridCell;
 import com.dajava.backend.domain.heatmap.dto.HeatmapMetadata;
 import com.dajava.backend.domain.heatmap.dto.HeatmapResponse;
+import com.dajava.backend.domain.heatmap.dto.HeatmapWidthsResponse;
 import com.dajava.backend.domain.heatmap.exception.HeatmapException;
 import com.dajava.backend.domain.heatmap.validation.UrlEqualityValidator;
 import com.dajava.backend.domain.image.ImageDimensions;
@@ -41,7 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 그리드 데이터 생성을 위한 서비스 로직
  * 모든 SolutionEvent 를 각 타입별로 구분하여 그리드 데이터를 누적합니다.
- * 30분 이내에 동일한 요청이 들어오면 캐싱된 데이터를 반환합니다.
+ * 5분 이내에 동일한 요청이 들어오면 캐싱된 데이터를 반환합니다.
  * @author Metronon
  * @since 2025-04-03
  */
@@ -522,5 +523,39 @@ public class HeatmapServiceImpl implements HeatmapService {
 			.gridCells(gridCells)
 			.metadata(metadata)
 			.build();
+	}
+
+	/**
+	 * 현재 조회시 들어온 이미지 및 이벤트 로그로 인해 히트맵을 생성할 수 있는 widthRange 의 List 를 반환합니다.
+	 * 이를 통해 사용자가 원하는 너비의 히트맵을 선택해 확인할 수 있게 합니다.
+	 *
+	 * @param serialNumber register 객체를 얻어오기 위한 serialNumber
+	 * @param password 접근 권한을 확인하기 위한 인증 수단
+	 * @return HeatmapWidthsResponse widthRange 리스트
+	 */
+	@Override
+	public HeatmapWidthsResponse getWidths(String serialNumber, String password) {
+		List<PageCaptureData> pageCaptureDatas = new ArrayList<>();
+
+		Register findRegister = registerRepository.findBySerialNumber(serialNumber)
+			.orElseThrow(() -> new HeatmapException(SOLUTION_SERIAL_NUMBER_INVALID));
+
+		String targetUrl = findRegister.getUrl();
+
+		// 해싱된 password 로 접근 권한 확인
+		if (!PasswordUtils.verifyPassword(password, findRegister.getPassword())) {
+			throw new HeatmapException(SOLUTION_PASSWORD_INVALID);
+		}
+
+		if (!findRegister.getCaptureData().isEmpty()) {
+			pageCaptureDatas = findRegister.getCaptureData();
+		}
+
+		List<Integer> widthRanges = pageCaptureDatas.stream()
+			.filter(data -> data.getPageUrl().equals(targetUrl))
+			.map(PageCaptureData::getWidthRange)
+			.toList();
+
+		return new HeatmapWidthsResponse(widthRanges);
 	}
 }

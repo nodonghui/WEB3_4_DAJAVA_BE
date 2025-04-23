@@ -1,6 +1,7 @@
 package com.dajava.backend.domain.heatmap.service;
 
 import com.dajava.backend.domain.heatmap.dto.HeatmapResponse;
+import com.dajava.backend.domain.heatmap.dto.HeatmapWidthsResponse;
 
 public interface HeatmapService {
 	/**
@@ -11,4 +12,6 @@ public interface HeatmapService {
 	 * @return HeatmapResponse
 	 */
 	HeatmapResponse getHeatmap(String serialNumber, String password, String type);
+
+	HeatmapWidthsResponse getWidths(String serialNumber, String password);
 }
