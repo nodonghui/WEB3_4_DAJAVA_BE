@@ -12,8 +12,10 @@ import org.springframework.stereotype.Component;
 import com.dajava.backend.domain.event.es.entity.PointerClickEventDocument;
 import com.dajava.backend.domain.event.es.scheduler.vaildation.htmlparser.FSMHtmlParser;
 import com.dajava.backend.domain.event.es.scheduler.vaildation.htmlparser.HtmlNode;
+import com.dajava.backend.domain.event.exception.MalformedHtmlNodeException;
 import com.dajava.backend.domain.event.exception.PointerEventException;
 import com.dajava.backend.global.component.analyzer.ClickAnalyzerProperties;
+import com.dajava.backend.global.exception.ErrorCode;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -373,12 +375,12 @@ public class EsClickEventAnalyzer implements EsAnalyzer<PointerClickEventDocumen
 				FSMHtmlParser parser = new FSMHtmlParser();
 				HtmlNode root = parser.parse(elementHtml);
 
-				// ✅ 자식 노드 전체를 재귀적으로 분석
+				//  자식 노드 전체를 재귀적으로 분석
 				for (HtmlNode child : root.children) {
 					score += calculateSuspiciousScoreRecursively(child, 0.5); // 첫 자식은 0.5배부터 시작
 				}
 			} catch (Exception e) {
-				log.warn("자식 요소 분석 중 오류 발생: {}", e.getMessage());
+				log.warn("자식 요소 분석 중 오류 발생, 자식 요소는 점수에 포함시키지 않습니다 : {}", e.getMessage());
 			}
 		}
 
@@ -448,6 +450,9 @@ public class EsClickEventAnalyzer implements EsAnalyzer<PointerClickEventDocumen
 
 	private int calculateSuspiciousScoreRecursively(HtmlNode node, double weight) {
 		int score = 0;
+		if (node.malformed) {
+			throw new MalformedHtmlNodeException(ErrorCode.PARSING_ERROR);
+		}
 
 		// 현재 노드 점수 계산
 		score += (int)(calculateSuspiciousScore(node) * weight);
