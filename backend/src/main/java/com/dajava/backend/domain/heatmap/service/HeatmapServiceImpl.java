@@ -48,6 +48,7 @@ public class HeatmapServiceImpl implements HeatmapService {
 
 	private final RegisterRepository registerRepository;
 	private final FileStorageService fileStorageService;
+	private final SolutionEventFetcher solutionEventFetcher;
 
 	// 고정 그리드 사이즈
 	// 추후 기능 확장시 해당 사이즈를 인자로 받아 조정하도록 만들 계획
@@ -86,7 +87,7 @@ public class HeatmapServiceImpl implements HeatmapService {
 			}
 
 			// ES에 접근 후 데이터 가져오도록 변경
-			List<SolutionEventDocument> events = SolutionEventManager.getAllEvents(serialNumber, sortByTimestamp);
+			List<SolutionEventDocument> events = solutionEventFetcher.getAllEvents(serialNumber, sortByTimestamp);
 
 			// targetUrl 과 일치하고, width 가 widthRange 조건에 충족한 이벤트만 필터링 (프로토콜 무시)
 			List<SolutionEventDocument> filteredEvents = SolutionEventManager.getValidEvents(events, targetUrl, widthRange);
