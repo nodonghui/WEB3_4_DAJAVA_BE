@@ -62,7 +62,7 @@ public class HeatmapServiceImpl implements HeatmapService {
 	private static final int PAGE_SIZE = 1000;
 
 	@Override
-	@Cacheable(value = "heatmapCache", key = "{#serialNumber, #type}")
+	@Cacheable(value = "heatmapCache", key = "{#serialNumber, #type, #widthRange}")
 	@Transactional(readOnly = true)
 	public HeatmapResponse getHeatmap(String serialNumber, String password, String type, int widthRange) {
 		long startTime = System.currentTimeMillis();
