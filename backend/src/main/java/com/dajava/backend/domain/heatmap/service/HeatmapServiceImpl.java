@@ -26,7 +26,6 @@ import com.dajava.backend.domain.heatmap.dto.HeatmapMetadata;
 import com.dajava.backend.domain.heatmap.dto.HeatmapResponse;
 import com.dajava.backend.domain.heatmap.dto.HeatmapWidthsResponse;
 import com.dajava.backend.domain.heatmap.exception.HeatmapException;
-import com.dajava.backend.domain.heatmap.filter.SolutionEventFilter;
 import com.dajava.backend.domain.heatmap.validation.UrlEqualityValidator;
 import com.dajava.backend.domain.image.ImageDimensions;
 import com.dajava.backend.domain.image.service.pageCapture.FileStorageService;
@@ -279,7 +278,7 @@ public class HeatmapServiceImpl implements HeatmapService {
 	 */
 	private HeatmapResponse createCoordinateHeatmap(List<SolutionEventDocument> events, String type, String targetUrl, int widthRange) {
 		// targetUrl 과 일치하고, width 가 widthRange 조건에 충족한 이벤트만 필터링 (프로토콜 무시)
-		List<SolutionEventDocument> filteredEvents = SolutionEventFilter.filter(events, targetUrl, widthRange);
+		List<SolutionEventDocument> filteredEvents = SolutionEventManager.getValidEvents(events, targetUrl, widthRange);
 
 		// 필터링 결과가 없으면 빈 히트맵 리턴
 		if (filteredEvents.isEmpty()) {
@@ -394,7 +393,7 @@ public class HeatmapServiceImpl implements HeatmapService {
 	 */
 	private HeatmapResponse createScrollDepthHeatmap(List<SolutionEventDocument> events, String targetUrl, int widthRange) {
 		// targetUrl 과 일치하고, width 가 widthRange 조건에 충족한 이벤트만 필터링 (프로토콜 무시)
-		List<SolutionEventDocument> filteredEvents = SolutionEventFilter.filter(events, targetUrl, widthRange);
+		List<SolutionEventDocument> filteredEvents = SolutionEventManager.getValidEvents(events, targetUrl, widthRange);
 
 		// 필터링 결과가 없으면 빈 히트맵 리턴
 		if (filteredEvents.isEmpty()) {
