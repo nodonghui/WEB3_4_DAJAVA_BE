@@ -28,7 +28,7 @@ import com.dajava.backend.domain.event.es.scheduler.vaildation.EsScrollEventAnal
 import com.dajava.backend.domain.event.es.service.PointerEventDocumentService;
 import com.dajava.backend.domain.event.es.service.SessionDataDocumentService;
 import com.dajava.backend.domain.event.es.service.SolutionEventDocumentService;
-import com.dajava.backend.global.component.analyzer.ValidateSchedulerProperties;
+import com.dajava.backend.global.component.analyzer.BufferSchedulerProperties;
 
 /*
  * es 리포지드에서 데이터를 꺼내 검증하는 스케줄러 통합테스트 입니다.
@@ -47,14 +47,14 @@ class EsEventValidateSchedulerTest {
 	@Mock private EsMoveEventAnalyzer esMoveEventAnalyzer;
 	@Mock private EsScrollEventAnalyzer esScrollEventAnalyzer;
 
-	@Mock private ValidateSchedulerProperties validateSchedulerProperties;
+	@Mock private BufferSchedulerProperties bufferSchedulerProperties;
 
 	@InjectMocks
 	private EsEventValidateScheduler scheduler;
 
 	@BeforeEach
 	void setup() {
-		when(validateSchedulerProperties.getBatchSize()).thenReturn(100);
+		when(bufferSchedulerProperties.getBatchSize()).thenReturn(100);
 	}
 
 	@Test
