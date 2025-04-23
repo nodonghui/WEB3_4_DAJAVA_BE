@@ -10,6 +10,8 @@ import java.util.Set;
 import org.springframework.stereotype.Component;
 
 import com.dajava.backend.domain.event.es.entity.PointerClickEventDocument;
+import com.dajava.backend.domain.event.es.scheduler.vaildation.htmlparser.FSMHtmlParser;
+import com.dajava.backend.domain.event.es.scheduler.vaildation.htmlparser.HtmlNode;
 import com.dajava.backend.domain.event.exception.PointerEventException;
 import com.dajava.backend.global.component.analyzer.ClickAnalyzerProperties;
 
@@ -36,7 +38,7 @@ public class EsClickEventAnalyzer implements EsAnalyzer<PointerClickEventDocumen
 	}
 
 	// 의심 점수 임계값 - 이 값 이상이면 이상치로 간주
-	private final int SUSPICIOUS_THRESHOLD = 70;
+	private static final int SUSPICIOUS_THRESHOLD = 70;
 
 	// 태그 관련 점수 가중치
 	private static final Map<String, Integer> TAG_SCORES = Map.ofEntries(
@@ -355,20 +357,29 @@ public class EsClickEventAnalyzer implements EsAnalyzer<PointerClickEventDocumen
 		int score = 0;
 		String elementHtml = event.getElement();
 
-		// 텍스트 컨텐츠 확인 (간단한 구현, 실제로는 더 정교한 파싱이 필요) 추후 자식 요소 재귀 분석 추가
 		boolean hasTextContent = hasTextContent(elementHtml);
-
 		if (!hasTextContent) {
 			score += EMPTY_CONTENT_SCORE;
 		} else {
 			score += HAS_TEXT_CONTENT_SCORE;
 		}
 
-		// 자식 요소 존재 여부 확인
 		boolean hasChildElements = hasChildElements(elementHtml);
-
 		if (hasChildElements) {
 			score += HAS_CHILD_ELEMENTS_SCORE;
+
+			//자식 요소 파싱 및 점수 계산
+			try {
+				FSMHtmlParser parser = new FSMHtmlParser();
+				HtmlNode root = parser.parse(elementHtml);
+
+				// ✅ 자식 노드 전체를 재귀적으로 분석
+				for (HtmlNode child : root.children) {
+					score += calculateSuspiciousScoreRecursively(child, 0.5); // 첫 자식은 0.5배부터 시작
+				}
+			} catch (Exception e) {
+				log.warn("자식 요소 분석 중 오류 발생: {}", e.getMessage());
+			}
 		}
 
 		return score;
@@ -391,8 +402,6 @@ public class EsClickEventAnalyzer implements EsAnalyzer<PointerClickEventDocumen
 	private boolean hasChildElements(String elementHtml) {
 		if (elementHtml == null) return false;
 
-		String tagName = extractTagName(elementHtml);
-		String closingTag = "</" + tagName + ">";
 
 		// 여는 태그와 닫는 태그 사이에 다른 태그가 있는지 확인
 		int openingTagEnd = elementHtml.indexOf('>');
@@ -437,7 +446,40 @@ public class EsClickEventAnalyzer implements EsAnalyzer<PointerClickEventDocumen
 		return false;
 	}
 
+	private int calculateSuspiciousScoreRecursively(HtmlNode node, double weight) {
+		int score = 0;
+
+		// 현재 노드 점수 계산
+		score += (int)(calculateSuspiciousScore(node) * weight);
+
+		// 자식 노드도 재귀적으로 계산 (가중치는 점점 낮아짐)
+		for (HtmlNode child : node.children) {
+			score += calculateSuspiciousScoreRecursively(child, weight * 0.5); // 0.5배씩 점점 작아짐
+		}
+
+		return score;
+	}
+
+	private int calculateSuspiciousScore(HtmlNode node) {
+		String element = node.toString().toLowerCase(); // 간단히 string 기반으로 파싱
+
+		int score = 0;
+		score += calculateTagScore(element);
+		score += calculateClassScore(element);
+		score += calculateEventHandlerScore(element);
+
+		if (!node.textContent.isBlank()) {
+			score += HAS_TEXT_CONTENT_SCORE;
+		} else {
+			score += EMPTY_CONTENT_SCORE;
+		}
+
+		if (!node.children.isEmpty()) {
+			score += HAS_CHILD_ELEMENTS_SCORE;
+		}
+
+		return score;
+	}
+
 
 }
-
-
