@@ -64,7 +64,7 @@ public class HeatmapServiceImpl implements HeatmapService {
 	@Override
 	@Cacheable(value = "heatmapCache", key = "{#serialNumber, #type}")
 	@Transactional(readOnly = true)
-	public HeatmapResponse getHeatmap(String serialNumber, String password, String type) {
+	public HeatmapResponse getHeatmap(String serialNumber, String password, String type, int widthRange) {
 		long startTime = System.currentTimeMillis();
 		boolean sortByTimestamp = false;
 		// type 이 scroll 이면 정렬 플래그 변경
@@ -108,9 +108,9 @@ public class HeatmapServiceImpl implements HeatmapService {
 			// 그리드 생성 로직으로 결과값 생성
 			HeatmapResponse response;
 			if ("scroll".equalsIgnoreCase(type)) {
-				response = createScrollDepthHeatmap(events, targetUrl);
+				response = createScrollDepthHeatmap(events, targetUrl, widthRange);
 			} else if ("click".equalsIgnoreCase(type) || "move".equalsIgnoreCase(type)) {
-				response = createCoordinateHeatmap(events, type, targetUrl);
+				response = createCoordinateHeatmap(events, type, targetUrl, widthRange);
 			} else {
 				throw new HeatmapException(INVALID_EVENT_TYPE);
 			}
@@ -119,7 +119,8 @@ public class HeatmapServiceImpl implements HeatmapService {
 			List<PageCaptureData> captureDataList = findRegister.getCaptureData();
 
 			Optional<PageCaptureData> optionalData = captureDataList.stream()
-				.filter(data -> data.getPageUrl().equals(targetUrl))
+				.filter(data -> data.getPageUrl().equals(targetUrl)
+					&& data.getWidthRange() == widthRange)
 				.findFirst();
 
 			if (optionalData.isPresent()) {
@@ -275,10 +276,11 @@ public class HeatmapServiceImpl implements HeatmapService {
 	 * @param type 세션 데이터에서 추출할 로그 데이터의 타입
 	 * @return HeatmapResponse 그리드 데이터와 메타 데이터를 포함한 히트맵 응답 DTO
 	 */
-	private HeatmapResponse createCoordinateHeatmap(List<SolutionEventDocument> events, String type, String targetUrl) {
+	private HeatmapResponse createCoordinateHeatmap(List<SolutionEventDocument> events, String type, String targetUrl, int widthRange) {
 		// targetUrl 과 일치하는 이벤트만 필터링 (프로토콜 무시)
 		List<SolutionEventDocument> filteredEvents = events.stream()
-			.filter(event -> urlEqualityValidator.isMatching(targetUrl, event.getPageUrl()))
+			.filter(event -> urlEqualityValidator.isMatching(targetUrl, event.getPageUrl())
+				&& (event.getBrowserWidth() / 100) * 100 == widthRange)
 			.toList();
 
 		// 필터링 결과가 없으면 빈 히트맵 리턴
@@ -392,10 +394,11 @@ public class HeatmapServiceImpl implements HeatmapService {
 	 * @param events serialNumber 를 통해 가져온 세션 데이터
 	 * @return HeatmapResponse 그리드 데이터와 메타 데이터를 포함한 히트맵 응답 DTO
 	 */
-	private HeatmapResponse createScrollDepthHeatmap(List<SolutionEventDocument> events, String targetUrl) {
+	private HeatmapResponse createScrollDepthHeatmap(List<SolutionEventDocument> events, String targetUrl, int widthRange) {
 		// targetUrl 과 일치하는 이벤트만 필터링 (프로토콜 무시)
 		List<SolutionEventDocument> filteredEvents = events.stream()
-			.filter(event -> urlEqualityValidator.isMatching(targetUrl, event.getPageUrl()))
+			.filter(event -> urlEqualityValidator.isMatching(targetUrl, event.getPageUrl())
+			&& (event.getBrowserWidth() / 100) * 100 == widthRange)
 			.toList();
 
 		// 필터링 결과가 없으면 빈 히트맵 리턴

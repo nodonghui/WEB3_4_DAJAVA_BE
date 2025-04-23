@@ -38,9 +38,10 @@ public class HeatmapController {
 	public HeatmapResponse getHeatmap(
 		@PathVariable String serialNumber,
 		@PathVariable String password,
-		@RequestParam String type
+		@RequestParam String type,
+		@RequestParam int widthRange
 	) {
-		return heatmapService.getHeatmap(serialNumber, password, type);
+		return heatmapService.getHeatmap(serialNumber, password, type, widthRange);
 	}
 
 	@Operation(

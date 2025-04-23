@@ -11,7 +11,7 @@ public interface HeatmapService {
 	 * @param type 시각화 데이터의 타입 정보
 	 * @return HeatmapResponse
 	 */
-	HeatmapResponse getHeatmap(String serialNumber, String password, String type);
+	HeatmapResponse getHeatmap(String serialNumber, String password, String type, int widthRange);
 
 	HeatmapWidthsResponse getWidths(String serialNumber, String password);
 }
