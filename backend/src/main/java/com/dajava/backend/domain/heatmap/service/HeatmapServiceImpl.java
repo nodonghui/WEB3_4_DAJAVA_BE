@@ -108,9 +108,9 @@ public class HeatmapServiceImpl implements HeatmapService {
 			// 그리드 생성 로직으로 결과값 생성
 			HeatmapResponse response;
 			if (sortByTimestamp) {
-				response = createScrollDepthHeatmap(filteredEvents, targetUrl, widthRange);
+				response = createScrollDepthHeatmap(filteredEvents, targetUrl);
 			} else {
-				response = createCoordinateHeatmap(filteredEvents, targetUrl, widthRange);
+				response = createCoordinateHeatmap(filteredEvents, targetUrl);
 			}
 
 			// toBuilder 를 통해 pageCapture 경로값 추가
@@ -223,7 +223,7 @@ public class HeatmapServiceImpl implements HeatmapService {
 	 * @param type 세션 데이터에서 추출할 로그 데이터의 타입
 	 * @return HeatmapResponse 그리드 데이터와 메타 데이터를 포함한 히트맵 응답 DTO
 	 */
-	private HeatmapResponse createCoordinateHeatmap(List<SolutionEventDocument> events, String targetUrl, int widthRange) {
+	private HeatmapResponse createCoordinateHeatmap(List<SolutionEventDocument> events, String targetUrl) {
 		// 필터링 결과가 없으면 빈 히트맵 리턴
 		if (events.isEmpty()) {
 			return createEmptyHeatmapResponse();
@@ -326,7 +326,7 @@ public class HeatmapServiceImpl implements HeatmapService {
 	 * @param events serialNumber 를 통해 가져온 세션 데이터
 	 * @return HeatmapResponse 그리드 데이터와 메타 데이터를 포함한 히트맵 응답 DTO
 	 */
-	private HeatmapResponse createScrollDepthHeatmap(List<SolutionEventDocument> events, String targetUrl, int widthRange) {
+	private HeatmapResponse createScrollDepthHeatmap(List<SolutionEventDocument> events, String targetUrl) {
 		// 필터링 결과가 없으면 빈 히트맵 리턴
 		if (events.isEmpty()) {
 			return createEmptyHeatmapResponse();
