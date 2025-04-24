@@ -257,6 +257,11 @@ public class HeatmapServiceImpl implements HeatmapService {
 			int x = event.getClientX();
 			int y = event.getClientY() + event.getScrollY();
 
+			// 상대 좌표로 변환
+			// 강제 형변환에서 소수점이 버려지기 때문에 float 사용으로 메모리 사용 최적화
+			float relativeX = (float) x / event.getBrowserWidth();
+			float relativeY = (float) y / event.getScrollHeight();
+
 			// 이벤트 시간 업데이트
 			if (firstEventTime == null || event.getTimestamp().isBefore(firstEventTime)) {
 				firstEventTime = event.getTimestamp();
@@ -266,8 +271,17 @@ public class HeatmapServiceImpl implements HeatmapService {
 			}
 
 			// 그리드 좌표 계산
-			int gridX = x / GRID_SIZE;
-			int gridY = y / GRID_SIZE;
+			int totalGridsX = maxPageWidth / GRID_SIZE;
+			int totalGridsY = maxPageHeight / GRID_SIZE;
+
+			// 강제 형변환으로 그리드 할당
+			int gridX = (int) (relativeX * totalGridsX);
+			int gridY = (int) (relativeY * totalGridsY);
+
+			// 그리드 범위 제한
+			gridX = Math.min(Math.max(gridX, 0), totalGridsX - 1);
+			gridY = Math.min(Math.max(gridY, 0), totalGridsY - 1);
+
 			String gridKey = gridX + ":" + gridY;
 
 			// 해당 그리드 셀 카운트 증가
@@ -341,7 +355,7 @@ public class HeatmapServiceImpl implements HeatmapService {
 		LocalDateTime lastEventTime = events.getLast().getTimestamp();
 
 		// 화면 체류 시간 저장을 위한 HashMap
-		Map<Integer, Long> durationByGridY = new HashMap<>();
+		Map<Integer, Long> durationByRelativeGridY = new HashMap<>();
 
 		// 세션을 구분하기 위한 고유 식별자 저장 HashSet
 		Set<String> sessionIds = new HashSet<>();
@@ -374,24 +388,35 @@ public class HeatmapServiceImpl implements HeatmapService {
 			int viewportHeight = prevEvent.getViewportHeight() != null ? prevEvent.getViewportHeight() : 1024;
 			int viewportBottom = viewportTop + viewportHeight;
 
-			// 화면 그리드 단위로 처리하기 위해 범위 지정
-			int gridYStart = viewportTop / GRID_SIZE;
-			int gridYEnd = viewportBottom / GRID_SIZE;
+			int scrollHeight = prevEvent.getScrollHeight() != null ? prevEvent.getScrollHeight() : viewportHeight;
+
+			// 상대적 위치 계산 (0~1 범위)
+			double relativeTop = (double) viewportTop / scrollHeight;
+			double relativeBottom = (double) viewportBottom / scrollHeight;
+
+			// 상대 위치를 총 그리드 개수에 맞게 스케일링
+			int totalGridsY = maxPageHeight / GRID_SIZE;
+			int gridYStart = (int) (relativeTop * totalGridsY);
+			int gridYEnd = (int) (relativeBottom * totalGridsY);
+
+			// 그리드 범위 제한
+			gridYStart = Math.max(0, gridYStart);
+			gridYEnd = Math.min(totalGridsY - 1, gridYEnd);
 
 			// 지정된 범위로 각 그리드에 체류 시간 설정
-			for (int gridY = gridYStart; gridY < gridYEnd; gridY++) {
-				durationByGridY.put(gridY, durationByGridY.getOrDefault(gridY, 0L) + duration);
+			for (int gridY = gridYStart; gridY <= gridYEnd; gridY++) {
+				durationByRelativeGridY.put(gridY, durationByRelativeGridY.getOrDefault(gridY, 0L) + duration);
 			}
 
 			prevEvent = cntEvent;
 		}
 
 		// 최대 체류 시간
-		long maxDuration = durationByGridY.values().stream().max(Long::compareTo).orElse(1L);
+		long maxDuration = durationByRelativeGridY.values().stream().max(Long::compareTo).orElse(1L);
 
 		// 그리드 셀 리스트 생성
 		List<GridCell> gridCells = new ArrayList<>();
-		for (Map.Entry<Integer, Long> entry : durationByGridY.entrySet()) {
+		for (Map.Entry<Integer, Long> entry : durationByRelativeGridY.entrySet()) {
 			int gridY = entry.getKey();
 			long duration = entry.getValue();
 
