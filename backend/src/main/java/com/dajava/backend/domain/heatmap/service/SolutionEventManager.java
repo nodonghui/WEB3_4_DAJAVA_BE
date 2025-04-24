@@ -1,6 +1,7 @@
 package com.dajava.backend.domain.heatmap.service;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 
@@ -44,5 +45,21 @@ public class SolutionEventManager {
 		return events.stream()
 			.filter(event -> event.getType().equals(type))
 			.toList();
+	}
+
+	protected static int getMaxPageHeight(List<SolutionEventDocument> events) {
+		return events.stream()
+			.map(SolutionEventDocument::getBrowserWidth)
+			.filter(Objects::nonNull)
+			.max(Integer::compare)
+			.orElse(0);
+	}
+
+	protected static int getMaxPageWidth(List<SolutionEventDocument> events) {
+		return events.stream()
+			.map(event -> event.getScrollHeight() != null ? event.getScrollHeight() :
+				(event.getViewportHeight() != null ? event.getViewportHeight() : 0))
+			.max(Integer::compare)
+			.orElse(0);
 	}
 }

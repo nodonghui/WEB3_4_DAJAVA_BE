@@ -92,6 +92,7 @@ public class HeatmapServiceImpl implements HeatmapService {
 			// targetUrl 과 일치하고, width 가 widthRange 조건에 충족한 이벤트만 필터링 (프로토콜 무시)
 			List<SolutionEventDocument> filteredEvents = SolutionEventManager.getValidEvents(events, targetUrl, widthRange);
 
+			// scroll 타입이 아니라면 타입에 따라 이벤트 필터링
 			if (!sortByTimestamp) {
 				filteredEvents = SolutionEventManager.getTargetEvents(filteredEvents, type);
 			}
@@ -223,17 +224,14 @@ public class HeatmapServiceImpl implements HeatmapService {
 	 * @return HeatmapResponse 그리드 데이터와 메타 데이터를 포함한 히트맵 응답 DTO
 	 */
 	private HeatmapResponse createCoordinateHeatmap(List<SolutionEventDocument> events, String targetUrl, int widthRange) {
-		// targetUrl 과 일치하고, width 가 widthRange 조건에 충족한 이벤트만 필터링 (프로토콜 무시)
-		List<SolutionEventDocument> filteredEvents = SolutionEventManager.getValidEvents(events, targetUrl, widthRange);
-
 		// 필터링 결과가 없으면 빈 히트맵 리턴
-		if (filteredEvents.isEmpty()) {
+		if (events.isEmpty()) {
 			return createEmptyHeatmapResponse();
 		}
 
-		// 전체 페이지 크기 초기화
-		int maxPageWidth = 0;
-		int maxPageHeight = 0;
+		// 전체 이벤트에서 max 값 사전 설정
+		int maxPageWidth = SolutionEventManager.getMaxPageWidth(events);
+		int maxPageHeight = SolutionEventManager.getMaxPageHeight(events);
 
 		// 그리드 맵 - 좌표를 키로 사용하는 HashMap
 		Map<String, Integer> gridMap = new HashMap<>();
@@ -245,7 +243,7 @@ public class HeatmapServiceImpl implements HeatmapService {
 		// 세션을 구분하기 위한 고유 식별자 저장 HashSet
 		Set<String> sessionIds = new HashSet<>();
 
-		for (SolutionEventDocument event : filteredEvents) {
+		for (SolutionEventDocument event : events) {
 			// 총 세션수를 count 하기 위해 HashSet 에 추가함
 			if (event.getSessionId() != null) {
 				sessionIds.add(event.getSessionId());
@@ -258,10 +256,6 @@ public class HeatmapServiceImpl implements HeatmapService {
 
 			int x = event.getClientX();
 			int y = event.getClientY() + event.getScrollY();
-
-			// 페이지 크기 업데이트
-			maxPageWidth = Math.max(maxPageWidth, event.getBrowserWidth());
-			maxPageHeight = Math.max(maxPageHeight, event.getScrollHeight());
 
 			// 이벤트 시간 업데이트
 			if (firstEventTime == null || event.getTimestamp().isBefore(firstEventTime)) {
@@ -307,7 +301,7 @@ public class HeatmapServiceImpl implements HeatmapService {
 		// 메타데이터 생성
 		HeatmapMetadata metadata = HeatmapMetadata.builder()
 			.maxCount(maxCount)
-			.totalEvents(filteredEvents.size())
+			.totalEvents(events.size())
 			.pageUrl(targetUrl)
 			.totalSessions(totalSessions)
 			.firstEventTime(firstEventTime)
@@ -333,20 +327,18 @@ public class HeatmapServiceImpl implements HeatmapService {
 	 * @return HeatmapResponse 그리드 데이터와 메타 데이터를 포함한 히트맵 응답 DTO
 	 */
 	private HeatmapResponse createScrollDepthHeatmap(List<SolutionEventDocument> events, String targetUrl, int widthRange) {
-		// targetUrl 과 일치하고, width 가 widthRange 조건에 충족한 이벤트만 필터링 (프로토콜 무시)
-		List<SolutionEventDocument> filteredEvents = SolutionEventManager.getValidEvents(events, targetUrl, widthRange);
-
 		// 필터링 결과가 없으면 빈 히트맵 리턴
-		if (filteredEvents.isEmpty()) {
+		if (events.isEmpty()) {
 			return createEmptyHeatmapResponse();
 		}
 
-		int maxPageWidth = 0;
-		int maxPageHeight = 0;
+		// 전체 이벤트에서 max 값 사전 설정
+		int maxPageWidth = SolutionEventManager.getMaxPageWidth(events);
+		int maxPageHeight = SolutionEventManager.getMaxPageHeight(events);
 
 		// 시간순 정렬로 데이터를 가져오므로, 첫 데이터와 마지막 데이터로 시간 설정
-		LocalDateTime firstEventTime = filteredEvents.getFirst().getTimestamp();
-		LocalDateTime lastEventTime = filteredEvents.getLast().getTimestamp();
+		LocalDateTime firstEventTime = events.getFirst().getTimestamp();
+		LocalDateTime lastEventTime = events.getLast().getTimestamp();
 
 		// 화면 체류 시간 저장을 위한 HashMap
 		Map<Integer, Long> durationByGridY = new HashMap<>();
@@ -355,38 +347,18 @@ public class HeatmapServiceImpl implements HeatmapService {
 		Set<String> sessionIds = new HashSet<>();
 
 		// 시간 간격 비교를 위한 직전 이벤트
-		SolutionEventDocument prevEvent = filteredEvents.getFirst();
+		SolutionEventDocument prevEvent = events.getFirst();
 
 		// 첫번째 데이터 로그의 sessionId 를 HashSet 에 저장
 		sessionIds.add(prevEvent.getSessionId());
 
-		// 전체 페이지 크기 업데이트
-		if (prevEvent.getBrowserWidth() != null) {
-			maxPageWidth = Math.max(maxPageWidth, prevEvent.getBrowserWidth());
-		}
-		if (prevEvent.getScrollHeight() != null) {
-			maxPageHeight = Math.max(maxPageHeight, prevEvent.getScrollHeight());
-		} else if (prevEvent.getViewportHeight() != null) {
-			maxPageHeight = Math.max(maxPageHeight, prevEvent.getViewportHeight());
-		}
-
 		// event 리스트에서 전후 데이터의 타임스탬프를 비교해 grid 정보를 생성하는 로직
-		for (int i = 1; i < filteredEvents.size(); i++) {
-			SolutionEventDocument cntEvent = filteredEvents.get(i);
+		for (int i = 1; i < events.size(); i++) {
+			SolutionEventDocument cntEvent = events.get(i);
 
 			// 총 세션수를 count 하기 위해 HashSet 에 추가함
 			if (cntEvent.getSessionId() != null) {
 				sessionIds.add(cntEvent.getSessionId());
-			}
-
-			// 전체 페이지 크기 업데이트
-			if (cntEvent.getBrowserWidth() != null) {
-				maxPageWidth = Math.max(maxPageWidth, cntEvent.getBrowserWidth());
-			}
-			if (cntEvent.getScrollHeight() != null) {
-				maxPageHeight = Math.max(maxPageHeight, cntEvent.getScrollHeight());
-			} else if (cntEvent.getViewportHeight() != null) {
-				maxPageHeight = Math.max(maxPageHeight, cntEvent.getViewportHeight());
 			}
 
 			// 두 이벤트 시간 간격 계산
@@ -445,7 +417,7 @@ public class HeatmapServiceImpl implements HeatmapService {
 		// 메타데이터 생성
 		HeatmapMetadata metadata = HeatmapMetadata.builder()
 			.maxCount((int)(maxDuration / 100))
-			.totalEvents(filteredEvents.size())
+			.totalEvents(events.size())
 			.pageUrl(targetUrl)
 			.totalSessions(totalSessions)
 			.firstEventTime(firstEventTime)
