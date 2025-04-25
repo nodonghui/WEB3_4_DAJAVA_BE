@@ -3,13 +3,13 @@ server:
 
 spring:
   elasticsearch:
-    uris: http://elasticsearch:9200/
+    uris: http://dajava.db.chsan626.co.kr:9200/
   application:
     name: dajava_server
   datasource:
-    url: jdbc:mysql://team05-mysql.c3ki4qoo6im1.ap-northeast-2.rds.amazonaws.com:3306/dajava
+    url: jdbc:mysql://dev-mysql.cv8406mww28t.ap-northeast-2.rds.amazonaws.com:3306/myapp
     username: lldj
-    password: ${db.password}
+    password: ${db.mysql.password}
     driver-class-name: com.mysql.cj.jdbc.Driver
   cache:
     type: redis
@@ -25,9 +25,9 @@ spring:
         use_sql_comments: true
   data:
     redis:
-      host: redis_1
+      host: dajava.db.chsan626.co.kr
       port: 6379
-      password: 1234
+      password: ${db.redis.password}
 
 springdoc:
   swagger-ui:
