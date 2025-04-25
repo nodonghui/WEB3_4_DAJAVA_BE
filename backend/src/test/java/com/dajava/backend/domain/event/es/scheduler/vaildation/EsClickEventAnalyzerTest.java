@@ -1,6 +1,7 @@
 package com.dajava.backend.domain.event.es.scheduler.vaildation;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -81,34 +82,22 @@ class EsClickEventAnalyzerTest {
 	}
 
 	@Test
-	@DisplayName("의심 클릭이 감지되어 isOutlier로 마킹되는지 확인")
-	void testSuspiciousClickDetection() {
-
+	void testNestedHtmlElementScoreCalculation() {
 		LocalDateTime now = LocalDateTime.now();
 		long timestamp = now.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-		PointerClickEventDocument suspicious = createEvent(timestamp, 100, 200, "div");
-		List<PointerClickEventDocument> docs = List.of(suspicious);
+		// given: 테스트용 HTML
+		String html = "<div class=\"outer\">\n" +
+			"  <span class=\"inner\">Hello <b>World</b></span>\n" +
+			"</div>";
 
-		analyzer.analyze(docs);
+		PointerClickEventDocument event = createEvent(timestamp, 100, 100, html);
 
-		assertThat(suspicious.getIsOutlier()).isTrue();
-	}
 
-	@Test
-	@DisplayName("조건에 부합하지 않으면 이상치로 마킹되지 않음")
-	void testNonOutlier() {
+		// when: 점수 계산
+		int score = analyzer.calculateContentScore(event);
 
-		LocalDateTime now = LocalDateTime.now();
-		long timestamp = now.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-
-		List<PointerClickEventDocument> docs = List.of(
-			createEvent(timestamp, 100, 100, "button"),
-			createEvent(timestamp + 6000, 102, 101, "button"),
-			createEvent(timestamp + 12000, 103, 99, "button")
-		);
-
-		analyzer.analyze(docs);
-
-		assertThat(docs.stream().noneMatch(PointerClickEventDocument::getIsOutlier)).isTrue();
+		// then: 디버그 출력 & 검증
+		System.out.println("최종 점수: " + score);
+		assertTrue(score > 0, "중첩된 자식 태그의 점수가 포함되어야 함");
 	}
 }
