@@ -52,6 +52,9 @@ class HeatmapServiceImplTest {
 	private Register register;
 	private List<SolutionEventDocument> mockDocuments;
 
+	private final int WIDTH_RANGE = 1200;
+	private final int GRID_SIZE = 10;
+
 	@BeforeEach
 	void setUp() {
 		// Register 객체 초기화
@@ -151,7 +154,6 @@ class HeatmapServiceImplTest {
 		String password = "password123!";
 		String type = "click";
 		String targetUrl = "http://localhost:3000/myPage1";
-		int widthRange = 1200;
 
 		try (MockedStatic<PasswordUtils> passwordUtilsMock = mockStatic(PasswordUtils.class)) {
 			when(registerRepository.findBySerialNumber(serialNumber))
@@ -167,7 +169,7 @@ class HeatmapServiceImplTest {
 			when(urlEqualityValidator.isMatching(eq(targetUrl), anyString())).thenReturn(true);
 
 			// When
-			HeatmapResponse response = heatmapService.getHeatmap(serialNumber, password, type, widthRange);
+			HeatmapResponse response = heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE);
 
 			// Then
 			assertNotNull(response);
@@ -188,7 +190,6 @@ class HeatmapServiceImplTest {
 		String password = "password123!";
 		String type = "mousemove";
 		String targetUrl = "http://localhost:3000/myPage1";
-		int widthRange = 1200;
 
 		try (MockedStatic<PasswordUtils> passwordUtilsMock = mockStatic(PasswordUtils.class)) {
 			when(registerRepository.findBySerialNumber(serialNumber))
@@ -203,7 +204,7 @@ class HeatmapServiceImplTest {
 			when(urlEqualityValidator.isMatching(eq(targetUrl), anyString())).thenReturn(true);
 
 			// When
-			HeatmapResponse response = heatmapService.getHeatmap(serialNumber, password, type, widthRange);
+			HeatmapResponse response = heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE);
 
 			// Then
 			assertNotNull(response);
@@ -220,7 +221,6 @@ class HeatmapServiceImplTest {
 		String password = "password123!";
 		String type = "scroll";
 		String targetUrl = "http://localhost:3000/myPage1";
-		int widthRange = 1200;
 
 		try (MockedStatic<PasswordUtils> passwordUtilsMock = mockStatic(PasswordUtils.class)) {
 			when(registerRepository.findBySerialNumber(serialNumber))
@@ -235,7 +235,7 @@ class HeatmapServiceImplTest {
 			when(urlEqualityValidator.isMatching(eq(targetUrl), anyString())).thenReturn(true);
 
 			// When
-			HeatmapResponse response = heatmapService.getHeatmap(serialNumber, password, type, widthRange);
+			HeatmapResponse response = heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE);
 
 			// Then
 			assertNotNull(response);
@@ -251,13 +251,12 @@ class HeatmapServiceImplTest {
 		String serialNumber = "INVALID_SN";
 		String password = "password123!";
 		String type = "click";
-		int widthRange = 1200;
 
 		when(registerRepository.findBySerialNumber(serialNumber))
 			.thenReturn(Optional.empty());
 
 		// When & Then
-		assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type, widthRange));
+		assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE));
 		verify(registerRepository).findBySerialNumber(serialNumber);
 		verify(solutionEventDocumentRepository, never()).findBySerialNumber(any(), any());
 	}
@@ -269,7 +268,6 @@ class HeatmapServiceImplTest {
 		String serialNumber = "5_team_testSerial";
 		String password = "wrong_password";
 		String type = "click";
-		int widthRange = 1200;
 
 		try (MockedStatic<PasswordUtils> passwordUtilsMock = mockStatic(PasswordUtils.class)) {
 			when(registerRepository.findBySerialNumber(serialNumber))
@@ -278,7 +276,7 @@ class HeatmapServiceImplTest {
 				.thenReturn(false);
 
 			// When & Then
-			assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type, widthRange));
+			assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE));
 			verify(registerRepository).findBySerialNumber(serialNumber);
 			verify(solutionEventDocumentRepository, never()).findBySerialNumber(any(), any());
 		}
@@ -291,7 +289,6 @@ class HeatmapServiceImplTest {
 		String serialNumber = "5_team_testSerial";
 		String password = "password123!";
 		String type = "click";
-		int widthRange = 1200;
 
 		try (MockedStatic<PasswordUtils> passwordUtilsMock = mockStatic(PasswordUtils.class)) {
 			when(registerRepository.findBySerialNumber(serialNumber))
@@ -303,7 +300,7 @@ class HeatmapServiceImplTest {
 				.thenReturn(Collections.emptyList());
 
 			// When & Then
-			assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type, widthRange));
+			assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE));
 			verify(solutionEventDocumentRepository).findBySerialNumber(eq(serialNumber), any(Pageable.class));
 		}
 	}
@@ -315,7 +312,6 @@ class HeatmapServiceImplTest {
 		String serialNumber = "5_team_testSerial";
 		String password = "password123!";
 		String type = "click";
-		int widthRange = 1200;
 
 		try (MockedStatic<PasswordUtils> passwordUtilsMock = mockStatic(PasswordUtils.class)) {
 			when(registerRepository.findBySerialNumber(serialNumber))
@@ -327,7 +323,7 @@ class HeatmapServiceImplTest {
 				.thenReturn(Collections.emptyList());
 
 			// When & Then
-			assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type, widthRange));
+			assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE));
 			verify(solutionEventDocumentRepository).findBySerialNumber(eq(serialNumber), any(Pageable.class));
 		}
 	}
@@ -339,7 +335,6 @@ class HeatmapServiceImplTest {
 		String serialNumber = "5_team_testSerial";
 		String password = "password123!";
 		String type = "invalid_type";
-		int widthRange = 1200;
 
 		try (MockedStatic<PasswordUtils> passwordUtilsMock = mockStatic(PasswordUtils.class)) {
 			when(registerRepository.findBySerialNumber(serialNumber))
@@ -353,7 +348,7 @@ class HeatmapServiceImplTest {
 			// URL 비교 메서드 stubbing은 제거 (실제로 호출되지 않음)
 
 			// When & Then
-			assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type, widthRange));
+			assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE));
 
 			// 페이징으로 인해 2번 호출됨
 			verify(solutionEventDocumentRepository, times(2))
@@ -369,7 +364,6 @@ class HeatmapServiceImplTest {
 		String password = "password123!";
 		String type = "click";
 		String targetUrl = "http://localhost:3000/myPage1";
-		int widthRange = 1200;
 
 		// 1500개의 클릭 이벤트 Document 생성 (timestamp: 밀리초 단위)
 		List<SolutionEventDocument> largeEventDocs = new ArrayList<>();
@@ -407,7 +401,7 @@ class HeatmapServiceImplTest {
 			when(urlEqualityValidator.isMatching(eq(targetUrl), anyString())).thenReturn(true);
 
 			// When
-			HeatmapResponse response = heatmapService.getHeatmap(serialNumber, password, type, widthRange);
+			HeatmapResponse response = heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE);
 
 			// Then
 			assertNotNull(response);

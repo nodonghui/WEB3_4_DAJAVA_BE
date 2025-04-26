@@ -50,17 +50,13 @@ public class HeatmapServiceImpl implements HeatmapService {
 	private final FileStorageService fileStorageService;
 	private final SolutionEventFetcher solutionEventFetcher;
 
-	// 고정 그리드 사이즈
-	// 추후 기능 확장시 해당 사이즈를 인자로 받아 조정하도록 만들 계획
-	private static final int GRID_SIZE = 10;
-
 	// 현재 구현된 히트맵 타입
 	private static final Set<String> EVENT_TYPES = Set.of("click", "move", "scroll");
 
 	@Override
 	@Cacheable(value = "heatmapCache", key = "{#serialNumber, #type, #widthRange}")
 	@Transactional(readOnly = true)
-	public HeatmapResponse getHeatmap(String serialNumber, String password, String type, int widthRange) {
+	public HeatmapResponse getHeatmap(String serialNumber, String password, String type, int widthRange, int gridSize) {
 		// 히트맵 데이터 생성 시작 시각
 		long startTime = System.currentTimeMillis();
 
@@ -107,9 +103,9 @@ public class HeatmapServiceImpl implements HeatmapService {
 			// 그리드 생성 로직으로 결과값 생성
 			HeatmapResponse response;
 			if (sortByTimestamp) {
-				response = createScrollDepthHeatmap(filteredEvents, targetUrl);
+				response = createScrollDepthHeatmap(filteredEvents, targetUrl, gridSize);
 			} else {
-				response = createCoordinateHeatmap(filteredEvents, targetUrl);
+				response = createCoordinateHeatmap(filteredEvents, targetUrl, gridSize);
 			}
 
 			// toBuilder 를 통해 pageCapture 경로값 추가
@@ -131,14 +127,14 @@ public class HeatmapServiceImpl implements HeatmapService {
 				if (pageWidth == 0 && pageHeight == 0) {
 					// 이미지가 알 수 없는 이유로 손상된 경우 이벤트 기반 페이지 너비, 높이, 그리드 사이즈 그대로 사용
 					response = response.toBuilder()
-						.gridSize(GRID_SIZE)
+						.gridSize(gridSize)
 						.pageCapture("")
 						.build();
 				} else {
 					response = response.toBuilder()
-						.gridSize(GRID_SIZE)
-						.gridSizeX(pageWidth / GRID_SIZE)
-						.gridSizeY(pageHeight / GRID_SIZE)
+						.gridSize(gridSize)
+						.gridSizeX(pageWidth / gridSize)
+						.gridSizeY(pageHeight / gridSize)
 						.pageCapture(captureFileName)
 						.pageWidth(pageWidth)
 						.pageHeight(pageHeight)
@@ -147,7 +143,7 @@ public class HeatmapServiceImpl implements HeatmapService {
 			} else {
 				// 이미지 관련 데이터가 없어도 반환된 데이터를 그대로 사용
 				response = response.toBuilder()
-					.gridSize(GRID_SIZE)
+					.gridSize(gridSize)
 					.pageCapture("")
 					.build();
 			}
@@ -222,7 +218,7 @@ public class HeatmapServiceImpl implements HeatmapService {
 	 * @param type 세션 데이터에서 추출할 로그 데이터의 타입
 	 * @return HeatmapResponse 그리드 데이터와 메타 데이터를 포함한 히트맵 응답 DTO
 	 */
-	private HeatmapResponse createCoordinateHeatmap(List<SolutionEventDocument> events, String targetUrl) {
+	private HeatmapResponse createCoordinateHeatmap(List<SolutionEventDocument> events, String targetUrl, int gridSize) {
 		// 필터링 결과가 없으면 빈 히트맵 리턴
 		if (events.isEmpty()) {
 			return createEmptyHeatmapResponse();
@@ -270,8 +266,8 @@ public class HeatmapServiceImpl implements HeatmapService {
 			}
 
 			// 그리드 좌표 계산
-			int totalGridsX = maxPageWidth / GRID_SIZE;
-			int totalGridsY = maxPageHeight / GRID_SIZE;
+			int totalGridsX = maxPageWidth / gridSize;
+			int totalGridsY = maxPageHeight / gridSize;
 
 			// 강제 형변환으로 그리드 할당
 			int gridX = (int) (relativeX * totalGridsX);
@@ -323,8 +319,8 @@ public class HeatmapServiceImpl implements HeatmapService {
 
 		// Heatmap Response 생성
 		return HeatmapResponse.builder()
-			.gridSizeX(maxPageWidth / GRID_SIZE)
-			.gridSizeY(maxPageHeight / GRID_SIZE)
+			.gridSizeX(maxPageWidth / gridSize)
+			.gridSizeY(maxPageHeight / gridSize)
 			.pageWidth(maxPageWidth)
 			.pageHeight(maxPageHeight)
 			.gridCells(gridCells)
@@ -339,7 +335,7 @@ public class HeatmapServiceImpl implements HeatmapService {
 	 * @param events serialNumber 를 통해 가져온 세션 데이터
 	 * @return HeatmapResponse 그리드 데이터와 메타 데이터를 포함한 히트맵 응답 DTO
 	 */
-	private HeatmapResponse createScrollDepthHeatmap(List<SolutionEventDocument> events, String targetUrl) {
+	private HeatmapResponse createScrollDepthHeatmap(List<SolutionEventDocument> events, String targetUrl, int gridSize) {
 		// 필터링 결과가 없으면 빈 히트맵 리턴
 		if (events.isEmpty()) {
 			return createEmptyHeatmapResponse();
@@ -394,7 +390,7 @@ public class HeatmapServiceImpl implements HeatmapService {
 			double relativeBottom = (double) viewportBottom / scrollHeight;
 
 			// 상대 위치를 총 그리드 개수에 맞게 스케일링
-			int totalGridsY = maxPageHeight / GRID_SIZE;
+			int totalGridsY = maxPageHeight / gridSize;
 			int gridYStart = (int) (relativeTop * totalGridsY);
 			int gridYEnd = (int) (relativeBottom * totalGridsY);
 
@@ -420,7 +416,7 @@ public class HeatmapServiceImpl implements HeatmapService {
 			long duration = entry.getValue();
 
 			// 페이지 width 를 그리드 단위로 계산
-			int widthInGrids = Math.max(1, maxPageWidth / GRID_SIZE);
+			int widthInGrids = Math.max(1, maxPageWidth / gridSize);
 
 			// 최대 체류 시간 대비 강도 계산
 			int intensity = (int)((duration * 100.0) / maxDuration);
@@ -450,8 +446,8 @@ public class HeatmapServiceImpl implements HeatmapService {
 
 		// Heatmap Response 생성
 		return HeatmapResponse.builder()
-			.gridSizeX(maxPageWidth / GRID_SIZE)
-			.gridSizeY(maxPageHeight / GRID_SIZE)
+			.gridSizeX(maxPageWidth / gridSize)
+			.gridSizeY(maxPageHeight / gridSize)
 			.pageWidth(maxPageWidth)
 			.pageHeight(maxPageHeight)
 			.gridCells(gridCells)
