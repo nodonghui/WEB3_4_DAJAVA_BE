@@ -53,7 +53,6 @@ public class HeatmapServiceImpl implements HeatmapService {
 	// 고정 그리드 사이즈
 	// 추후 기능 확장시 해당 사이즈를 인자로 받아 조정하도록 만들 계획
 	private static final int GRID_SIZE = 10;
-	private static final int PAGE_SIZE = 1000;
 
 	// 현재 구현된 히트맵 타입
 	private static final Set<String> EVENT_TYPES = Set.of("click", "move", "scroll");
