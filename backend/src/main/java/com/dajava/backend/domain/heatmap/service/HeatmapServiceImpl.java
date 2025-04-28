@@ -274,8 +274,8 @@ public class HeatmapServiceImpl implements HeatmapService {
 			int gridY = (int) (relativeY * totalGridsY);
 
 			// 그리드 범위 제한
-			gridX = Math.min(Math.max(gridX, 0), totalGridsX - 1);
-			gridY = Math.min(Math.max(gridY, 0), totalGridsY - 1);
+			gridX = Math.clamp(gridX, 0, totalGridsX - 1);
+			gridY = Math.clamp(gridY, 0, totalGridsY - 1);
 
 			String gridKey = gridX + ":" + gridY;
 
