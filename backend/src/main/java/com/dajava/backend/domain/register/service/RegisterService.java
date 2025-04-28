@@ -39,8 +39,11 @@ import com.dajava.backend.domain.register.repository.RegisterRepository;
 import com.dajava.backend.domain.solution.entity.Solution;
 import com.dajava.backend.domain.solution.exception.SolutionException;
 import com.dajava.backend.global.exception.ErrorCode;
+import com.dajava.backend.global.sentry.SentryMonitored;
 import com.dajava.backend.global.utils.PasswordUtils;
 
+import io.sentry.Sentry;
+import io.sentry.SentryLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -71,13 +74,15 @@ public class RegisterService {
 	@Transactional
 	public RegisterCreateResponse createRegister(final RegisterCreateRequest request) {
 		RegisterCreateRequest validatedRequest = registerValidator.validateCreateRequest(request);
+		return processCreateRegister(validatedRequest);
+	}
 
+	@SentryMonitored(level = SentryLevel.FATAL, operation = "create_register")
+	private RegisterCreateResponse processCreateRegister(RegisterCreateRequest validatedRequest) {
 		Register newRegister = registerRepository.save(Register.create(validatedRequest));
-
 		log.info("Register 엔티티 생성 : {} ", newRegister);
 
 		registerCacheService.refreshCacheAll();
-
 		emailService.sendRegisterCreateEmail(
 			newRegister.getEmail(),
 			newRegister.getUrl(),
