@@ -30,6 +30,10 @@ public class PageCaptureData {
 	@Column(nullable = false)
 	private String pageUrl;
 
+	// 각 너비를 나누는 시작점 (100px 단위)
+	@Column(nullable = false)
+	private int widthRange;
+
 	@ManyToOne
 	@JoinColumn(name = "register_id", nullable = false)
 	private Register register;

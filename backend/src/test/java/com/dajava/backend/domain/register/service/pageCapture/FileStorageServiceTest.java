@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.Comparator;
 
 import org.junit.jupiter.api.AfterAll;
@@ -15,8 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.mock.web.MockMultipartFile;
 
+import com.dajava.backend.domain.image.dto.ImageSaveResponse;
 import com.dajava.backend.domain.image.service.pageCapture.FileStorageService;
 import com.dajava.backend.domain.register.entity.PageCaptureData;
 import com.dajava.backend.domain.register.repository.PageCaptureDataRepository;
@@ -27,7 +28,6 @@ public class FileStorageServiceTest {
 	@Value("${image.path}")
 	String path;
 
-	// 생성자 주입 대신 필드에 바로 @Autowired 처리합니다.
 	@Autowired
 	private PageCaptureDataRepository pageCaptureDataRepository;
 
@@ -49,53 +49,53 @@ public class FileStorageServiceTest {
 	}
 
 	@Test
-	@DisplayName("1. 신규 파일 업로드 시 파일 생성 테스트")
+	@DisplayName("1. 신규 파일 업로드 시 이미지 저장 및 파일 생성 테스트")
 	void t001() throws Exception {
 		// Given
 		FileStorageService fileStorageService = new FileStorageService(path);
-		MockMultipartFile imageFile = new MockMultipartFile(
-			"imageFile",
-			"test-image.png",
-			"image/png",
-			"테스트 이미지 데이터".getBytes(StandardCharsets.UTF_8)
-		);
+		String originalData = "테스트 이미지 데이터";
+		// Base64 인코딩, data:image/png;base64, 접두어 포함 (포함해도 무방)
+		String base64Encoded = Base64.getEncoder().encodeToString(originalData.getBytes(StandardCharsets.UTF_8));
+		String base64Image = "data:image/png;base64," + base64Encoded;
+		String originalFilename = "test-image.png";
 
-		// When: storeFile 메서드가 파일명(UUID + 확장자)만 반환하도록 변경됨
-		String fileName = fileStorageService.storeFile(imageFile);
+		// When
+		ImageSaveResponse saveResponse = fileStorageService.storeBase64Image(base64Image, originalFilename);
+		String fileName = saveResponse.fileName();
 
-		// Then Assertions
+		// Then
 		assertNotNull(fileName, "파일명이 null이어서는 안됩니다.");
 		assertTrue(fileName.endsWith(".png"), "파일명이 .png 확장자로 끝나야 합니다.");
 
 		// 실제 파일이 저장되었는지 확인
-		Path filePath = Paths.get("C:/page-capture").resolve(fileName);
+		Path filePath = Paths.get(path).resolve(fileName);
 		assertTrue(Files.exists(filePath), "파일이 실제로 저장되어야 합니다.");
 
 		// 저장된 파일의 내용이 일치하는지 확인
 		byte[] storedContent = Files.readAllBytes(filePath);
-		assertArrayEquals("테스트 이미지 데이터".getBytes(StandardCharsets.UTF_8),
+		assertArrayEquals(originalData.getBytes(StandardCharsets.UTF_8),
 			storedContent, "파일의 내용이 기대한 값과 일치해야 합니다.");
 	}
 
 	@Test
-	@DisplayName("2. 기존 파일 덮어쓰기(Override) 테스트")
+	@DisplayName("2. 기존 파일 덮어쓰기(Override) 이미지 업데이트 테스트")
 	void t002() throws Exception {
 		// Given
 		FileStorageService fileStorageService = new FileStorageService(path);
 
 		// 먼저 신규 업로드로 파일 생성
-		MockMultipartFile imageFileOriginal = new MockMultipartFile(
-			"imageFile",
-			"test-image.png",
-			"image/png",
-			"원본 파일 데이터".getBytes(StandardCharsets.UTF_8)
-		);
-		String initialFileName = fileStorageService.storeFile(imageFileOriginal);
-		Path filePath = Paths.get("C:/page-capture").resolve(initialFileName);
+		String originalData = "원본 파일 데이터";
+		String base64Original = "data:image/png;base64," +
+			Base64.getEncoder().encodeToString(originalData.getBytes(StandardCharsets.UTF_8));
+		String originalFilename = "test-image.png";
+
+		ImageSaveResponse initialResponse = fileStorageService.storeBase64Image(base64Original, originalFilename);
+		String initialFileName = initialResponse.fileName();
+		Path filePath = Paths.get(path).resolve(initialFileName);
 
 		assertTrue(Files.exists(filePath), "신규 업로드한 파일이 존재해야 합니다.");
 		byte[] originalContent = Files.readAllBytes(filePath);
-		assertArrayEquals("원본 파일 데이터".getBytes(StandardCharsets.UTF_8),
+		assertArrayEquals(originalData.getBytes(StandardCharsets.UTF_8),
 			originalContent, "저장된 원본 파일의 내용이 일치해야 합니다.");
 
 		// 기존 엔티티(PageCaptureData)에 원래 파일명이 설정된 상태 생성
@@ -104,23 +104,23 @@ public class FileStorageServiceTest {
 			.pageUrl("http://localhost:3000/myPage")
 			.build();
 
-		// When: PageCaptureData 객체를 전달하여 기존 파일 덮어쓰기 수행
-		MockMultipartFile imageFileUpdated = new MockMultipartFile(
-			"imageFile",
-			"test-image-updated.png", // 확장자 png
-			"image/png",
-			"업데이트된 파일 데이터".getBytes(StandardCharsets.UTF_8)
-		);
-		String updatedFileName = fileStorageService.updateFile(imageFileUpdated, pageData);
+		// When: updateBase64Image 를 호출하여 기존 파일 덮어쓰기 수행
+		String updatedData = "업데이트된 파일 데이터";
+		String base64Updated = "data:image/png;base64," +
+			Base64.getEncoder().encodeToString(updatedData.getBytes(StandardCharsets.UTF_8));
+		// 원본 파일명과 단순히 확장자 추출을 위한 파일명 전달
+		String newOriginalFilename = "test-image-updated.png";
+		ImageSaveResponse updateResponse = fileStorageService.updateBase64Image(base64Updated, pageData,
+			newOriginalFilename);
+		String updatedFileName = updateResponse.fileName();
 
-		// Then Assertions
+		// Then
 		assertNotNull(updatedFileName, "업데이트 후 파일명이 null이어서는 안 됩니다.");
-		// 기존 엔티티에 저장된 파일명과 업데이트 후 파일명이 동일해야 함
 		assertEquals(initialFileName, updatedFileName, "기존 파일명과 업데이트 후 파일명이 동일해야 합니다.");
 
 		// 실제 파일 내용이 업데이트되었는지 확인
 		byte[] updatedContent = Files.readAllBytes(filePath);
-		assertArrayEquals("업데이트된 파일 데이터".getBytes(StandardCharsets.UTF_8),
+		assertArrayEquals(updatedData.getBytes(StandardCharsets.UTF_8),
 			updatedContent, "파일 내용이 업데이트된 데이터와 일치해야 합니다.");
 	}
 }

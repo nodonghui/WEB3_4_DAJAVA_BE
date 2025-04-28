@@ -52,6 +52,9 @@ class HeatmapServiceImplTest {
 	private Register register;
 	private List<SolutionEventDocument> mockDocuments;
 
+	private final int WIDTH_RANGE = 1200;
+	private final int GRID_SIZE = 10;
+
 	@BeforeEach
 	void setUp() {
 		// Register 객체 초기화
@@ -166,7 +169,7 @@ class HeatmapServiceImplTest {
 			when(urlEqualityValidator.isMatching(eq(targetUrl), anyString())).thenReturn(true);
 
 			// When
-			HeatmapResponse response = heatmapService.getHeatmap(serialNumber, password, type);
+			HeatmapResponse response = heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE);
 
 			// Then
 			assertNotNull(response);
@@ -201,7 +204,7 @@ class HeatmapServiceImplTest {
 			when(urlEqualityValidator.isMatching(eq(targetUrl), anyString())).thenReturn(true);
 
 			// When
-			HeatmapResponse response = heatmapService.getHeatmap(serialNumber, password, type);
+			HeatmapResponse response = heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE);
 
 			// Then
 			assertNotNull(response);
@@ -232,7 +235,7 @@ class HeatmapServiceImplTest {
 			when(urlEqualityValidator.isMatching(eq(targetUrl), anyString())).thenReturn(true);
 
 			// When
-			HeatmapResponse response = heatmapService.getHeatmap(serialNumber, password, type);
+			HeatmapResponse response = heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE);
 
 			// Then
 			assertNotNull(response);
@@ -253,7 +256,7 @@ class HeatmapServiceImplTest {
 			.thenReturn(Optional.empty());
 
 		// When & Then
-		assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type));
+		assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE));
 		verify(registerRepository).findBySerialNumber(serialNumber);
 		verify(solutionEventDocumentRepository, never()).findBySerialNumber(any(), any());
 	}
@@ -273,7 +276,7 @@ class HeatmapServiceImplTest {
 				.thenReturn(false);
 
 			// When & Then
-			assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type));
+			assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE));
 			verify(registerRepository).findBySerialNumber(serialNumber);
 			verify(solutionEventDocumentRepository, never()).findBySerialNumber(any(), any());
 		}
@@ -297,7 +300,7 @@ class HeatmapServiceImplTest {
 				.thenReturn(Collections.emptyList());
 
 			// When & Then
-			assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type));
+			assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE));
 			verify(solutionEventDocumentRepository).findBySerialNumber(eq(serialNumber), any(Pageable.class));
 		}
 	}
@@ -320,7 +323,7 @@ class HeatmapServiceImplTest {
 				.thenReturn(Collections.emptyList());
 
 			// When & Then
-			assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type));
+			assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE));
 			verify(solutionEventDocumentRepository).findBySerialNumber(eq(serialNumber), any(Pageable.class));
 		}
 	}
@@ -345,7 +348,7 @@ class HeatmapServiceImplTest {
 			// URL 비교 메서드 stubbing은 제거 (실제로 호출되지 않음)
 
 			// When & Then
-			assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type));
+			assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE));
 
 			// 페이징으로 인해 2번 호출됨
 			verify(solutionEventDocumentRepository, times(2))
@@ -398,7 +401,7 @@ class HeatmapServiceImplTest {
 			when(urlEqualityValidator.isMatching(eq(targetUrl), anyString())).thenReturn(true);
 
 			// When
-			HeatmapResponse response = heatmapService.getHeatmap(serialNumber, password, type);
+			HeatmapResponse response = heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE);
 
 			// Then
 			assertNotNull(response);
