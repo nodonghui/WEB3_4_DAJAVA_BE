@@ -228,8 +228,12 @@ public class HeatmapServiceImpl implements HeatmapService {
 		int maxPageWidth = SolutionEventManager.getMaxPageWidth(events);
 		int maxPageHeight = SolutionEventManager.getMaxPageHeight(events);
 
+		// 그리드 갯수 계산
+		int totalGridsX = maxPageWidth / gridSize;
+		int totalGridsY = maxPageHeight / gridSize;
+
 		// 그리드 맵 - 좌표를 키로 사용하는 HashMap
-		Map<String, Integer> gridMap = new HashMap<>();
+		Map<Integer, Integer> gridMap = new HashMap<>();
 
 		// 이벤트 시간 초기화
 		LocalDateTime firstEventTime = null;
@@ -265,10 +269,6 @@ public class HeatmapServiceImpl implements HeatmapService {
 				lastEventTime = event.getTimestamp();
 			}
 
-			// 그리드 좌표 계산
-			int totalGridsX = maxPageWidth / gridSize;
-			int totalGridsY = maxPageHeight / gridSize;
-
 			// 강제 형변환으로 그리드 할당
 			int gridX = (int) (relativeX * totalGridsX);
 			int gridY = (int) (relativeY * totalGridsY);
@@ -277,7 +277,8 @@ public class HeatmapServiceImpl implements HeatmapService {
 			gridX = Math.clamp(gridX, 0, totalGridsX - 1);
 			gridY = Math.clamp(gridY, 0, totalGridsY - 1);
 
-			String gridKey = gridX + ":" + gridY;
+			// String gridKey = gridX + ":" + gridY;
+			Integer gridKey = gridY * totalGridsX + gridX;
 
 			// 해당 그리드 셀 카운트 증가
 			gridMap.put(gridKey, gridMap.getOrDefault(gridKey, 0) + 1);
@@ -288,10 +289,12 @@ public class HeatmapServiceImpl implements HeatmapService {
 
 		// 그리드 셀 리스트 생성
 		List<GridCell> gridCells = new ArrayList<>();
-		for (Map.Entry<String, Integer> entry : gridMap.entrySet()) {
-			String[] coordinates = entry.getKey().split(":");
-			int gridX = Integer.parseInt(coordinates[0]);
-			int gridY = Integer.parseInt(coordinates[1]);
+		for (Map.Entry<Integer, Integer> entry : gridMap.entrySet()) {
+			Integer gridKey = entry.getKey();
+			int gridX = gridKey % totalGridsX;
+			int gridY = (gridKey - gridX) / totalGridsX;
+			// int gridX = Integer.parseInt(coordinates[0]);
+			// int gridY = Integer.parseInt(coordinates[1]);
 			int count = entry.getValue();
 
 			// 최대 카운트 값 대비 강도 계산
