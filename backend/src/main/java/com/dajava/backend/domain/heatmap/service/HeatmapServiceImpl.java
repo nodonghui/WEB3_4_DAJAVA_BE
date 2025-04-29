@@ -322,8 +322,8 @@ public class HeatmapServiceImpl implements HeatmapService {
 
 		// Heatmap Response 생성
 		return HeatmapResponse.builder()
-			.gridSizeX(maxPageWidth / gridSize)
-			.gridSizeY(maxPageHeight / gridSize)
+			.gridSizeX(totalGridsX)
+			.gridSizeY(totalGridsY)
 			.pageWidth(maxPageWidth)
 			.pageHeight(maxPageHeight)
 			.gridCells(gridCells)
