@@ -292,7 +292,7 @@ public class HeatmapServiceImpl implements HeatmapService {
 		for (Map.Entry<Integer, Integer> entry : gridMap.entrySet()) {
 			Integer gridKey = entry.getKey();
 			int gridX = gridKey % totalGridsX;
-			int gridY = (gridKey - gridX) / totalGridsX;
+			int gridY = gridKey / totalGridsX;
 			// int gridX = Integer.parseInt(coordinates[0]);
 			// int gridY = Integer.parseInt(coordinates[1]);
 			int count = entry.getValue();
@@ -348,6 +348,10 @@ public class HeatmapServiceImpl implements HeatmapService {
 		int maxPageWidth = SolutionEventManager.getMaxPageWidth(events);
 		int maxPageHeight = SolutionEventManager.getMaxPageHeight(events);
 
+		// 그리드 갯수 계산
+		int totalGridsX = maxPageWidth / gridSize;
+		int totalGridsY = maxPageHeight / gridSize;
+
 		// 시간순 정렬로 데이터를 가져오므로, 첫 데이터와 마지막 데이터로 시간 설정
 		LocalDateTime firstEventTime = events.getFirst().getTimestamp();
 		LocalDateTime lastEventTime = events.getLast().getTimestamp();
@@ -393,7 +397,6 @@ public class HeatmapServiceImpl implements HeatmapService {
 			double relativeBottom = (double) viewportBottom / scrollHeight;
 
 			// 상대 위치를 총 그리드 개수에 맞게 스케일링
-			int totalGridsY = maxPageHeight / gridSize;
 			int gridYStart = (int) (relativeTop * totalGridsY);
 			int gridYEnd = (int) (relativeBottom * totalGridsY);
 
@@ -449,8 +452,8 @@ public class HeatmapServiceImpl implements HeatmapService {
 
 		// Heatmap Response 생성
 		return HeatmapResponse.builder()
-			.gridSizeX(maxPageWidth / gridSize)
-			.gridSizeY(maxPageHeight / gridSize)
+			.gridSizeX(totalGridsX)
+			.gridSizeY(totalGridsY)
 			.pageWidth(maxPageWidth)
 			.pageHeight(maxPageHeight)
 			.gridCells(gridCells)
