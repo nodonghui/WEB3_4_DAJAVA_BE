@@ -12,11 +12,13 @@ import com.dajava.backend.domain.event.dto.PointerClickEventRequest;
 import com.dajava.backend.domain.event.dto.PointerMoveEventRequest;
 import com.dajava.backend.domain.event.dto.PointerScrollEventRequest;
 import com.dajava.backend.domain.event.service.EventLogService;
+import com.dajava.backend.domain.event.validater.EventValidation;
+import com.dajava.backend.domain.event.validater.EventValidator;
 
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * EventLog 의 컨트롤러 입니다.
@@ -26,10 +28,14 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/v1/logs")
 @RequiredArgsConstructor
+@Slf4j
 @Tag(name = "EventLogController", description = "이벤트 로깅 컨트롤러")
 public class EventLogController {
 
 	private final EventLogService eventLogService;
+	private final EventValidator<PointerClickEventRequest> pointerClickEventValidator;
+	private final EventValidator<PointerMoveEventRequest> pointerMoveEventValidator;
+	private final EventValidator<PointerScrollEventRequest> pointerScrollEventValidator;
 
 	/**
 	 * Click(Touch) 이벤트 로깅
@@ -41,7 +47,12 @@ public class EventLogController {
 	public String logClick(
 		@Valid @RequestBody PointerClickEventRequest clickEventRequest
 	) {
+		log.debug("[ClickEvent] 수신: sessionId={}, eventId={}", clickEventRequest.getSessionId(), clickEventRequest.getEventId());
+		log.debug("[ClickEvent] Validation 시작");
+		pointerClickEventValidator.validate(clickEventRequest);
+		log.debug("[ClickEvent] Validation 완료, 저장 시작");
 		eventLogService.createClickEvent(clickEventRequest);
+		log.debug("[ClickEvent] 버퍼에 저장 완료");
 		return "클릭 이벤트 수신 완료";
 	}
 
@@ -55,7 +66,12 @@ public class EventLogController {
 	public String logMovement(
 		@Valid @RequestBody PointerMoveEventRequest moveEventRequest
 	) {
+		log.debug("[MoveEvent] 수신: sessionId={}, eventId={}", moveEventRequest.getSessionId(), moveEventRequest.getEventId());
+		log.debug("[MoveEvent] Validation 시작");
+		pointerMoveEventValidator.validate(moveEventRequest);
+		log.debug("[MoveEvent] Validation 완료, 저장 시작");
 		eventLogService.createMoveEvent(moveEventRequest);
+		log.debug("[MoveEvent] 버퍼에 저장 완료");
 		return "이동 이벤트 수신 완료";
 	}
 
@@ -69,7 +85,12 @@ public class EventLogController {
 	public String logScroll(
 		@Valid @RequestBody PointerScrollEventRequest scrollEventRequest
 	) {
+		log.debug("[ScrollEvent] 수신: sessionId={}, eventId={}", scrollEventRequest.getSessionId(), scrollEventRequest.getEventId());
+		log.debug("[ScrollEvent] Validation 시작");
+		pointerScrollEventValidator.validate(scrollEventRequest);
+		log.debug("[ScrollEvent] Validation 완료, 저장 시작");
 		eventLogService.createScrollEvent(scrollEventRequest);
+		log.debug("[ScrollEvent] 버퍼에 저장 완료");
 		return "스크롤 이벤트 수신 완료";
 	}
 
@@ -79,6 +100,11 @@ public class EventLogController {
 	public void logEnd(
 		@PathVariable String sessionId
 	) {
+		log.debug("[SessionEnd] 종료 요청 수신: sessionId={}", sessionId);
 		eventLogService.expireSession(sessionId);
+		log.debug("[SessionEnd] 세션 종료 완료: sessionId={}", sessionId);
 	}
+
+
+
 }

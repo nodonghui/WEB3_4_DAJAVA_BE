@@ -391,7 +391,9 @@ public class EsClickEventAnalyzer implements EsAnalyzer<PointerClickEventDocumen
 	 * 요소에 텍스트 컨텐츠가 있는지 확인합니다.
 	 */
 	private boolean hasTextContent(String elementHtml) {
-		if (elementHtml == null) return false;
+		if (elementHtml == null) {
+			return false;
+		}
 
 		// 태그를 제외한 텍스트 추출 (간단한 구현)
 		String textContent = elementHtml.replaceAll("<[^>]*>", "").trim();
@@ -402,7 +404,9 @@ public class EsClickEventAnalyzer implements EsAnalyzer<PointerClickEventDocumen
 	 * 요소에 자식 요소가 있는지 확인합니다.
 	 */
 	private boolean hasChildElements(String elementHtml) {
-		if (elementHtml == null) return false;
+		if (elementHtml == null) {
+			return false;
+		}
 
 
 		// 여는 태그와 닫는 태그 사이에 다른 태그가 있는지 확인
@@ -431,7 +435,9 @@ public class EsClickEventAnalyzer implements EsAnalyzer<PointerClickEventDocumen
 	 * 요소에 이벤트 핸들러가 있는지 확인합니다.
 	 */
 	private boolean hasEventHandler(String elementHtml) {
-		if (elementHtml == null) return false;
+		if (elementHtml == null) {
+			return false;
+		}
 
 		// 일반적인 이벤트 핸들러 속성 체크
 		String[] eventHandlers = {
