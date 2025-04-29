@@ -1,6 +1,7 @@
 package com.dajava.backend.domain.event.scheduler;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -37,7 +38,7 @@ public class EventBufferScheduler {
 	 */
 	//@Scheduled(fixedRateString = "#{@bufferSchedulerProperties.inactiveSessionDetectThresholdMs}")
 	public void flushInactiveEventBuffers() {
-		log.info("비활성 세션 처리 작업 시작");
+		log.info("[BufferScheduler] 비활성 세션 처리 작업 시작");
 		long now = System.currentTimeMillis();
 		Set<SessionDataKey> activeKeys = eventBuffer.getAllActiveSessionKeys();
 		int inactiveCount = 0;
@@ -54,15 +55,20 @@ public class EventBufferScheduler {
 
 			// 비활성 세션 여부 확인
 			if (latestUpdate == null || (now - latestUpdate) >= properties.getInactiveThresholdMs()) {
-				log.info("비활성 세션 감지: {}", sessionKey);
+				log.debug("[BufferScheduler] 비활성 세션 감지: {}", sessionKey);
 				inactiveCount++;
 
 				// 배치 처리를 통해 데이터 저장 및 캐시 제거
-				activityHandleService.processInactiveBatchForSession(sessionKey);
+				try {
+					activityHandleService.processInactiveBatchForSession(sessionKey);
+					log.debug("[BufferScheduler] 비활성 세션 {} 데이터 저장 완료", sessionKey);
+				} catch (Exception e) {
+					log.error("[BufferScheduler] 세션 {} 처리 중 오류 발생: {}", sessionKey, e.getMessage(), e);
+				}
 			}
 		}
 
-		log.info("비활성 세션 처리 완료: 총 {}개 세션 처리됨", inactiveCount);
+		log.info("[BufferScheduler] 비활성 세션 처리 완료: 총 {}개 세션 처리됨", inactiveCount);
 	}
 
 	/**
@@ -74,20 +80,22 @@ public class EventBufferScheduler {
 	// 우선
 	//@Scheduled(fixedRateString = "#{@bufferSchedulerProperties.activeSessionFlushIntervalMs}")
 	public void flushAllEventBuffers() {
-		log.info("모든 활성 세션 정기 처리 작업 시작");
+		log.info("[BufferScheduler] 모든 활성 세션 정기 처리 작업 시작");
 
 		Set<SessionDataKey> activeKeys = eventBuffer.getAllActiveSessionKeys();
-		log.info("처리할 활성 세션 수: {}", activeKeys.size());
+		log.info("[BufferScheduler] 처리할 활성 세션 수: {}", activeKeys.size());
+		log.debug("[BufferScheduler] 현재 활성 세션 키 목록: {}", activeKeys.stream().limit(5).toList());
 
 		for (SessionDataKey sessionKey : activeKeys) {
 			try {
 				activityHandleService.processActiveBatchForSession(sessionKey);
+				log.debug("[BufferScheduler] 활성 세션 {} 데이터 저장 완료", sessionKey);
 			} catch (Exception e) {
-				log.error("세션 {} 처리 중 오류 발생: {}", sessionKey, e.getMessage(), e);
+				log.error("[BufferScheduler] 세션 {} 처리 중 오류 발생: {}", sessionKey, e.getMessage(), e);
 			}
 		}
 
-		log.info("모든 활성 세션 정기 처리 완료");
+		log.info("[BufferScheduler] 모든 활성 세션 정기 처리 완료");
 	}
 
 	/**
@@ -99,6 +107,7 @@ public class EventBufferScheduler {
 
 		for (Long update : updates) {
 			if (update != null && (latest == null || update > latest)) {
+				log.trace("업데이트 비교: 기존 = {}, 새로운 = {}", latest, update);
 				latest = update;
 			}
 		}
@@ -106,4 +115,3 @@ public class EventBufferScheduler {
 		return latest;
 	}
 }
-

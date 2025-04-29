@@ -29,33 +29,33 @@ public class EventValidation {
 		long now = Instant.now().toEpochMilli();
 
 		if (timestamp < now - MAX_PAST_ALLOW_MILLIS) {
-			log.warn("Timestamp too old: timestamp={}, now={}", timestamp, now);
+			log.warn("[EventValidator] Timestamp too old: timestamp={}, now={}", timestamp, now);
 			throw new PointerEventException(ErrorCode.INVALID_TIMESTAMP);
 		}
 
 		if (timestamp > now + MAX_FUTURE_ALLOW_MILLIS) {
-			log.warn("Timestamp from the future: timestamp={}, now={}", timestamp, now);
+			log.warn("[EventValidator] Timestamp from the future: timestamp={}, now={}", timestamp, now);
 			throw new PointerEventException(ErrorCode.INVALID_TIMESTAMP);
 		}
 	}
 
 	public static void validateSessionExists(SessionDataDocument sessionDataDocument, String sessionId) {
 		if (sessionDataDocument == null) {
-			log.warn("SessionDataDocument is null for sessionId: {}", sessionId);
+			log.warn("[EventValidator] SessionDataDocument is null for sessionId: {}", sessionId);
 			throw new PointerEventException(ErrorCode.SESSION_DATA_DOCUMENT_NOT_FOUND);
 		}
 	}
 
 	private static void validateBrowserWidth(Integer browserWidth) {
 		if (browserWidth <= 0) {
-			log.warn("Invalid browserWidth: {}", browserWidth);
+			log.warn("[EventValidator] Invalid browserWidth: {}", browserWidth);
 			throw new PointerEventException(ErrorCode.INVALID_BROWSER_WIDTH);
 		}
 	}
 
 	private static void validateViewportHeight(Integer viewportHeight) {
 		if (viewportHeight <= 0) {
-			log.warn("Invalid viewportHeight: {}", viewportHeight);
+			log.warn("[EventValidator] Invalid viewportHeight: {}", viewportHeight);
 			throw new PointerEventException(ErrorCode.INVALID_VIEWPORT_HEIGHT);
 		}
 	}
@@ -69,7 +69,7 @@ public class EventValidation {
 		validateViewportHeight(viewportHeight);
 
 		if (scrollHeight <= 0) {
-			log.warn("Invalid scrollHeight: {}", scrollHeight);
+			log.warn("[EventValidator] Invalid scrollHeight: {}", scrollHeight);
 			throw new PointerEventException(ErrorCode.INVALID_SCROLL_HEIGHT);
 		}
 	}
@@ -84,12 +84,12 @@ public class EventValidation {
 		validateViewportHeight(viewportHeight);
 
 		if (clientX < 0 || clientX > browserWidth) {
-			log.warn("Invalid clientX: {} (browserWidth: {})", clientX, browserWidth);
+			log.warn("[EventValidator] Invalid clientX: {} (browserWidth: {})", clientX, browserWidth);
 			throw new PointerEventException(ErrorCode.INVALID_CLIENT_X);
 		}
 
 		if (clientY < 0 || clientY > viewportHeight) {
-			log.warn("Invalid clientY: {} (viewportHeight: {})", clientY, viewportHeight);
+			log.warn("[EventValidator] Invalid clientY: {} (viewportHeight: {})", clientY, viewportHeight);
 			throw new PointerEventException(ErrorCode.INVALID_CLIENT_Y);
 		}
 	}
@@ -100,7 +100,7 @@ public class EventValidation {
 			HtmlNode root = parser.parse(elementHtml);
 
 			if (root == null) {
-				log.warn("Parsed root is null for elementHtml: {}", elementHtml);
+				log.warn("[EventValidator] Parsed root is null for elementHtml: {}", elementHtml);
 				throw new PointerEventException(ErrorCode.INVALID_ELEMENT_HTML);
 			}
 
@@ -108,7 +108,7 @@ public class EventValidation {
 			// 예를 들어, 필수 속성이나 태그 체크 등
 
 		} catch (Exception e) {
-			log.warn("elementHtml 파싱 실패: {}", e.getMessage());
+			log.warn("[EventValidator] elementHtml 파싱 실패: {}", e.getMessage());
 			throw new PointerEventException(ErrorCode.INVALID_ELEMENT_HTML);
 		}
 	}

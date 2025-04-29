@@ -17,13 +17,6 @@ import com.dajava.backend.domain.event.es.entity.SolutionEventDocument;
 @Repository
 public interface SolutionEventDocumentRepository extends ElasticsearchRepository<SolutionEventDocument, Long> {
 
-	/**
-	 * 솔루션 단위로 저장된 이벤트 객체들을 모두 조회
-	 *
-	 * @param serialNumber 솔루션 시리얼 번호
-	 * @return List<SolutionEventDocument>
-	 */
-	List<SolutionEventDocument> findBySerialNumber(String serialNumber);
 
 	/**
 	 * 솔루션 단위로 저장된 이벤트 객체들을 페이징하여 조회

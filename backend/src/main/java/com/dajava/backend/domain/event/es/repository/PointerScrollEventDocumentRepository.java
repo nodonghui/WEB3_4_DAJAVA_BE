@@ -18,14 +18,6 @@ public interface PointerScrollEventDocumentRepository
 	extends ElasticsearchRepository<PointerScrollEventDocument, String> {
 
 	/**
-	 * sessionId에 해당하는 pointerScrollEventDocument를 정렬해 가져옴
-	 *
-	 * @param sessionId
-	 * @return List<PointerScrollEventDocument>
-	 */
-	List<PointerScrollEventDocument> findBySessionId(String sessionId, Sort sort);
-
-	/**
 	 * sessionId에 해당하는 pointerMoveEventDocument를  페이징으로 분할하여 정렬해 가져옴
 	 *
 	 * @param sessionId , pageable
