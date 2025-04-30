@@ -3,6 +3,8 @@ package com.dajava.backend.domain.event.es.service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,68 +40,64 @@ public class PointerEventDocumentServiceImpl implements PointerEventDocumentServ
 	private final PointerMoveEventDocumentRepository moveEventDocumentRepository;
 	private final PointerScrollEventDocumentRepository scrollEventDocumentRepository;
 
-
-	@Override
-	public List<PointerClickEventDocument> fetchAllClickEventDocumentsBySessionId(String sessionId,int batchSize) {
-		List<PointerClickEventDocument> allEvents = new ArrayList<>();
-		int page = 0;
-		Page<PointerClickEventDocument> resultPage;
-
-		if (!clickEventDocumentRepository.existsBySessionId(sessionId)) {
-			log.info("해당 sessionId에 대한 이벤트 데이터가 없습니다: {}", sessionId);
+	private <T> List<T> fetchAllEventsBySessionId(
+		String sessionId,
+		int batchSize,
+		Function<PageRequest, Page<T>> pageFetcher,
+		Supplier<Boolean> sessionExistsChecker,
+		String eventType
+	) {
+		if (!sessionExistsChecker.get()) {
+			log.info("[PointerEventDocumentService] {} 이벤트 없음: {}", eventType, sessionId);
 			return Collections.emptyList();
 		}
 
+		List<T> allEvents = new ArrayList<>();
+		int page = 0;
+		Page<T> resultPage;
+
 		do {
 			PageRequest pageRequest = PageRequest.of(page, batchSize, Sort.by(Sort.Direction.ASC, "timestamp"));
-			resultPage = clickEventDocumentRepository.findBySessionId(sessionId, pageRequest);
+			resultPage = pageFetcher.apply(pageRequest);
 			allEvents.addAll(resultPage.getContent());
 			page++;
 		} while (!resultPage.isLast());
 
 		return allEvents;
+	}
+
+
+	@Override
+	public List<PointerClickEventDocument> fetchAllClickEventDocumentsBySessionId(String sessionId, int batchSize) {
+		return fetchAllEventsBySessionId(
+			sessionId,
+			batchSize,
+			pageRequest -> clickEventDocumentRepository.findBySessionId(sessionId, pageRequest),
+			() -> clickEventDocumentRepository.existsBySessionId(sessionId),
+			"Click"
+		);
 	}
 
 	@Override
 	public List<PointerMoveEventDocument> fetchAllMoveEventDocumentsBySessionId(String sessionId, int batchSize) {
-		List<PointerMoveEventDocument> allEvents = new ArrayList<>();
-		int page = 0;
-		Page<PointerMoveEventDocument> resultPage;
-
-		if (!moveEventDocumentRepository.existsBySessionId(sessionId)) {
-			log.info("해당 sessionId에 대한 이벤트 데이터가 없습니다: {}", sessionId);
-			return Collections.emptyList();
-		}
-
-		do {
-			PageRequest pageRequest = PageRequest.of(page, batchSize, Sort.by(Sort.Direction.ASC, "timestamp"));
-			resultPage = moveEventDocumentRepository.findBySessionId(sessionId, pageRequest);
-			allEvents.addAll(resultPage.getContent());
-			page++;
-		} while (!resultPage.isLast());
-
-		return allEvents;
+		return fetchAllEventsBySessionId(
+			sessionId,
+			batchSize,
+			pageRequest -> moveEventDocumentRepository.findBySessionId(sessionId, pageRequest),
+			() -> moveEventDocumentRepository.existsBySessionId(sessionId),
+			"Move"
+		);
 	}
 
 	@Override
 	public List<PointerScrollEventDocument> fetchAllScrollEventDocumentsBySessionId(String sessionId, int batchSize) {
-		List<PointerScrollEventDocument> allEvents = new ArrayList<>();
-		int page = 0;
-		Page<PointerScrollEventDocument> resultPage;
-
-		if (!scrollEventDocumentRepository.existsBySessionId(sessionId)) {
-			log.info("해당 sessionId에 대한 이벤트 데이터가 없습니다: {}", sessionId);
-			return Collections.emptyList();
-		}
-
-		do {
-			PageRequest pageRequest = PageRequest.of(page, batchSize, Sort.by(Sort.Direction.ASC, "timestamp"));
-			resultPage = scrollEventDocumentRepository.findBySessionId(sessionId, pageRequest);
-			allEvents.addAll(resultPage.getContent());
-			page++;
-		} while (!resultPage.isLast());
-
-		return allEvents;
+		return fetchAllEventsBySessionId(
+			sessionId,
+			batchSize,
+			pageRequest -> scrollEventDocumentRepository.findBySessionId(sessionId, pageRequest),
+			() -> scrollEventDocumentRepository.existsBySessionId(sessionId),
+			"Scroll"
+		);
 	}
 
 }

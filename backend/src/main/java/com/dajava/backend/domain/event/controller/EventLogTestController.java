@@ -24,7 +24,7 @@ public class EventLogTestController {
 	@GetMapping("/test/push/validateScheduler")
 	@ResponseStatus(HttpStatus.OK)
 	public String logClick() {
-		esEventValidateScheduler.endedSessionValidate();
+		esEventValidateScheduler.runScheduledValidation();
 		return "검증 스케줄러 동작 완료";
 	}
 
