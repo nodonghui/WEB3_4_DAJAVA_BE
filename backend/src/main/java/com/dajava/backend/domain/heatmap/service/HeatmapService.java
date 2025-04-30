@@ -1,6 +1,7 @@
 package com.dajava.backend.domain.heatmap.service;
 
 import com.dajava.backend.domain.heatmap.dto.HeatmapResponse;
+import com.dajava.backend.domain.heatmap.dto.HeatmapWidthsResponse;
 
 public interface HeatmapService {
 	/**
@@ -10,5 +11,7 @@ public interface HeatmapService {
 	 * @param type 시각화 데이터의 타입 정보
 	 * @return HeatmapResponse
 	 */
-	HeatmapResponse getHeatmap(String serialNumber, String password, String type);
+	HeatmapResponse getHeatmap(String serialNumber, String password, String type, int widthRange, int gridSize);
+
+	HeatmapWidthsResponse getWidths(String serialNumber, String password);
 }

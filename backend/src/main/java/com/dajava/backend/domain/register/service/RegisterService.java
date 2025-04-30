@@ -1,22 +1,24 @@
 package com.dajava.backend.domain.register.service;
 
 import static com.dajava.backend.domain.register.converter.RegisterConverter.*;
-import static com.dajava.backend.global.exception.ErrorCode.*;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
+import javax.imageio.ImageIO;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.dajava.backend.domain.email.EmailService;
-import com.dajava.backend.domain.event.entity.SolutionData;
+import com.dajava.backend.domain.image.dto.ImageSaveResponse;
 import com.dajava.backend.domain.image.service.pageCapture.FileStorageService;
 import com.dajava.backend.domain.register.RegisterInfo;
 import com.dajava.backend.domain.register.converter.RegisterConverter;
@@ -36,11 +38,12 @@ import com.dajava.backend.domain.register.entity.Register;
 import com.dajava.backend.domain.register.exception.RegisterException;
 import com.dajava.backend.domain.register.implement.RegisterValidator;
 import com.dajava.backend.domain.register.repository.RegisterRepository;
-import com.dajava.backend.domain.solution.entity.Solution;
-import com.dajava.backend.domain.solution.exception.SolutionException;
 import com.dajava.backend.global.exception.ErrorCode;
+import com.dajava.backend.global.sentry.SentryMonitored;
 import com.dajava.backend.global.utils.PasswordUtils;
 
+import io.sentry.Sentry;
+import io.sentry.SentryLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -71,13 +74,15 @@ public class RegisterService {
 	@Transactional
 	public RegisterCreateResponse createRegister(final RegisterCreateRequest request) {
 		RegisterCreateRequest validatedRequest = registerValidator.validateCreateRequest(request);
+		return processCreateRegister(validatedRequest);
+	}
 
+	@SentryMonitored(level = SentryLevel.FATAL, operation = "create_register")
+	private RegisterCreateResponse processCreateRegister(RegisterCreateRequest validatedRequest) {
 		Register newRegister = registerRepository.save(Register.create(validatedRequest));
-
 		log.info("Register 엔티티 생성 : {} ", newRegister);
 
 		registerCacheService.refreshCacheAll();
-
 		emailService.sendRegisterCreateEmail(
 			newRegister.getEmail(),
 			newRegister.getUrl(),
@@ -163,24 +168,42 @@ public class RegisterService {
 
 		List<PageCaptureData> captureDataList = register.getCaptureData();
 
-		Optional<PageCaptureData> optionalData = captureDataList.stream()
-			.filter(data -> data.getPageUrl().equals(pageUrl))
-			.findFirst();
-
-		String fileName;
+		ImageSaveResponse response;
 
 		try {
 			// Base64 이미지 처리 및 저장
 			String content = new String(imageFile.getBytes(), StandardCharsets.UTF_8);
 
+			if (content.contains(",")) {
+				content = content.substring(content.indexOf(",") + 1);
+			}
+
+			byte[] imageData = java.util.Base64.getDecoder().decode(content);
+			BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(imageData));
+			if (bufferedImage == null) {
+				throw new RuntimeException("유효하지 않은 이미지 입니다.");
+			}
+			int widthRange = (bufferedImage.getWidth() / 100) * 100;
+
+			// widthRange 가 799 이하인 경우 (매우 작은 데스크톱 뷰 및 모바일 뷰) 요청을 튕겨냄
+			if (widthRange <= 700) {
+				throw new RegisterException(ErrorCode.MOBILE_VIEW_NOT_SUPPORTED);
+			}
+
+			Optional<PageCaptureData> optionalData = captureDataList.stream()
+				.filter(data -> data.getPageUrl().equals(pageUrl)
+					&& data.getWidthRange() == widthRange)
+				.findFirst();
+
 			if (optionalData.isPresent()) {
 				PageCaptureData existingData = optionalData.get();
-				fileName = fileStorageService.updateBase64Image(content, existingData, imageFile.getOriginalFilename());
+				response = fileStorageService.updateBase64Image(content, existingData, imageFile.getOriginalFilename());
 			} else {
-				fileName = fileStorageService.storeBase64Image(content, imageFile.getOriginalFilename());
+				response = fileStorageService.storeBase64Image(content, imageFile.getOriginalFilename());
 				PageCaptureData newData = PageCaptureData.builder()
 					.pageUrl(pageUrl)
-					.captureFileName(fileName)
+					.captureFileName(response.fileName())
+					.widthRange(widthRange)
 					.register(register)
 					.build();
 				captureDataList.add(newData);
@@ -194,7 +217,7 @@ public class RegisterService {
 		return new PageCaptureResponse(
 			true,
 			"페이지 캡쳐 데이터가 성공적으로 저장되었습니다.",
-			fileName
+			response.fileName()
 		);
 	}
 

@@ -18,6 +18,7 @@ public enum ErrorCode {
 	MODIFY_DATE_EXCEEDED(HttpStatus.BAD_REQUEST, "현재 종료일로부터 " + DEFAULT_REGISTER_DURATION + "일을 초과할 수 없습니다."),
 	INVALID_PAGE_CAPTURE(HttpStatus.BAD_REQUEST, "pageCapture 리스트는 공백이거나 null 일 수 없습니다."),
 	REGISTER_NOT_FOUND(HttpStatus.NOT_FOUND, "Register 정보를 찾을 수 없습니다."),
+	MOBILE_VIEW_NOT_SUPPORTED(HttpStatus.BAD_REQUEST, "이미지 파일의 너비가 조건을 충족하지 않습니다."),
 
 	// Solution
 	SOLUTION_SERIAL_NUMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "시리얼 넘버가 없습니다."),
