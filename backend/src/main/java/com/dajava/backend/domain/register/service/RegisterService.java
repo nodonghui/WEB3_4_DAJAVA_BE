@@ -104,6 +104,11 @@ public class RegisterService {
 	public RegisterModifyResponse modifySolution(RegisterModifyRequest request, Long solutionId) {
 
 		Register targetSolution = registerValidator.validateModifyRequest(request, solutionId);
+		return processModifyRegister(targetSolution, request, solutionId);
+	}
+
+	@SentryMonitored(level = SentryLevel.FATAL, operation = "modify_register")
+	private RegisterModifyResponse processModifyRegister(Register targetSolution, RegisterModifyRequest request, Long solutionId) {
 		targetSolution.updateEndDate(request.solutionCompleteDate());
 
 		log.info("[RegisterService] Solution endDate 수정 성공, Target Solution : {}, New endDate : {}",
