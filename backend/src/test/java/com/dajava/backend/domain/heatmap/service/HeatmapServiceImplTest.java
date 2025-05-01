@@ -18,10 +18,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Pageable;
 
 import com.dajava.backend.domain.event.es.entity.SolutionEventDocument;
-import com.dajava.backend.domain.event.es.repository.SolutionEventDocumentRepository;
 import com.dajava.backend.domain.heatmap.dto.HeatmapResponse;
 import com.dajava.backend.domain.heatmap.exception.HeatmapException;
 import com.dajava.backend.domain.heatmap.validation.UrlEqualityValidator;
@@ -36,9 +34,8 @@ class HeatmapServiceImplTest {
 	@Mock
 	private RegisterRepository registerRepository;
 
-	// ElasticSearch에서 이벤트 document를 직접 조회하는 Repository
 	@Mock
-	private SolutionEventDocumentRepository solutionEventDocumentRepository;
+	private SolutionEventFetcher solutionEventFetcher;
 
 	@Mock
 	private UrlEqualityValidator urlEqualityValidator;
@@ -144,6 +141,11 @@ class HeatmapServiceImplTest {
 				.build();
 			mockDocuments.add(scrollDoc);
 		}
+
+		// solutionEventFetcher의 동작을 설정
+		lenient().when(solutionEventFetcher.getAllEvents(anyString(), anyBoolean()))
+			.thenReturn(mockDocuments)
+			.thenReturn(Collections.emptyList());
 	}
 
 	@Test
@@ -160,13 +162,9 @@ class HeatmapServiceImplTest {
 				.thenReturn(Optional.of(register));
 			passwordUtilsMock.when(() -> PasswordUtils.verifyPassword(password, register.getPassword()))
 				.thenReturn(true);
-			// 페이징을 위해 첫 호출에 mockDocuments, 이후는 빈 리스트로 종료
-			when(solutionEventDocumentRepository.findBySerialNumber(eq(serialNumber), any(Pageable.class)))
-				.thenReturn(mockDocuments)
-				.thenReturn(Collections.emptyList());
 
 			// URL 비교 메서드 stubs 추가
-			when(urlEqualityValidator.isMatching(eq(targetUrl), anyString())).thenReturn(true);
+			lenient().when(urlEqualityValidator.isMatching(eq(targetUrl), anyString())).thenReturn(true);
 
 			// When
 			HeatmapResponse response = heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE);
@@ -188,7 +186,7 @@ class HeatmapServiceImplTest {
 		// Given
 		String serialNumber = "5_team_testSerial";
 		String password = "password123!";
-		String type = "mousemove";
+		String type = "move";
 		String targetUrl = "http://localhost:3000/myPage1";
 
 		try (MockedStatic<PasswordUtils> passwordUtilsMock = mockStatic(PasswordUtils.class)) {
@@ -196,12 +194,9 @@ class HeatmapServiceImplTest {
 				.thenReturn(Optional.of(register));
 			passwordUtilsMock.when(() -> PasswordUtils.verifyPassword(password, register.getPassword()))
 				.thenReturn(true);
-			when(solutionEventDocumentRepository.findBySerialNumber(eq(serialNumber), any(Pageable.class)))
-				.thenReturn(mockDocuments)
-				.thenReturn(Collections.emptyList());
 
 			// URL 비교 메서드 stubs 추가
-			when(urlEqualityValidator.isMatching(eq(targetUrl), anyString())).thenReturn(true);
+			lenient().when(urlEqualityValidator.isMatching(eq(targetUrl), anyString())).thenReturn(true);
 
 			// When
 			HeatmapResponse response = heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE);
@@ -227,12 +222,9 @@ class HeatmapServiceImplTest {
 				.thenReturn(Optional.of(register));
 			passwordUtilsMock.when(() -> PasswordUtils.verifyPassword(password, register.getPassword()))
 				.thenReturn(true);
-			when(solutionEventDocumentRepository.findBySerialNumber(eq(serialNumber), any(Pageable.class)))
-				.thenReturn(mockDocuments)
-				.thenReturn(Collections.emptyList());
 
 			// URL 비교 메서드 stubs 추가
-			when(urlEqualityValidator.isMatching(eq(targetUrl), anyString())).thenReturn(true);
+			lenient().when(urlEqualityValidator.isMatching(eq(targetUrl), anyString())).thenReturn(true);
 
 			// When
 			HeatmapResponse response = heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE);
@@ -258,7 +250,7 @@ class HeatmapServiceImplTest {
 		// When & Then
 		assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE));
 		verify(registerRepository).findBySerialNumber(serialNumber);
-		verify(solutionEventDocumentRepository, never()).findBySerialNumber(any(), any());
+		verify(solutionEventFetcher, never()).getAllEvents(any(), anyBoolean());
 	}
 
 	@Test
@@ -278,7 +270,7 @@ class HeatmapServiceImplTest {
 			// When & Then
 			assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE));
 			verify(registerRepository).findBySerialNumber(serialNumber);
-			verify(solutionEventDocumentRepository, never()).findBySerialNumber(any(), any());
+			verify(solutionEventFetcher, never()).getAllEvents(any(), anyBoolean());
 		}
 	}
 
@@ -295,13 +287,10 @@ class HeatmapServiceImplTest {
 				.thenReturn(Optional.of(register));
 			passwordUtilsMock.when(() -> PasswordUtils.verifyPassword(password, register.getPassword()))
 				.thenReturn(true);
-			// 이벤트 Document가 하나도 없는 경우(emptyList)
-			when(solutionEventDocumentRepository.findBySerialNumber(eq(serialNumber), any(Pageable.class)))
-				.thenReturn(Collections.emptyList());
 
 			// When & Then
 			assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE));
-			verify(solutionEventDocumentRepository).findBySerialNumber(eq(serialNumber), any(Pageable.class));
+			verify(solutionEventFetcher, never()).getAllEvents(any(), anyBoolean());
 		}
 	}
 
@@ -318,13 +307,10 @@ class HeatmapServiceImplTest {
 				.thenReturn(Optional.of(register));
 			passwordUtilsMock.when(() -> PasswordUtils.verifyPassword(password, register.getPassword()))
 				.thenReturn(true);
-			// 페이징 결과로 빈 리스트가 반환되는 경우
-			when(solutionEventDocumentRepository.findBySerialNumber(eq(serialNumber), any(Pageable.class)))
-				.thenReturn(Collections.emptyList());
 
 			// When & Then
 			assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE));
-			verify(solutionEventDocumentRepository).findBySerialNumber(eq(serialNumber), any(Pageable.class));
+			verify(solutionEventFetcher, never()).getAllEvents(any(), anyBoolean());
 		}
 	}
 
@@ -341,9 +327,6 @@ class HeatmapServiceImplTest {
 				.thenReturn(Optional.of(register));
 			passwordUtilsMock.when(() -> PasswordUtils.verifyPassword(password, register.getPassword()))
 				.thenReturn(true);
-			when(solutionEventDocumentRepository.findBySerialNumber(eq(serialNumber), any(Pageable.class)))
-				.thenReturn(mockDocuments)
-				.thenReturn(Collections.emptyList());
 
 			// URL 비교 메서드 stubbing은 제거 (실제로 호출되지 않음)
 
@@ -351,13 +334,13 @@ class HeatmapServiceImplTest {
 			assertThrows(HeatmapException.class, () -> heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE));
 
 			// 페이징으로 인해 2번 호출됨
-			verify(solutionEventDocumentRepository, times(2))
-				.findBySerialNumber(eq(serialNumber), any(Pageable.class));
+			verify(solutionEventFetcher, times(2))
+				.getAllEvents(eq(serialNumber), anyBoolean());
 		}
 	}
 
 	@Test
-	@DisplayName("9. 이벤트 수가 1000개 이상일 때 샘플링 적용 테스트")
+	@DisplayName("9. 이벤트 수가 10000개 이상일 때 샘플링 적용 테스트")
 	void t009() {
 		// Given
 		String serialNumber = "5_team_testSerial";
@@ -365,9 +348,9 @@ class HeatmapServiceImplTest {
 		String type = "click";
 		String targetUrl = "http://localhost:3000/myPage1";
 
-		// 1500개의 클릭 이벤트 Document 생성 (timestamp: 밀리초 단위)
+		// 15000개의 클릭 이벤트 Document 생성 (timestamp: 밀리초 단위)
 		List<SolutionEventDocument> largeEventDocs = new ArrayList<>();
-		for (int i = 0; i < 1500; i++) {
+		for (int i = 0; i < 15000; i++) {
 			long eventTimestamp = LocalDateTime.now().minusMinutes(i)
 				.atZone(ZoneId.systemDefault())
 				.toInstant()
@@ -392,10 +375,6 @@ class HeatmapServiceImplTest {
 		try (MockedStatic<PasswordUtils> passwordUtilsMock = mockStatic(PasswordUtils.class)) {
 			passwordUtilsMock.when(() -> PasswordUtils.verifyPassword(password, register.getPassword()))
 				.thenReturn(true);
-			// 페이징: 첫 호출에 1500개의 Document, 이후 빈 리스트 반환으로 종료
-			when(solutionEventDocumentRepository.findBySerialNumber(eq(serialNumber), any(Pageable.class)))
-				.thenReturn(largeEventDocs)
-				.thenReturn(Collections.emptyList());
 
 			// URL 비교 메서드 stubs 추가
 			when(urlEqualityValidator.isMatching(eq(targetUrl), anyString())).thenReturn(true);
@@ -408,8 +387,8 @@ class HeatmapServiceImplTest {
 			assertEquals(10, response.gridSize());
 			assertNotNull(response.gridCells());
 			assertNotNull(response.metadata());
-			// 1500개의 click 이벤트에 대해 2:1 샘플링 적용하면 총 이벤트 수는 750개여야 함
-			assertEquals(750, response.metadata().totalEvents());
+			// 15000개의 click 이벤트에 대해 2:1 샘플링 적용하면 총 이벤트 수는 750개여야 함
+			assertEquals(7500, response.metadata().totalEvents());
 			assertEquals("sample1.png", response.pageCapture());
 		}
 	}

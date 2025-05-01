@@ -151,7 +151,7 @@ public class HeatmapServiceImpl implements HeatmapService {
 			// 소요 시간 측정
 			long endTime = System.currentTimeMillis();
 			log.info("히트맵 생성 성능 분석 결과: 일련 번호={}, type={}, totalEvent={}, afterSamplingEvent={} 소요시간={}ms",
-				serialNumber, type, totalEvents, events.size(), (endTime - startTime)
+				serialNumber, type, events.size(), totalEvents, (endTime - startTime)
 			);
 
 			return response;
