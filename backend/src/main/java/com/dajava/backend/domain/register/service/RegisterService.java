@@ -80,7 +80,7 @@ public class RegisterService {
 	@SentryMonitored(level = SentryLevel.FATAL, operation = "create_register")
 	private RegisterCreateResponse processCreateRegister(RegisterCreateRequest validatedRequest) {
 		Register newRegister = registerRepository.save(Register.create(validatedRequest));
-		log.info("Register 엔티티 생성 : {} ", newRegister);
+		log.info("[RegisterService] Register 엔티티를 생성하였습니다. : {} ", newRegister);
 
 		registerCacheService.refreshCacheAll();
 		emailService.sendRegisterCreateEmail(
@@ -106,7 +106,7 @@ public class RegisterService {
 		Register targetSolution = registerValidator.validateModifyRequest(request, solutionId);
 		targetSolution.updateEndDate(request.solutionCompleteDate());
 
-		log.info("Solution endDate 수정 성공, Target Solution : {}, New endDate : {}",
+		log.info("[RegisterService] Solution endDate 수정 성공, Target Solution : {}, New endDate : {}",
 			solutionId, targetSolution.getEndDate());
 		return RegisterModifyResponse.create();
 	}
@@ -120,9 +120,9 @@ public class RegisterService {
 	 */
 	@Transactional
 	public RegisterDeleteResponse deleteSolution(Long solutionId) {
-		Register targetSolution = registerValidator.validateDeleteRequest(solutionId);
+		registerValidator.validateDeleteRequest(solutionId);
 
-		log.info("Solution endDate 삭제 성공, Target Solution : {} ", solutionId);
+		log.info("[RegisterService] Solution endDate 삭제 성공, Target Solution : {} ", solutionId);
 		return RegisterDeleteResponse.create();
 	}
 
@@ -144,7 +144,7 @@ public class RegisterService {
 		long registersSize = registerRepository.count();
 		long totalPages = (long)Math.ceil((double)registersSize / request.pageSize());
 
-		log.info("Solution 등록 리스트를 조회합니다. PageNum: {}, PageSize: {}, Search Count: {}",
+		log.info("[RegisterService] Solution 등록 리스트를 조회합니다. PageNum: {}, PageSize: {}, Search Count: {}",
 			request.pageNum(), request.pageSize(), registerInfos.size());
 
 		return RegistersInfoResponse.create(registerInfos, registersSize, totalPages, request.pageNum(),
@@ -181,12 +181,15 @@ public class RegisterService {
 			byte[] imageData = java.util.Base64.getDecoder().decode(content);
 			BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(imageData));
 			if (bufferedImage == null) {
+				log.warn("[RegisterService] 유효하지 않은 이미지 정보를 요청하였습니다. "
+					+ "serialNumber : {} , pageUrl : {}", serialNumber, pageUrl);
 				throw new RuntimeException("유효하지 않은 이미지 입니다.");
 			}
 			int widthRange = (bufferedImage.getWidth() / 100) * 100;
 
 			// widthRange 가 799 이하인 경우 (매우 작은 데스크톱 뷰 및 모바일 뷰) 요청을 튕겨냄
 			if (widthRange <= 700) {
+				log.warn("[RegisterService] 유효하지 않은 widthRange 입니다. Input width : {}", widthRange);
 				throw new RegisterException(ErrorCode.MOBILE_VIEW_NOT_SUPPORTED);
 			}
 
@@ -209,6 +212,7 @@ public class RegisterService {
 				captureDataList.add(newData);
 			}
 		} catch (IOException e) {
+			log.error("[RegisterService] 이미지를 처리하는 과정에서 오류가 발생하였습니다. e : {}", e.getMessage());
 			throw new RuntimeException("이미지 처리 중 오류가 발생했습니다", e);
 		}
 
@@ -230,7 +234,7 @@ public class RegisterService {
 		Register register = registerRepository.findBySerialNumber(serialNumber).orElseThrow(
 			() -> new RegisterException(ErrorCode.REGISTER_NOT_FOUND));
 
-		log.info("Register 강제 만료, serialNumber : {}", serialNumber);
+		log.info("[RegisterService] Register 엔티티를 강제 만료시킵니다. serialNumber : {}", serialNumber);
 		register.expire();
 	}
 	/**
@@ -242,7 +246,7 @@ public class RegisterService {
 		Optional<Register> optionalRegister = registerRepository.findBySerialNumber(registerCheckRequest.serialNumber());
 
 		if (optionalRegister.isEmpty()) {
-			log.warn("시리얼 번호 '{}' 로 등록된 사용자를 찾을 수 없습니다.", registerCheckRequest.serialNumber());
+			log.warn("[RegisterService] 시리얼 번호 '{}' 로 등록된 사용자를 찾을 수 없습니다.", registerCheckRequest.serialNumber());
 			return new RegisterCheckResponse(false);
 		}
 
@@ -252,7 +256,7 @@ public class RegisterService {
 			registerCheckRequest.password(), findRegister.getPassword());
 
 		if (!isValidPassword) {
-			log.warn("비밀번호 불일치 - 시리얼 번호: '{}'", registerCheckRequest.serialNumber());
+			log.warn("[RegisterService] 비밀번호 불일치 - 시리얼 번호: '{}'", registerCheckRequest.serialNumber());
 		}
 
 		return new RegisterCheckResponse(isValidPassword);
