@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Metronon
  * @since 2025-03-27
  */
-@Component
+//@Component
 @Slf4j
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class LogRequestFilter implements Filter {
