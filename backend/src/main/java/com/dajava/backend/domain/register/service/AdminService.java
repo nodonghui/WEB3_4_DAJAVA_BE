@@ -21,7 +21,7 @@ public class AdminService {
 
 	public void login(final String adminCode, HttpServletResponse response) {
 		if (!adminCode.equals(this.adminCode)) {
-			log.info("adminCode : {}, this.adminCode : {}", adminCode, this.adminCode);
+			log.warn("[AdminService] Admin 로그인 시도 실패, adminCode : {}, this.adminCode : {}", adminCode, this.adminCode);
 			throw new AdminException(ErrorCode.INVALID_ADMIN_CODE);
 		}
 
@@ -49,6 +49,7 @@ public class AdminService {
 		}
 
 		if (!isAuthenticated) {
+			log.warn("[AdminService] 인증에 실패했습니다. Request : {}", request.getRequestURI());
 			throw new AdminException(ErrorCode.AUTHORIZE_ERROR);
 		}
 	}
