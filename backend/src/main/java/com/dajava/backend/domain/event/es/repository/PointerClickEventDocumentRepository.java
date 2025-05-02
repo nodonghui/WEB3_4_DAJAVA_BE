@@ -18,14 +18,6 @@ public interface PointerClickEventDocumentRepository
 	extends ElasticsearchRepository<PointerClickEventDocument, String> {
 
 	/**
-	 * sessionId에 해당하는 pointerClickEventDocument를 정렬해 가져옴
-	 *
-	 * @param sessionId
-	 * @return List<PointerClickEventDocument>
-	 */
-	List<PointerClickEventDocument> findBySessionId(String sessionId, Sort sort);
-
-	/**
 	 * sessionId에 해당하는 pointerClickEventDocument를  페이징으로 분할하여 정렬해 가져옴
 	 *
 	 * @param sessionId , pageable

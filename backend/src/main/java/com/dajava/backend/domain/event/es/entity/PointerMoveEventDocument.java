@@ -57,7 +57,7 @@ public class PointerMoveEventDocument {
 	private Boolean isOutlier;
 
 	public void markAsOutlier() {
-		if (this.isOutlier) {
+		if (Boolean.TRUE.equals(this.isOutlier)) {
 			throw new PointerEventException(ErrorCode.ALREADY_OUTLIER_DOCUMENT);
 		}
 		this.isOutlier = true;
@@ -68,16 +68,16 @@ public class PointerMoveEventDocument {
 	}
 
 	public boolean isValid() {
-		return sessionId != null &&
-			pageUrl != null &&
-			timestamp != null &&
-			clientX != null &&
-			clientY != null &&
-			browserWidth != null &&
-			scrollHeight != null &&
-			viewportHeight != null &&
-			id != null &&
-			memberSerialNumber != null &&
-			scrollY != null;
+		return sessionId != null
+			&& pageUrl != null
+			&& timestamp != null
+			&& clientX != null
+			&& clientY != null
+			&& browserWidth != null
+			&& scrollHeight != null
+			&& viewportHeight != null
+			&& id != null
+			&& memberSerialNumber != null
+			&& scrollY != null;
 	}
 }

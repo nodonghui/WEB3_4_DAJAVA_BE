@@ -39,15 +39,12 @@ public class EventLogServiceImpl implements EventLogService {
 	@Override
 	@Transactional
 	public void createClickEvent(PointerClickEventRequest request) {
-		// log.info("클릭 이벤트 로깅: {}", request);
 
 		SessionDataKey sessionDataKey = new SessionDataKey(
 			request.getSessionId(), request.getPageUrl(), request.getMemberSerialNumber()
 		);
 
-		// SessionData 를 통해 Cache 확인, 없으면 생성
-		//sessionDataService.createOrFindSessionData(sessionDataKey);
-		// es 용 -> 저장을 틀 넣어놓고
+		// SessionDataKey 를 통해 Cache 확인, 없으면 생성
 		sessionDataService.createOrFindSessionDataDocument(sessionDataKey);
 
 		// 클릭 이벤트 버퍼링
@@ -60,15 +57,12 @@ public class EventLogServiceImpl implements EventLogService {
 	@Override
 	@Transactional
 	public void createMoveEvent(PointerMoveEventRequest request) {
-		// log.info("이동 이벤트 로깅: {}", request);
 
 		SessionDataKey sessionDataKey = new SessionDataKey(
 			request.getSessionId(), request.getPageUrl(), request.getMemberSerialNumber()
 		);
 
-		// SessionData 를 통해 Cache 확인, 없으면 생성
-		// sessionDataService.createOrFindSessionData(sessionDataKey);
-		// es 용
+		// SessionDataKey 를 통해 Cache 확인, 없으면 생성
 		sessionDataService.createOrFindSessionDataDocument(sessionDataKey);
 
 		// 이동 이벤트 버퍼링
@@ -81,15 +75,12 @@ public class EventLogServiceImpl implements EventLogService {
 	@Override
 	@Transactional
 	public void createScrollEvent(PointerScrollEventRequest request) {
-		// log.info("스크롤 이벤트 로깅: {}", request);
 
 		SessionDataKey sessionDataKey = new SessionDataKey(
 			request.getSessionId(), request.getPageUrl(), request.getMemberSerialNumber()
 		);
 
-		// SessionData 를 통해 Cache 확인, 없으면 생성
-		//sessionDataService.createOrFindSessionData(sessionDataKey);
-		// es 용
+		// SessionDataKey 를 통해 Cache 확인, 없으면 생성
 		sessionDataService.createOrFindSessionDataDocument(sessionDataKey);
 
 		// 스크롤 이벤트 버퍼링
@@ -99,10 +90,7 @@ public class EventLogServiceImpl implements EventLogService {
 	@Override
 	@Transactional
 	public void expireSession(String sessionId) {
-		log.info("세션 종료");
 
-		//SessionData data = sessionDataRepository.findBySessionId(sessionId)
-		//	.orElseThrow();
 		SessionDataDocument esData = sessionDataDocumentRepository.findBySessionId(sessionId)
 			.orElseThrow();
 
