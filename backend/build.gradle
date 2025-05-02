@@ -77,11 +77,23 @@ dependencies {
 
     // sentry
     implementation 'io.sentry:sentry-spring-boot-starter:7.3.0'
+
+    // AOP (Aspect-Oriented Programming)
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+    // Logback (Spring Boot 기본 포함이지만, 확장 기능 필요 시 명시 가능)
+    implementation 'org.springframework.boot:spring-boot-starter-logging'
+    implementation 'ch.qos.logback:logback-classic:1.5.13'
+
+    // Logstash Logback Encoder
+    implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
+
 }
 
 test {
     useJUnitPlatform()
 }
+
 tasks.named('test') {
     useJUnitPlatform()
 }

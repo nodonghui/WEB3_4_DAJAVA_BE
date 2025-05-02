@@ -40,12 +40,7 @@ spring:
       password: 1234
 
 logging:
-  level:
-    com.back: INFO
-    org.hibernate.SQL: INFO
-    org.hibernate.orm.jdbc.bind: INFO
-    org.hibernate.orm.jdbc.extract: INFO
-    org.springframework.transaction.interceptor: INFO
+  config: classpath:logback-spring.xml
 
 image:
   path: C:/page-capture
