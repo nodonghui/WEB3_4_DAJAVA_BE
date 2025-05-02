@@ -6,7 +6,7 @@ spring:
     deserialization:
       fail-on-null-for-primitives: true
   elasticsearch:
-    uris: http://127.0.0.1:9200/
+    uris: http://localhost:9200
   profiles:
     default: dev
     include: secret
@@ -33,14 +33,12 @@ spring:
         format_sql: true
         highlight_sql: true
         use_sql_comments: true
+
   data:
     redis:
       host: localhost
       port: 6379
       password: 1234
-
-logging:
-  config: classpath:logback-spring.xml
 
 image:
   path: C:/page-capture
