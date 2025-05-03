@@ -5,6 +5,7 @@ import com.dajava.backend.domain.heatmap.validation.MultipleOf;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record HeatmapRequest(
 	@NotBlank(message = "일련번호는 필수 값입니다.")
@@ -20,7 +21,7 @@ public record HeatmapRequest(
 	@Max(value = 50, message = "그리드 사이즈는 50 초과 값을 지원하지 않습니다.")
 	Integer gridSize,
 
-	@NotBlank(message = "히트맵 너비값은 필수 값입니다.")
+	@NotNull(message = "히트맵 너비값은 필수 값입니다.")
 	@Min(value = 800, message = "히트맵 너비값의 최소 값은 800 입니다.")
 	@MultipleOf(value = 100, message = "히트맵 너비값은 100 단위로 입력해야 합니다.")
 	Integer widthRange
