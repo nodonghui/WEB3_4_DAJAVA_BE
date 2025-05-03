@@ -27,6 +27,7 @@ import com.dajava.backend.domain.image.service.pageCapture.FileStorageService;
 import com.dajava.backend.domain.register.entity.PageCaptureData;
 import com.dajava.backend.domain.register.entity.Register;
 import com.dajava.backend.domain.register.repository.RegisterRepository;
+import com.dajava.backend.global.exception.ErrorCode;
 import com.dajava.backend.global.utils.PasswordUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -281,7 +282,7 @@ class HeatmapServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("6. 솔루션 데이터(이벤트 Document)가 없을 때 예외 발생 테스트")
+	@DisplayName("6. 이벤트 데이터가 없는 경우 빈 히트맵 응답 생성 테스트")
 	void t006() {
 		// Given
 		String serialNumber = "5_team_testSerial";
@@ -296,9 +297,24 @@ class HeatmapServiceImplTest {
 			when(solutionEventFetcher.getAllEvents(eq(serialNumber), anyBoolean()))
 				.thenReturn(Collections.emptyList());
 
-			// When & Then
-			HeatmapException exception = assertThrows(HeatmapException.class, () ->
-				heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE));
+			// When
+			HeatmapResponse response = heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE);
+
+			// Then
+			assertNotNull(response);
+			// 빈 히트맵 응답의 기본값들 확인
+			// 이미지 데이터를 목으로 설정했기 때문에 이미지의 기본값인 1200 * 3000 을 따라감
+			assertEquals(120, response.gridSizeX());
+			assertEquals(300, response.gridSizeY());
+			assertEquals(1200, response.pageWidth());
+			assertEquals(3000, response.pageHeight());
+			assertTrue(response.gridCells().isEmpty());
+
+			// 메타데이터 확인
+			assertEquals(0, response.metadata().maxCount());
+			assertEquals(0, response.metadata().totalEvents());
+			assertEquals("unknown", response.metadata().pageUrl());
+			assertEquals(0, response.metadata().totalSessions());
 
 			verify(registerRepository).findBySerialNumber(serialNumber);
 			verify(solutionEventFetcher).getAllEvents(eq(serialNumber), eq(false));
@@ -336,22 +352,16 @@ class HeatmapServiceImplTest {
 		// Given
 		String serialNumber = "5_team_testSerial";
 		String password = "password123!";
-		String type = "invalid_type"; // 유효하지 않은 타입
+		String type = "invalid_type"; // 유효하지 않은 타입 (EVENT_TYPES에 포함되지 않음)
 
-		try (MockedStatic<PasswordUtils> passwordUtilsMock = mockStatic(PasswordUtils.class)) {
-			when(registerRepository.findBySerialNumber(serialNumber))
-				.thenReturn(Optional.of(register));
-			passwordUtilsMock.when(() -> PasswordUtils.verifyPassword(password, register.getPassword()))
-				.thenReturn(true);
+		// When & Then
+		HeatmapException exception = assertThrows(HeatmapException.class, () ->
+			heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE));
 
-			// When & Then
-			HeatmapException exception = assertThrows(HeatmapException.class, () ->
-				heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE));
+		assertEquals(ErrorCode.INVALID_EVENT_TYPE, exception.errorCode);
 
-			verify(registerRepository).findBySerialNumber(serialNumber);
-			// 잘못된 이벤트 타입은 초기 유효성 검사에서 걸려야 함
-			verify(solutionEventFetcher, never()).getAllEvents(any(), anyBoolean());
-		}
+		// 리포지드 접근이 이루어지지 않았음을 체크
+		verify(solutionEventFetcher, never()).getAllEvents(any(), anyBoolean());
 	}
 
 	@Test
