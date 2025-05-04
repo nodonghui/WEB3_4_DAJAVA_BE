@@ -4,12 +4,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Comparator;
 import java.util.List;
 
@@ -21,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.mock.web.MockPart;
@@ -29,6 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.dajava.backend.domain.image.service.pageCapture.FileStorageService;
 import com.dajava.backend.domain.register.dto.register.RegisterCreateRequest;
 import com.dajava.backend.domain.register.dto.register.RegisterModifyRequest;
 import com.dajava.backend.domain.register.entity.Register;
@@ -61,6 +65,9 @@ class RegisterControllerTest {
 
 	@Autowired
 	private RegisterRepository registerRepository;
+
+	@Autowired
+	private FileStorageService fileStorageService;
 
 	@Value("${custom.adminCode}")
 	private String adminCode;
@@ -227,28 +234,33 @@ class RegisterControllerTest {
 		String serialNumber = newRegister.getSerialNumber();
 		String pageUrl = newRegister.getUrl();
 
-		// 테스트용 이미지 파일 생성
-		MockMultipartFile imageFile = new MockMultipartFile(
-			"imageFile",
-			"test-image.png",
-			"image/png",
-			"테스트 이미지 데이터".getBytes()
-		);
+		ClassPathResource imageResource = new ClassPathResource("images/mock_page.jpeg");
+		try (InputStream inputStream = imageResource.getInputStream()) {
+			byte[] binaryData = inputStream.readAllBytes();
+			String base64String = Base64.getEncoder().encodeToString(binaryData);
 
-		// 캐시 리프레시
-		registerCacheService.refreshCacheAll();
+			MockMultipartFile multipartFile = new MockMultipartFile(
+				"imageFile",
+				"mock_page.jpeg",
+				MediaType.IMAGE_JPEG_VALUE,
+				base64String.getBytes()
+			);
 
-		// When & Then Second - 실제 서비스를 사용하여 테스트
-		mockMvc.perform(multipart("/v1/register/page-capture")
-				.file(imageFile)
-				.part(new MockPart("serialNumber", serialNumber.getBytes(StandardCharsets.UTF_8)))
-				.part(new MockPart("pageUrl", pageUrl.getBytes(StandardCharsets.UTF_8)))
-				.contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
-			.andExpect(status().isOk())
-			.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-			.andExpect(jsonPath("$.success").value(true))
-			.andExpect(jsonPath("$.message").isString())
-			.andExpect(jsonPath("$.captureFileName").isString());
+			// 캐시 리프레시
+			registerCacheService.refreshCacheAll();
+
+			// When & Then Second - 실제 서비스를 사용하여 테스트
+			mockMvc.perform(multipart("/v1/register/page-capture")
+					.file(multipartFile)
+					.part(new MockPart("serialNumber", serialNumber.getBytes(StandardCharsets.UTF_8)))
+					.part(new MockPart("pageUrl", pageUrl.getBytes(StandardCharsets.UTF_8)))
+					.contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+				.andExpect(status().isOk())
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.success").value(true))
+				.andExpect(jsonPath("$.message").isString())
+				.andExpect(jsonPath("$.captureFileName").isString());
+		}
 	}
 
 	@Test
