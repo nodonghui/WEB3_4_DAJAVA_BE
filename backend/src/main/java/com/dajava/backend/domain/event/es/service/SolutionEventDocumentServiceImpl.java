@@ -25,10 +25,10 @@ public class SolutionEventDocumentServiceImpl implements SolutionEventDocumentSe
 	@Override
 	public void saveAllSolutionEvents(List<SolutionEventDocument> events) {
 		if (events == null || events.isEmpty()) {
-			log.warn("저장할 SolutionEvent가 없습니다.");
+			log.warn("[SolutionEventDocumentService] 저장할 SolutionEvent가 없습니다.");
 			return;
 		}
 		solutionEventDocumentRepository.saveAll(events);
-		log.debug("SolutionEvent {}건 저장 완료", events.size());
+		log.debug("[SolutionEventDocumentService] SolutionEvent {}건 저장 완료", events.size());
 	}
 }

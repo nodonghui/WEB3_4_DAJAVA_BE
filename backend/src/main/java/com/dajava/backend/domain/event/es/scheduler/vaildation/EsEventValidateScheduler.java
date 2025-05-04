@@ -19,9 +19,11 @@ import com.dajava.backend.domain.event.es.service.SolutionEventDocumentService;
 import com.dajava.backend.domain.event.exception.PointerEventException;
 import com.dajava.backend.domain.log.converter.EventConverter;
 import com.dajava.backend.global.component.analyzer.BufferSchedulerProperties;
+import com.dajava.backend.global.sentry.SentryMonitored;
 import com.dajava.backend.global.utils.EventsUtils;
 
 import co.elastic.clients.elasticsearch._types.ElasticsearchException;
+import io.sentry.SentryLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -56,8 +58,9 @@ public class EsEventValidateScheduler {
 	 * 배치 처리 구현에 페이징을 사용했습니다.
 	 * 그래도 메모리 터지는 경우 최대 데이터 상한선을 설정해 스케줄러가 처리 가능한 데이터 제한
 	 */
-	@Scheduled(fixedRateString = "#{@bufferSchedulerProperties.validateEndSessionMs}")
-	public void endedSessionValidate() {
+	//@Scheduled(fixedRateString = "#{@bufferSchedulerProperties.validateEndSessionMs}")
+	@SentryMonitored(level = SentryLevel.FATAL, operation = "validate_scheduler")
+	public void runScheduledValidation() {
 
 		log.info("검증 스케줄러 시작");
 
@@ -69,21 +72,21 @@ public class EsEventValidateScheduler {
 		do {
 			resultPage = sessionDataDocumentService.getEndedSessions(page, batchSize);
 
-			log.info("Batch {}: SessionData size : {}", page, resultPage.getContent().size());
+			log.info("[ValidateScheduler] Batch {}: SessionData size : {}", page, resultPage.getContent().size());
 
 			for (SessionDataDocument sessionDataDocument : resultPage.getContent()) {
 				try {
 					processSession(sessionDataDocument);
 				} catch (PointerEventException e) {
-					log.warn("세션 검증 실패 (이미 검증된 세션일 수 있음): {}, {}", sessionDataDocument.getSessionId(), e.getMessage());
+					log.warn("[ValidateScheduler] 세션 검증 실패 (이미 검증된 세션일 수 있음): {}, {}",
+						sessionDataDocument.getSessionId(), e.getMessage());
 				} catch (ElasticsearchException | UncategorizedElasticsearchException e) {
-					log.warn("세션 ID: {} - Elasticsearch 쿼리 실패", sessionDataDocument.getSessionId());
-					log.warn("Exception Message: {}", e.getMessage());
-					log.warn("Full Stack Trace", e);
+					log.warn("[ValidateScheduler] 세션 ID: {} - Elasticsearch 쿼리 실패", sessionDataDocument.getSessionId());
+					log.warn("[ValidateScheduler] Exception Message: {}", e.getMessage());
+					log.warn("[ValidateScheduler] Full Stack Trace", e);
 
-				}
-				catch (Exception e) {
-					log.error("	예상치 못한 에러 발생 - 세션 ID: {}", sessionDataDocument.getSessionId(), e);
+				} catch (Exception e) {
+					log.error("[ValidateScheduler] 예상치 못한 에러 발생 - 세션 ID: {}", sessionDataDocument.getSessionId(), e);
 				}
 			}
 
@@ -109,40 +112,69 @@ public class EsEventValidateScheduler {
 	public void processSession(SessionDataDocument sessionDataDocument) {
 
 		if (sessionDataDocument.isVerified()) {
-			log.info("이미 검증된 세션 데이터 입니다 sessionId : {}", sessionDataDocument.getSessionId());
+			log.info("[ValidateScheduler] 이미 검증된 세션 데이터 입니다 sessionId : {}", sessionDataDocument.getSessionId());
 			return;
 		}
 
 		String sessionId = sessionDataDocument.getSessionId();
-		log.info("검증 되는 세션 아이디 : {}", sessionId);
+		log.info("[ValidateScheduler] 검증 되는 세션 아이디 : {}", sessionId);
 
-		int batchSize = bufferSchedulerProperties.getBatchSize();
-		List<PointerClickEventDocument> clickEvents = pointerEventDocumentService.fetchAllClickEventDocumentsBySessionId(sessionId, batchSize);
-		List<PointerMoveEventDocument> moveEvents = pointerEventDocumentService.fetchAllMoveEventDocumentsBySessionId(sessionId, batchSize);
-		List<PointerScrollEventDocument> scrollEvents = pointerEventDocumentService.fetchAllScrollEventDocumentsBySessionId(sessionId, batchSize);
+		List<PointerClickEventDocument> clickEvents = fetchValidClickEvents(sessionId);
+		List<PointerMoveEventDocument> moveEvents = fetchValidMoveEvents(sessionId);
+		List<PointerScrollEventDocument> scrollEvents = fetchValidScrollEvents(sessionId);
 
-		// null 값 있음 안되니 필터링
-		EventsUtils.filterValidClickEvents(clickEvents);
-		EventsUtils.filterValidMoveEvents(moveEvents);
-		EventsUtils.filterValidScrollEvents(scrollEvents);
+		analyzeEvents(clickEvents, moveEvents, scrollEvents);
+		saveResults(sessionDataDocument, clickEvents, moveEvents, scrollEvents);
+	}
 
-		log.info("검증 되는 clickEventsDocument 개수 : {}", clickEvents.size());
-		log.info("검증 되는 moveEventsDocument 개수 : {}", moveEvents.size());
-		log.info("검증 되는 scrollEventsDocument 개수 : {}", scrollEvents.size());
+	private List<PointerClickEventDocument> fetchValidClickEvents(String sessionId) {
+		List<PointerClickEventDocument> list = pointerEventDocumentService.fetchAllClickEventDocumentsBySessionId(sessionId, bufferSchedulerProperties.getBatchSize());
+		EventsUtils.filterValidClickEvents(list);
+		log.info("[ValidateScheduler] 검증되는 clickEvents 개수: {}", list.size());
+		return list;
+	}
 
+	private List<PointerMoveEventDocument> fetchValidMoveEvents(String sessionId) {
+		List<PointerMoveEventDocument> list = pointerEventDocumentService.fetchAllMoveEventDocumentsBySessionId(sessionId, bufferSchedulerProperties.getBatchSize());
+		EventsUtils.filterValidMoveEvents(list);
+		log.info("[ValidateScheduler] 검증되는 moveEvents 개수: {}", list.size());
+		return list;
+	}
+
+	private List<PointerScrollEventDocument> fetchValidScrollEvents(String sessionId) {
+		List<PointerScrollEventDocument> list = pointerEventDocumentService.fetchAllScrollEventDocumentsBySessionId(sessionId, bufferSchedulerProperties.getBatchSize());
+		EventsUtils.filterValidScrollEvents(list);
+		log.info("[ValidateScheduler] 검증되는 scrollEvents 개수: {}", list.size());
+		return list;
+	}
+
+	private void analyzeEvents(
+		List<PointerClickEventDocument> clickEvents,
+		List<PointerMoveEventDocument> moveEvents,
+		List<PointerScrollEventDocument> scrollEvents
+	) {
 		esClickEventAnalyzer.analyze(clickEvents);
 		esMoveEventAnalyzer.analyze(moveEvents);
 		esScrollEventAnalyzer.analyze(scrollEvents);
+	}
 
+	private void saveResults(
+		SessionDataDocument sessionDataDocument,
+		List<PointerClickEventDocument> clickEvents,
+		List<PointerMoveEventDocument> moveEvents,
+		List<PointerScrollEventDocument> scrollEvents
+	) {
 		sessionDataDocument.markAsVerified();
 
-		log.info("검증 완료");
+		log.info("[ValidateScheduler] 검증 완료");
 
 		List<SolutionEventDocument> solutionEvents = EventConverter.toSolutionEventDocuments(
-			clickEvents, moveEvents, scrollEvents);
+			clickEvents, moveEvents, scrollEvents
+		);
 
 		solutionEventDocumentService.saveAllSolutionEvents(solutionEvents);
-		log.info("저장된 SolutionEventDocument 개수 : {}", solutionEvents.size());
+		log.info("[ValidateScheduler] 저장된 SolutionEventDocument 개수 : {}", solutionEvents.size());
+
 		sessionDataDocumentService.save(sessionDataDocument);
 	}
 

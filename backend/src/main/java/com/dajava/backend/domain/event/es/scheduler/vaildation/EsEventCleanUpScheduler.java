@@ -55,6 +55,8 @@ public class EsEventCleanUpScheduler {
 
 	private static final String SOLUTION_EVENTS = "solution-event";
 
+	private static final String TIMESTAMP = "timestamp";
+
 	/**
 	 * 한번에 삭제 하지 않고 24시간 분할해 이벤트 로그 데이터를 삭제하는 스케줄러
 	 * es의 데이터를 timestamp 에 맞춰 삭제합니다.
@@ -68,7 +70,7 @@ public class EsEventCleanUpScheduler {
 
 		Instant now = Instant.now();
 		Instant deleteBefore = now.minus(logDeleteDay, ChronoUnit.DAYS);
-		Instant dayNPlus1 = now.minus(logDeleteDay + 1, ChronoUnit.DAYS);
+		Instant dayNPlus1 = now.minus((long) logDeleteDay + 1, ChronoUnit.DAYS);
 
 		// 혹시 지워지지 않은 오래된 데이터 삭제
 		for (String indexName : INDEX_NAMES) {
@@ -78,7 +80,7 @@ public class EsEventCleanUpScheduler {
 		// 시간 단위로 24개 구간으로 쪼개기, 2일전 ~ 1일전 데이터 삭제
 		for (int i = 0; i < 24; i++) {
 			Instant from = deleteBefore.plus(i, ChronoUnit.HOURS);
-			Instant to = deleteBefore.plus(i + 1, ChronoUnit.HOURS);
+			Instant to = deleteBefore.plus((long) i + 1, ChronoUnit.HOURS);
 
 			long fromMillis = from.toEpochMilli();
 			long toMillis = to.toEpochMilli();
@@ -109,7 +111,7 @@ public class EsEventCleanUpScheduler {
 
 		Instant now = Instant.now();
 		Instant deleteBefore = now.minus(logDeleteDay, ChronoUnit.DAYS);
-		Instant dayNPlus1 = now.minus(logDeleteDay + 1, ChronoUnit.DAYS);
+		Instant dayNPlus1 = now.minus((long) logDeleteDay + 1, ChronoUnit.DAYS);
 
 		for (Register register : completedRegisters) {
 			String serialNumber = register.getSerialNumber();
@@ -120,7 +122,7 @@ public class EsEventCleanUpScheduler {
 			// 24시간으로 분할해 삭제
 			for (int i = 0; i < 24; i++) {
 				Instant from = deleteBefore.plus(i, ChronoUnit.HOURS);
-				Instant to = deleteBefore.plus(i + 1, ChronoUnit.HOURS);
+				Instant to = deleteBefore.plus((long) i + 1, ChronoUnit.HOURS);
 
 				long fromMillis = from.toEpochMilli();
 				long toMillis = to.toEpochMilli();
@@ -141,7 +143,7 @@ public class EsEventCleanUpScheduler {
 	 */
 	private void deleteEventDocsByTimeRange(String indexName, long fromMillis, long toMillis, Instant from, Instant to) {
 		try {
-			Criteria criteria = new Criteria("timestamp")
+			Criteria criteria = new Criteria(TIMESTAMP)
 				.greaterThanEqual(fromMillis)
 				.lessThan(toMillis);
 
@@ -169,11 +171,11 @@ public class EsEventCleanUpScheduler {
 	private void deleteSolutionDocsBySerialAndRange(String serialNumber, long fromMillis, long toMillis, Instant from, Instant to) {
 		try {
 			Criteria criteria = new Criteria("serialNumber").is(serialNumber)
-				.and(new Criteria("timestamp").greaterThanEqual(fromMillis).lessThan(toMillis));
+				.and(new Criteria(TIMESTAMP).greaterThanEqual(fromMillis).lessThan(toMillis));
 
 			Query query = new CriteriaQuery(criteria);
 
-			ByQueryResponse response = elasticsearchOperations.delete(query, Object.class, IndexCoordinates.of("solution-event"));
+			ByQueryResponse response = elasticsearchOperations.delete(query, Object.class, IndexCoordinates.of(SOLUTION_EVENTS));
 			long deletedCount = response.getDeleted();
 
 			log.info("[solution-event] serialNumber [{}]의 [{} ~ {}] 구간 문서 삭제 성공 - {}건",
@@ -192,7 +194,7 @@ public class EsEventCleanUpScheduler {
 	 */
 	private void deleteOldEventDocsBefore(String indexName, long timestampMillis, Instant timestampInstant) {
 		try {
-			Criteria criteria = new Criteria("timestamp").lessThan(timestampMillis);
+			Criteria criteria = new Criteria(TIMESTAMP).lessThan(timestampMillis);
 			Query query = new CriteriaQuery(criteria);
 
 			ByQueryResponse response = elasticsearchOperations.delete(query, Object.class, IndexCoordinates.of(indexName));
@@ -214,10 +216,10 @@ public class EsEventCleanUpScheduler {
 	private void deleteOldSolutionDocsBefore(String serialNumber, long timestampMillis, Instant timestampInstant) {
 		try {
 			Criteria criteria = new Criteria("serialNumber").is(serialNumber)
-				.and(new Criteria("timestamp").lessThan(timestampMillis));
+				.and(new Criteria(TIMESTAMP).lessThan(timestampMillis));
 			Query query = new CriteriaQuery(criteria);
 
-			ByQueryResponse response = elasticsearchOperations.delete(query, Object.class, IndexCoordinates.of("solution-event"));
+			ByQueryResponse response = elasticsearchOperations.delete(query, Object.class, IndexCoordinates.of(SOLUTION_EVENTS));
 			log.info("[solution-event] serialNumber [{}]의 [{} 이전] 문서 삭제 성공 - {}건",
 				serialNumber, timestampInstant, response.getDeleted());
 		} catch (Exception e) {
