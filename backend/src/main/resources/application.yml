@@ -48,4 +48,4 @@ logging:
     org.springframework.transaction.interceptor: INFO
 
 image:
-  path: C:/page-capture
+  path: backend/images/page-capture
