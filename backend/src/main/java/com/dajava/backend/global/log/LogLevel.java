@@ -1,4 +1,4 @@
-package src.global.constant.log;
+package com.dajava.backend.global.log;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

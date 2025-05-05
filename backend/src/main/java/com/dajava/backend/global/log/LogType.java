@@ -1,4 +1,4 @@
-package src.global.constant.log;
+package com.dajava.backend.global.log;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum LogType {
 	API("api"),
-	SYSTEM("syetem"),
+	SYSTEM("system"),
 	DEFAULT("default");
 
 	private final String type;

@@ -1,20 +1,16 @@
-package src.global.common.log;
+package com.dajava.backend.global.log;
 
 import java.util.Arrays;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-
-import org.slf4j.MDC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
-
-import src.global.constant.log.LogLevel;
 
 // AOP로 인식하고 bean에 등록
 @Aspect
