@@ -30,6 +30,9 @@ import com.dajava.backend.domain.register.dto.register.RegistersInfoResponse;
 import com.dajava.backend.domain.register.service.AdminService;
 import com.dajava.backend.domain.register.service.RegisterCacheService;
 import com.dajava.backend.domain.register.service.RegisterService;
+import com.dajava.backend.global.log.LogLevel;
+import com.dajava.backend.global.log.LogType;
+import com.dajava.backend.global.log.Loggable;
 import com.dajava.backend.global.sentry.SentryMonitored;
 import com.dajava.backend.global.sentry.SentryUtil;
 
@@ -55,6 +58,7 @@ import lombok.extern.slf4j.Slf4j;
 @Tag(name = "RegisterController", description = "API 신청 폼 컨트롤러")
 @RestController
 @RequiredArgsConstructor
+@Loggable(level = LogLevel.INFO, type = LogType.API)
 public class RegisterController {
 
 	private final RegisterService registerService;
