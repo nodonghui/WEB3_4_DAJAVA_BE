@@ -62,7 +62,7 @@ public class EsEventValidateScheduler {
 	@SentryMonitored(level = SentryLevel.FATAL, operation = "validate_scheduler")
 	public void runScheduledValidation() {
 
-		log.info("검증 스케줄러 시작");
+		log.info("[ValidateScheduler] 검증 스케줄러 시작");
 
 		int batchSize = bufferSchedulerProperties.getBatchSize();
 		int page = 0;

@@ -13,5 +13,6 @@ public class BufferSchedulerProperties {
 	private String activeSessionFlushIntervalMs;
 	private long inactiveThresholdMs;
 	private long validateEndSessionMs;
-	private int batchSize ;
+	private int batchSize;
+	private int abusingCheckMs;
 }
