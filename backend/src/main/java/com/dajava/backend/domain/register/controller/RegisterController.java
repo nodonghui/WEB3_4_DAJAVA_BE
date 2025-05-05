@@ -30,7 +30,10 @@ import com.dajava.backend.domain.register.dto.register.RegistersInfoResponse;
 import com.dajava.backend.domain.register.service.AdminService;
 import com.dajava.backend.domain.register.service.RegisterCacheService;
 import com.dajava.backend.domain.register.service.RegisterService;
+import com.dajava.backend.global.sentry.SentryMonitored;
+import com.dajava.backend.global.sentry.SentryUtil;
 
+import io.sentry.SentryLevel;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -184,6 +187,7 @@ public class RegisterController {
 		return registerCacheService.getSerialNumberCache();
 	}
 
+	@SentryMonitored(level = SentryLevel.FATAL)
 	@Operation(
 		summary = "솔루션 시리얼넘버의 캐시 정보를 반환하는 테스트 API"
 	)
