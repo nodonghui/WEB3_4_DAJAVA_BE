@@ -40,7 +40,7 @@ class HeatmapControllerTest {
 
 	private HeatmapResponse mockResponse;
 
-	private final int WIDTH_RANGE = 1200;
+	private final Integer WIDTH_RANGE = 1200;
 	private final int GRID_SIZE = 10;
 
 	@BeforeEach
@@ -87,7 +87,8 @@ class HeatmapControllerTest {
 
 		// When & Then
 		mockMvc.perform(get("/v1/solution/heatmap/{serialNumber}/{password}", serialNumber, password)
-				.param("type", type))
+				.param("type", type)
+				.param("widthRange", String.valueOf(WIDTH_RANGE)))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.gridSize").value(10))
 			.andExpect(jsonPath("$.pageWidth").value(1200))
@@ -109,13 +110,14 @@ class HeatmapControllerTest {
 		// Given
 		String serialNumber = "5_team_testSerial";
 		String password = "password123!";
-		String type = "mousemove";
+		String type = "move";
 
 		when(heatmapService.getHeatmap(serialNumber, password, type, WIDTH_RANGE, GRID_SIZE)).thenReturn(mockResponse);
 
 		// When & Then
 		mockMvc.perform(get("/v1/solution/heatmap/{serialNumber}/{password}", serialNumber, password)
-				.param("type", type))
+				.param("type", type)
+				.param("widthRange", String.valueOf(WIDTH_RANGE)))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.gridSize").value(10));
 	}
@@ -132,7 +134,8 @@ class HeatmapControllerTest {
 
 		// When & Then
 		mockMvc.perform(get("/v1/solution/heatmap/{serialNumber}/{password}", serialNumber, password)
-				.param("type", type))
+				.param("type", type)
+				.param("widthRange", String.valueOf(WIDTH_RANGE)))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.gridSize").value(10));
 	}
@@ -150,7 +153,8 @@ class HeatmapControllerTest {
 
 		// When & Then
 		mockMvc.perform(get("/v1/solution/heatmap/{serialNumber}/{password}", serialNumber, password)
-				.param("type", type))
+				.param("type", type)
+				.param("widthRange", String.valueOf(WIDTH_RANGE)))
 			.andExpect(status().isUnauthorized());
 	}
 
@@ -167,7 +171,8 @@ class HeatmapControllerTest {
 
 		// When & Then
 		mockMvc.perform(get("/v1/solution/heatmap/{serialNumber}/{password}", serialNumber, password)
-				.param("type", type))
+				.param("type", type)
+				.param("widthRange", String.valueOf(WIDTH_RANGE)))
 			.andExpect(status().isUnauthorized());
 	}
 
@@ -184,7 +189,8 @@ class HeatmapControllerTest {
 
 		// When & Then
 		mockMvc.perform(get("/v1/solution/heatmap/{serialNumber}/{password}", serialNumber, password)
-				.param("type", type))
+				.param("type", type)
+				.param("widthRange", String.valueOf(WIDTH_RANGE)))
 			.andExpect(status().isBadRequest());
 	}
 
@@ -201,7 +207,8 @@ class HeatmapControllerTest {
 
 		// When & Then
 		mockMvc.perform(get("/v1/solution/heatmap/{serialNumber}/{password}", serialNumber, password)
-				.param("type", type))
+				.param("type", type)
+				.param("widthRange", String.valueOf(WIDTH_RANGE)))
 			.andExpect(status().isNotFound());
 	}
 
@@ -218,7 +225,8 @@ class HeatmapControllerTest {
 
 		// When & Then
 		mockMvc.perform(get("/v1/solution/heatmap/{serialNumber}/{password}", serialNumber, password)
-				.param("type", type))
+				.param("type", type)
+				.param("widthRange", String.valueOf(WIDTH_RANGE)))
 			.andExpect(status().isNotFound());
 	}
 }

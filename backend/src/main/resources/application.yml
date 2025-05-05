@@ -41,4 +41,4 @@ spring:
       password: 1234
 
 image:
-  path: C:/page-capture
+  path: backend/images/page-capture
