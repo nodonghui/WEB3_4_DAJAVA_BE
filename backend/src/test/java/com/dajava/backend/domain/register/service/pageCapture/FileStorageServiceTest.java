@@ -31,10 +31,10 @@ public class FileStorageServiceTest {
 	@Autowired
 	private PageCaptureDataRepository pageCaptureDataRepository;
 
-	// 테스트 종료 후 "C:/page-capture" 하위의 모든 파일/디렉터리 삭제
+	// 테스트 종료 후 "backend/images/page-capture" 하위의 모든 파일/디렉터리 삭제
 	@AfterAll
 	static void cleanup() throws IOException {
-		Path baseDir = Paths.get("C:/page-capture");
+		Path baseDir = Paths.get("backend/images/page-capture");
 		if (Files.exists(baseDir)) {
 			Files.walk(baseDir)
 				.sorted(Comparator.reverseOrder())

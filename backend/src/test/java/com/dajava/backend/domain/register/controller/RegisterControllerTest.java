@@ -85,7 +85,7 @@ class RegisterControllerTest {
 	// 테스트가 끝난 후 생성된 파일 및 디렉토리를 삭제
 	@AfterAll
 	static void cleanup() throws IOException {
-		Path baseDir = Paths.get("C:/page-capture");
+		Path baseDir = Paths.get("backend/images/page-capture");
 		if (Files.exists(baseDir)) {
 			// 디렉토리 내 모든 파일 및 하위 디렉토리를 역순(파일부터 지워야 디렉토리 지울 수 있음)으로 삭제
 			Files.walk(baseDir)
