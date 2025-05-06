@@ -26,10 +26,14 @@ public class AbusingBaseLineServiceImp implements AbusingBaseLineService {
 
 	/**
 	 * pageUrl 기준으로 Baseline 조회
+	 * 만약 url에 대한 baseline이 없다면 새로 생성
 	 */
 	@Override
 	public AbusingBaseLine getBaselineByPageUrl(String pageUrl) {
 		return abusingBaseLineRepository.findByPageUrl(pageUrl)
-			.orElseThrow(() -> new AbusingBaseLineException(ABUSING_BASE_LINE_NOT_FOUND));
+			.orElseGet(() -> {
+				AbusingBaseLine newBaseline = AbusingBaseLine.create(pageUrl);
+				return abusingBaseLineRepository.save(newBaseline);
+			});
 	}
 }

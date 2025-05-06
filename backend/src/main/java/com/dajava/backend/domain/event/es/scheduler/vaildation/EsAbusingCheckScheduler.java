@@ -62,6 +62,8 @@ public class EsAbusingCheckScheduler {
 			}
 		}
 
+		log.info("[AbusingCheckScheduler] 어뷰징 데이터 필터링 스케줄러 종료");
+
 	}
 
 }
