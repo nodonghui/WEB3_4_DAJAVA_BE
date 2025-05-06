@@ -5,8 +5,11 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.elasticsearch.UncategorizedElasticsearchException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.dajava.backend.domain.event.es.entity.AbusingBaseLine;
 import com.dajava.backend.domain.event.es.entity.SessionDataDocument;
+import com.dajava.backend.domain.event.es.service.AbusingBaseLineService;
 import com.dajava.backend.domain.event.es.service.PointerEventDocumentService;
 import com.dajava.backend.domain.event.es.service.SessionDataDocumentService;
 import com.dajava.backend.domain.event.exception.PointerEventException;
@@ -31,10 +34,9 @@ import lombok.extern.slf4j.Slf4j;
 public class EsAbusingCheckScheduler {
 
 	private final SessionDataDocumentService sessionDataDocumentService;
-	private final PointerEventDocumentService pointerEventDocumentService;
+	private final AbusingCheckProcessor abusingCheckProcessor;
 
 	private final BufferSchedulerProperties bufferSchedulerProperties;
-
 
 	//@Scheduled(fixedRateString = "#{@bufferSchedulerProperties.abusingCheckMs}")
 	@SentryMonitored(level = SentryLevel.FATAL, operation = "abusing_check_scheduler")
@@ -44,11 +46,20 @@ public class EsAbusingCheckScheduler {
 
 		List<SessionDataDocument> sessionDataDocuments = sessionDataDocumentService.getRecentSessionsInLastHour();
 
-		for(SessionDataDocument sessionDataDocument : sessionDataDocuments) {
-			String sessionId = sessionDataDocument.getSessionId();
-			String pageUrl = sessionDataDocument.getPageUrl();
+		for (SessionDataDocument session : sessionDataDocuments) {
+			try {
+				abusingCheckProcessor.processSession(session);
+			} catch (PointerEventException e) {
+				log.warn("[AbusingCheckScheduler] 세션 검증 실패 (이미 검증된 세션일 수 있음): {}, {}",
+					session.getSessionId(), e.getMessage());
+			} catch (ElasticsearchException | UncategorizedElasticsearchException e) {
+				log.warn("[AbusingCheckScheduler] 세션 ID: {} - Elasticsearch 쿼리 실패", session.getSessionId());
+				log.warn("[AbusingCheckScheduler] Exception Message: {}", e.getMessage());
+				log.warn("[AbusingCheckScheduler] Full Stack Trace", e);
 
-			//문제 있는 데이터인 경우
+			} catch (Exception e) {
+				log.error("[AbusingCheckScheduler] 예상치 못한 에러 발생 - 세션 ID: {}", session.getSessionId(), e);
+			}
 		}
 
 	}

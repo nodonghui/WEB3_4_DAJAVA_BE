@@ -41,14 +41,24 @@ public class AbusingBaseLine extends BaseTimeEntity {
 	@Column(nullable = false)
 	private int sampleSize;
 
+	@Column(nullable = false)
+	private double m2; // Welford 알고리즘에서 분산 누적합
+
+	public void updateStatistics(long newAverage, double newStandardDeviation, int newSampleSize, double newM2) {
+		this.averageEventsPerHour = newAverage;
+		this.standardDeviation = newStandardDeviation;
+		this.sampleSize = newSampleSize;
+		this.m2 = newM2;
+	}
+
 	//averageEventsPerHour의 디폴트 값은 300으로 설정, 데이터를 받으며 값이 계속 수정됨
 	public static AbusingBaseLine create(String pageUrl) {
 		return AbusingBaseLine.builder()
 			.pageUrl(pageUrl)
 			.averageEventsPerHour(300)
 			.standardDeviation(100)
-			.sampleSize(1)
+			.sampleSize(0) // 데이터 들어오며 sampleSize = 1 로 시작
+			.m2(100 * 100) // 표준편차^2 * sampleSize
 			.build();
 	}
 }
-
