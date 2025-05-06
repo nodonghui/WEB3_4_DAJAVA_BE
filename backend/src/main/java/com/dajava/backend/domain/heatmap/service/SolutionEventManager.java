@@ -47,7 +47,7 @@ public class SolutionEventManager {
 			.toList();
 	}
 
-	protected static int getMaxPageHeight(List<SolutionEventDocument> events) {
+	protected static int getMaxPageWidth(List<SolutionEventDocument> events) {
 		return events.stream()
 			.map(SolutionEventDocument::getBrowserWidth)
 			.filter(Objects::nonNull)
@@ -55,7 +55,7 @@ public class SolutionEventManager {
 			.orElse(0);
 	}
 
-	protected static int getMaxPageWidth(List<SolutionEventDocument> events) {
+	protected static int getMaxPageHeight(List<SolutionEventDocument> events) {
 		return events.stream()
 			.map(event -> event.getScrollHeight() != null ? event.getScrollHeight() :
 				(event.getViewportHeight() != null ? event.getViewportHeight() : 0))
