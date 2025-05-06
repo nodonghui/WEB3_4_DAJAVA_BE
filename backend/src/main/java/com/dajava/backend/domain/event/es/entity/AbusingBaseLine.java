@@ -33,7 +33,7 @@ public class AbusingBaseLine extends BaseTimeEntity {
 	private String pageUrl;
 
 	@Column(nullable = false)
-	private int averageEventsPerHour;
+	private long averageEventsPerHour;
 
 	@Column(nullable = false)
 	private double standardDeviation;

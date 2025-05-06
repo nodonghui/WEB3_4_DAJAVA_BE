@@ -7,6 +7,7 @@ import org.springframework.data.elasticsearch.UncategorizedElasticsearchExceptio
 import org.springframework.stereotype.Component;
 
 import com.dajava.backend.domain.event.es.entity.SessionDataDocument;
+import com.dajava.backend.domain.event.es.service.PointerEventDocumentService;
 import com.dajava.backend.domain.event.es.service.SessionDataDocumentService;
 import com.dajava.backend.domain.event.exception.PointerEventException;
 import com.dajava.backend.global.component.analyzer.BufferSchedulerProperties;
@@ -30,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 public class EsAbusingCheckScheduler {
 
 	private final SessionDataDocumentService sessionDataDocumentService;
+	private final PointerEventDocumentService pointerEventDocumentService;
 
 	private final BufferSchedulerProperties bufferSchedulerProperties;
 
