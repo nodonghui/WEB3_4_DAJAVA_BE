@@ -43,7 +43,10 @@ public class EsAbusingCheckScheduler {
 		List<SessionDataDocument> sessionDataDocuments = sessionDataDocumentService.getRecentSessionsInLastHour();
 
 		for(SessionDataDocument sessionDataDocument : sessionDataDocuments) {
+			String sessionId = sessionDataDocument.getSessionId();
+			String pageUrl = sessionDataDocument.getPageUrl();
 
+			//문제 있는 데이터인 경우
 		}
 
 	}

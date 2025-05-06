@@ -100,6 +100,28 @@ public class PointerEventDocumentServiceImpl implements PointerEventDocumentServ
 		);
 	}
 
+	@Override
+	public long countClickEvents(String sessionId, String pageUrl) {
+		return clickEventDocumentRepository.countBySessionIdAndPageUrl(sessionId, pageUrl);
+	}
+
+	@Override
+	public long countMoveEvents(String sessionId, String pageUrl) {
+		return moveEventDocumentRepository.countBySessionIdAndPageUrl(sessionId, pageUrl);
+	}
+
+	@Override
+	public long countScrollEvents(String sessionId, String pageUrl) {
+		return scrollEventDocumentRepository.countBySessionIdAndPageUrl(sessionId, pageUrl);
+	}
+
+	@Override
+	public long countAllEvents(String sessionId, String pageUrl) {
+		return countClickEvents(sessionId, pageUrl)
+			+ countMoveEvents(sessionId, pageUrl)
+			+ countScrollEvents(sessionId, pageUrl);
+	}
+
 
 
 }
