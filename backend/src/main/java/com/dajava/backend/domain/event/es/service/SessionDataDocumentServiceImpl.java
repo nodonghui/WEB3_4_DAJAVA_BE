@@ -1,5 +1,9 @@
 package com.dajava.backend.domain.event.es.service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -31,4 +35,14 @@ public class SessionDataDocumentServiceImpl implements SessionDataDocumentServic
 		sessionDataDocumentRepository.save(sessionDataDocument);
 	}
 
+	@Override
+	public List<SessionDataDocument> getRecentSessionsInLastHour() {
+		LocalDateTime now = LocalDateTime.now();
+		LocalDateTime oneHourAgo = now.minusHours(1);
+
+		long from = oneHourAgo.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+		long to = now.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+
+		return sessionDataDocumentRepository.findSessionsWithinTimestampRange(from, to);
+	}
 }

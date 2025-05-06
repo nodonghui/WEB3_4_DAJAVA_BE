@@ -1,5 +1,7 @@
 package com.dajava.backend.domain.event.es.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.dajava.backend.domain.event.es.entity.AbusingBaseLine;
@@ -9,4 +11,9 @@ import com.dajava.backend.domain.event.es.entity.AbusingBaseLine;
  *  @author NohDongHui
  */
 public interface AbusingBaseLineRepository extends JpaRepository<AbusingBaseLine, Long> {
+
+	/**
+	 * pageUrl 기준으로 Baseline 조회
+	 */
+	Optional<AbusingBaseLine> findByPageUrl(String pageUrl);
 }

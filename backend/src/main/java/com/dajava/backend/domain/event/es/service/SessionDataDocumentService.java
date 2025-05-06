@@ -1,5 +1,7 @@
 package com.dajava.backend.domain.event.es.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 
 import com.dajava.backend.domain.event.es.entity.SessionDataDocument;
@@ -27,4 +29,10 @@ public interface SessionDataDocumentService {
 	 * @return
 	 */
 	public void save(SessionDataDocument sessionDataDocument);
+
+	/**
+	 * 현재 시각으로 부터 1시간 이내 세션 데이터를 조회하는 메서드
+	 * @return
+	 */
+	public List<SessionDataDocument> getRecentSessionsInLastHour();
 }

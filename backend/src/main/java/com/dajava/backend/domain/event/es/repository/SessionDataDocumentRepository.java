@@ -1,5 +1,6 @@
 package com.dajava.backend.domain.event.es.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -47,4 +48,25 @@ public interface SessionDataDocumentRepository
 	 * @return Page<SessionDataDocument>
 	 */
 	Page<SessionDataDocument> findByIsSessionEndedTrueAndIsVerifiedFalse(Pageable pageable);
+
+	/**
+	 * 현재 시각으로 부터 1시간 이내 세션 데이터 조회
+	 * @param fromTimestamp
+	 * @param toTimestamp
+	 * @return
+	 */
+	@Query("""
+	{
+  		"range": {
+    		"timestamp": {
+      			"gte": "?0",
+      			"lte": "?1"
+    		}
+  		}
+	}
+		""")
+	List<SessionDataDocument> findSessionsWithinTimestampRange(
+		Long fromTimestamp,
+		Long toTimestamp
+	);
 }

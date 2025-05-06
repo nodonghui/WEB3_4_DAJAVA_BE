@@ -1,5 +1,7 @@
 package com.dajava.backend.domain.event.es.scheduler.vaildation;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.elasticsearch.UncategorizedElasticsearchException;
 import org.springframework.stereotype.Component;
@@ -37,6 +39,12 @@ public class EsAbusingCheckScheduler {
 	public void runScheduledAbusingCheck() {
 
 		log.info("[AbusingCheckScheduler] 어뷰징 데이터 필터링 스케줄러 시작");
+
+		List<SessionDataDocument> sessionDataDocuments = sessionDataDocumentService.getRecentSessionsInLastHour();
+
+		for(SessionDataDocument sessionDataDocument : sessionDataDocuments) {
+
+		}
 
 	}
 

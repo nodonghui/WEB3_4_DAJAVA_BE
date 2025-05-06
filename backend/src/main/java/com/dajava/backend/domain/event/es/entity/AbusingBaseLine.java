@@ -35,11 +35,20 @@ public class AbusingBaseLine extends BaseTimeEntity {
 	@Column(nullable = false)
 	private int averageEventsPerHour;
 
+	@Column(nullable = false)
+	private double standardDeviation;
+
+	@Column(nullable = false)
+	private int sampleSize;
+
 	//averageEventsPerHour의 디폴트 값은 300으로 설정, 데이터를 받으며 값이 계속 수정됨
 	public static AbusingBaseLine create(String pageUrl) {
 		return AbusingBaseLine.builder()
 			.pageUrl(pageUrl)
 			.averageEventsPerHour(300)
+			.standardDeviation(100)
+			.sampleSize(1)
 			.build();
 	}
 }
+

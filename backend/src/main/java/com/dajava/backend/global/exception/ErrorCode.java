@@ -67,10 +67,13 @@ public enum ErrorCode {
 	IMAGE_IO_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 읽기 중 오류가 발생했습니다."),
 
 	// heatmap
-	ELASTICSEARCH_QUERY_FAILED(HttpStatus.BAD_REQUEST,"es 쿼리문이 실패했습니다"),
+	ELASTICSEARCH_QUERY_FAILED(HttpStatus.BAD_REQUEST, "es 쿼리문이 실패했습니다"),
 
 	// htmlparser
-	PARSING_ERROR(HttpStatus.BAD_REQUEST,"검증 로직 자식 요소 파싱에서 문제가 발생했습니다.");
+	PARSING_ERROR(HttpStatus.BAD_REQUEST, "검증 로직 자식 요소 파싱에서 문제가 발생했습니다."),
+
+	// abusingBaseLine
+	ABUSING_BASE_LINE_NOT_FOUND(HttpStatus.NOT_FOUND, "검증 로직 자식 요소 파싱에서 문제가 발생했습니다.");
 
 	private final HttpStatus httpStatus;
 	private final String description;
