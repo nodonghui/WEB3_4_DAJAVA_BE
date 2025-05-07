@@ -21,7 +21,7 @@ public class AbusingCheckProcessor {
 	private final AbusingBaseLineService abusingBaseLineService;
 	private final SessionDataDocumentService sessionDataDocumentService;
 
-	private static final int BASELINE_MIN_SAMPLE_SIZE = 10;
+	private static final int BASELINE_MIN_SAMPLE_SIZE = 11;
 	private static final int EXTREME_SESSION_COUNT = 2000;
 
 	@Transactional
@@ -75,7 +75,7 @@ public class AbusingCheckProcessor {
 	private void handleInitialLearning(AbusingBaseLine baseline, long eventCount) {
 		log.debug("[AbusingCheck] 초기 baseline 학습 중 - sampleSize: {}", baseline.getSampleSize());
 
-		if (baseline.getSampleSize() == 10) {
+		if (baseline.getSampleSize() == BASELINE_MIN_SAMPLE_SIZE - 1) {
 			baseline.setPriorAverage(baseline.getAverageEventsPerHour());
 			log.debug("[AbusingCheck] prior 설정 완료 - priorAvg: {}, priorWeight: {}",
 				baseline.getPriorAverage(), baseline.getPriorWeight());
