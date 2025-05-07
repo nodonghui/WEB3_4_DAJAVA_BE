@@ -96,7 +96,7 @@ public class AbusingCheckProcessor {
 		double m2 = baseline.getM2();
 
 		int newSampleSize = sampleSize + 1;
-		double delta = eventCount - avg;
+		double delta = (double)eventCount - avg;
 		double newAvg = avg + delta / newSampleSize;
 		double delta2 = eventCount - newAvg;
 		double newM2 = m2 + delta * delta2;

@@ -2,16 +2,12 @@ package com.dajava.backend.domain.event.es.scheduler.vaildation;
 
 import java.util.List;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.elasticsearch.UncategorizedElasticsearchException;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-import com.dajava.backend.domain.event.es.entity.AbusingBaseLine;
 import com.dajava.backend.domain.event.es.entity.SessionDataDocument;
-import com.dajava.backend.domain.event.es.service.AbusingBaseLineService;
-import com.dajava.backend.domain.event.es.service.PointerEventDocumentService;
 import com.dajava.backend.domain.event.es.service.SessionDataDocumentService;
+import com.dajava.backend.domain.event.exception.AbusingBaseLineException;
 import com.dajava.backend.domain.event.exception.PointerEventException;
 import com.dajava.backend.global.component.analyzer.BufferSchedulerProperties;
 import com.dajava.backend.global.sentry.SentryMonitored;
@@ -57,6 +53,8 @@ public class EsAbusingCheckScheduler {
 				log.warn("[AbusingCheckScheduler] Exception Message: {}", e.getMessage());
 				log.warn("[AbusingCheckScheduler] Full Stack Trace", e);
 
+			} catch (AbusingBaseLineException e) {
+				log.error("[AbusingCheckScheduler] 이미 해당 url baseline의 priorAverage이 설정되어 있습니다.  -  url : {}", session.getPageUrl());
 			} catch (Exception e) {
 				log.error("[AbusingCheckScheduler] 예상치 못한 에러 발생 - 세션 ID: {}", session.getSessionId(), e);
 			}
