@@ -50,5 +50,13 @@ logging:
 init:
   flag:1
 
-image:
-  path: /data/page-capture
+aws:
+  region: ap-northeast-2
+  credentials:
+    access-key: ${AWS_ACCESS_KEY_ID}
+    secret-key: ${AWS_SECRET_ACCESS_KEY}
+  s3:
+    bucket-name: hyunsanbucket
+    folder: page-captures
+  cloudfront:
+    domain: https://dxdgv3u13ofcj.cloudfront.net # 현재는 cloudfront 도메인, 추후 수정 예정
