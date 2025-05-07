@@ -53,8 +53,8 @@ init:
 aws:
   region: ap-northeast-2
   credentials:
-    access-key: ${AWS_ACCESS_KEY_ID}
-    secret-key: ${AWS_SECRET_ACCESS_KEY}
+    access-key: ${aws.access-key}
+    secret-key: ${aws.secret-access-key}
   s3:
     bucket-name: hyunsanbucket
     folder: page-captures
