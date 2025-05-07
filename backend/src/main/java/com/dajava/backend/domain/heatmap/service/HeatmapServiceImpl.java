@@ -24,7 +24,7 @@ import com.dajava.backend.domain.heatmap.dto.HeatmapResponse;
 import com.dajava.backend.domain.heatmap.dto.HeatmapWidthsResponse;
 import com.dajava.backend.domain.heatmap.exception.HeatmapException;
 import com.dajava.backend.domain.image.ImageDimensions;
-import com.dajava.backend.domain.image.service.pageCapture.FileStorageService;
+import com.dajava.backend.domain.image.service.pageCapture.LocalFileStorageService;
 import com.dajava.backend.domain.register.entity.PageCaptureData;
 import com.dajava.backend.domain.register.entity.Register;
 import com.dajava.backend.domain.register.repository.RegisterRepository;
@@ -47,7 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 public class HeatmapServiceImpl implements HeatmapService {
 
 	private final RegisterRepository registerRepository;
-	private final FileStorageService fileStorageService;
+	private final LocalFileStorageService fileStorageService;
 	private final SolutionEventFetcher solutionEventFetcher;
 
 	// 현재 구현된 히트맵 타입

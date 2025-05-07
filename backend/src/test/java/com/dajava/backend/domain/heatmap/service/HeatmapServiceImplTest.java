@@ -23,7 +23,7 @@ import com.dajava.backend.domain.event.es.entity.SolutionEventDocument;
 import com.dajava.backend.domain.heatmap.dto.HeatmapResponse;
 import com.dajava.backend.domain.heatmap.exception.HeatmapException;
 import com.dajava.backend.domain.image.ImageDimensions;
-import com.dajava.backend.domain.image.service.pageCapture.FileStorageService;
+import com.dajava.backend.domain.image.service.pageCapture.LocalFileStorageService;
 import com.dajava.backend.domain.register.entity.PageCaptureData;
 import com.dajava.backend.domain.register.entity.Register;
 import com.dajava.backend.domain.register.repository.RegisterRepository;
@@ -40,7 +40,7 @@ class HeatmapServiceImplTest {
 	private SolutionEventFetcher solutionEventFetcher;
 
 	@Mock
-	private FileStorageService fileStorageService;
+	private LocalFileStorageService localFileStorageService;
 
 	@InjectMocks
 	private HeatmapServiceImpl heatmapService;
@@ -153,7 +153,7 @@ class HeatmapServiceImplTest {
 
 		// fileStorageService 동작 설정하여 목 너비 및 높이를 반환하도록 처리
 		ImageDimensions stubbedDimensions = new ImageDimensions(1200, 3000);
-		lenient().when(fileStorageService.getImageDimensions(anyString())).thenReturn(stubbedDimensions);
+		lenient().when(localFileStorageService.getImageDimensions(anyString())).thenReturn(stubbedDimensions);
 	}
 
 	@Test

@@ -32,7 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.dajava.backend.domain.image.service.pageCapture.FileStorageService;
+import com.dajava.backend.domain.image.service.pageCapture.LocalFileStorageService;
 import com.dajava.backend.domain.register.dto.register.RegisterCreateRequest;
 import com.dajava.backend.domain.register.dto.register.RegisterModifyRequest;
 import com.dajava.backend.domain.register.entity.Register;
@@ -67,7 +67,7 @@ class RegisterControllerTest {
 	private RegisterRepository registerRepository;
 
 	@Autowired
-	private FileStorageService fileStorageService;
+	private LocalFileStorageService localFileStorageService;
 
 	@Value("${custom.adminCode}")
 	private String adminCode;
