@@ -73,7 +73,8 @@ public enum ErrorCode {
 	PARSING_ERROR(HttpStatus.BAD_REQUEST, "검증 로직 자식 요소 파싱에서 문제가 발생했습니다."),
 
 	// abusingBaseLine
-	ABUSING_BASE_LINE_NOT_FOUND(HttpStatus.NOT_FOUND, "검증 로직 자식 요소 파싱에서 문제가 발생했습니다.");
+	ABUSING_BASE_LINE_NOT_FOUND(HttpStatus.NOT_FOUND, "검증 로직 자식 요소 파싱에서 문제가 발생했습니다."),
+	ALREADY_PRIOR_AVERAGE(HttpStatus.BAD_REQUEST, "이미 priorAverage가 설정되어있습니다.");
 
 	private final HttpStatus httpStatus;
 	private final String description;

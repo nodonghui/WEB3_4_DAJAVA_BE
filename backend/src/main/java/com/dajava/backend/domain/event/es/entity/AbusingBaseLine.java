@@ -1,7 +1,9 @@
 package com.dajava.backend.domain.event.es.entity;
 
 
+import com.dajava.backend.domain.event.exception.AbusingBaseLineException;
 import com.dajava.backend.global.common.BaseTimeEntity;
+import com.dajava.backend.global.exception.ErrorCode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -44,11 +46,33 @@ public class AbusingBaseLine extends BaseTimeEntity {
 	@Column(nullable = false)
 	private double m2; // Welford 알고리즘에서 분산 누적합
 
+	@Column(nullable = false)
+	private long priorAverage; // 기본 평균값
+
+	@Column(nullable = false)
+	private int priorWeight; // prior sample size
+
 	public void updateStatistics(long newAverage, double newStandardDeviation, int newSampleSize, double newM2) {
 		this.averageEventsPerHour = newAverage;
 		this.standardDeviation = newStandardDeviation;
 		this.sampleSize = newSampleSize;
 		this.m2 = newM2;
+	}
+
+	public double calculateBayesianAverage() {
+		long priorAvg = this.priorAverage;
+		int priorWeight = this.priorWeight;
+		long observedAvg = this.averageEventsPerHour;
+		int observedSample = this.sampleSize;
+
+		return ((priorWeight * priorAvg) + (observedSample * observedAvg)) / (double)(priorWeight + observedSample);
+	}
+
+	public void setPriorAverage(long priorAverage) {
+		if (this.priorAverage != 0) {
+			throw new AbusingBaseLineException(ErrorCode.ALREADY_PRIOR_AVERAGE);
+		}
+		this.priorAverage = priorAverage;
 	}
 
 	//averageEventsPerHour의 디폴트 값은 300으로 설정, 데이터를 받으며 값이 계속 수정됨
@@ -59,6 +83,8 @@ public class AbusingBaseLine extends BaseTimeEntity {
 			.standardDeviation(100)
 			.sampleSize(0) // 데이터 들어오며 sampleSize = 1 로 시작
 			.m2(100 * 100) // 표준편차^2 * sampleSize
+			.priorAverage(0)
+			.priorWeight(10)
 			.build();
 	}
 }

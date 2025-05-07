@@ -21,7 +21,8 @@ public class AbusingCheckProcessor {
 	private final AbusingBaseLineService abusingBaseLineService;
 	private final SessionDataDocumentService sessionDataDocumentService;
 
-	private static final int BASELINE_MIN_SAMPLE_SIZE = 30;
+	private static final int BASELINE_MIN_SAMPLE_SIZE = 10;
+	private static final int EXTREME_SESSION_COUNT = 2000;
 
 	@Transactional
 	public void processSession(SessionDataDocument session) {
@@ -39,6 +40,11 @@ public class AbusingCheckProcessor {
 
 		// baseline 학습 단계
 		if (baseline.getSampleSize() < BASELINE_MIN_SAMPLE_SIZE) {
+			if (eventCount > EXTREME_SESSION_COUNT) {
+				log.warn("[AbusingCheck] 극단값 무시 - sampleSize: {}, eventCount: {}",
+					baseline.getSampleSize(), eventCount);
+				return;
+			}
 			handleInitialLearning(baseline, eventCount);
 			return;
 		}
@@ -58,7 +64,8 @@ public class AbusingCheckProcessor {
 	}
 
 	private double calculateZScore(long eventCount, AbusingBaseLine baseline) {
-		return (eventCount - baseline.getAverageEventsPerHour()) / baseline.getStandardDeviation();
+		double bayesianAvg = baseline.calculateBayesianAverage();
+		return (eventCount - bayesianAvg) / Math.max(baseline.getStandardDeviation(), 30.0); // 최소 표준편차 보정
 	}
 
 	private boolean isAbusing(double zScore) {
@@ -67,6 +74,13 @@ public class AbusingCheckProcessor {
 
 	private void handleInitialLearning(AbusingBaseLine baseline, long eventCount) {
 		log.debug("[AbusingCheck] 초기 baseline 학습 중 - sampleSize: {}", baseline.getSampleSize());
+
+		if (baseline.getSampleSize() == 10) {
+			baseline.setPriorAverage(baseline.getAverageEventsPerHour());
+			log.debug("[AbusingCheck] prior 설정 완료 - priorAvg: {}, priorWeight: {}",
+				baseline.getPriorAverage(), baseline.getPriorWeight());
+		}
+
 		updateBaselineWithWelford(baseline, eventCount);
 	}
 
@@ -78,7 +92,6 @@ public class AbusingCheckProcessor {
 
 	private void updateBaselineWithWelford(AbusingBaseLine baseline, long eventCount) {
 		long avg = baseline.getAverageEventsPerHour();
-		double stddev = baseline.getStandardDeviation();
 		int sampleSize = baseline.getSampleSize();
 		double m2 = baseline.getM2();
 
