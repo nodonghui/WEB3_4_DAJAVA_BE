@@ -13,6 +13,7 @@ import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
@@ -34,6 +35,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * @author Metronon
  */
 @Service
+@Profile("!prod")
 public class LocalFileStorageService implements FileStorageService {
 
 	// 파일 저장 경로 (외부 설정에서 주입)

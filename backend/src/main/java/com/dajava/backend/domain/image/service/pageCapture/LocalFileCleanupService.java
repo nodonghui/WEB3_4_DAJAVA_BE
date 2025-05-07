@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import com.dajava.backend.domain.register.entity.PageCaptureData;
@@ -20,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
+@Profile("!prod")
 public class LocalFileCleanupService implements FileCleanupService {
 
 	// 파일 저장 경로 (외부 설정에서 주입)
