@@ -10,6 +10,11 @@ import com.dajava.backend.domain.log.dto.identifier.SessionIdentifier;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Redis에 현재 존재하는 모든 이벤트 유형에 대한 활성 세션 키를 한꺼번에 수집하는 유틸리티 컴포넌트 클래스
+ * @author sungkibum, jhon S
+ */
+
 @Component
 @RequiredArgsConstructor
 public class SessionKeyCollector {
