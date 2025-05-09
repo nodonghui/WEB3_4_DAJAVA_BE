@@ -51,22 +51,10 @@ public interface SessionDataDocumentRepository
 
 	/**
 	 * 현재 시각으로 부터 1시간 이내 세션 데이터 조회
-	 * @param fromTimestamp
-	 * @param toTimestamp
+	 * 마지막 데이터 저장 시간은 lastEventTimestamp 기준으로 함
+	 * @param from
+	 * @param to
 	 * @return
 	 */
-	@Query("""
-	{
-  		"range": {
-    		"timestamp": {
-      			"gte": "?0",
-      			"lte": "?1"
-    		}
-  		}
-	}
-		""")
-	List<SessionDataDocument> findSessionsWithinTimestampRange(
-		Long fromTimestamp,
-		Long toTimestamp
-	);
+	List<SessionDataDocument> findByLastEventTimestampBetween(Long from, Long to);
 }

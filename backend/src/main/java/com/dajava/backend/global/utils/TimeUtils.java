@@ -6,6 +6,9 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class TimeUtils {
 	/**
 	 * 두 LocalDateTime 사이의 시간 차이를 시간(hours) 단위의 int로 반환
@@ -33,6 +36,23 @@ public class TimeUtils {
 			(int) (epochMillis % 1000) * 1_000_000,
 			ZoneOffset.UTC
 		);
+	}
+
+	/**
+	 * 주어진 업데이트 시간들 중 가장 최근 값을 반환합니다.
+	 * 모든 값이 null인 경우 null을 반환합니다.
+	 */
+	public static Long getLatestUpdate(Long... updates) {
+		Long latest = null;
+
+		for (Long update : updates) {
+			if (update != null && (latest == null || update > latest)) {
+				log.trace("업데이트 비교: 기존 = {}, 새로운 = {}", latest, update);
+				latest = update;
+			}
+		}
+
+		return latest;
 	}
 
 	/**

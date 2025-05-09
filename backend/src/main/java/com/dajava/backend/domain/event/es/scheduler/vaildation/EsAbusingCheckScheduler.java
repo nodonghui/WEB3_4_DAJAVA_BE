@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
  * 검사 후 어뷰징 세션 데이터의 boolean 값을 바꿉니다.
  * 1시간 내 세션 데이터 조회 -> 상위, 하위 10퍼센트 데이터 제외한 데이터로 시간, 수신 데이터량에 대한 baseline 갱신
  * -> 데이터들을 baseline 기준으로 검사해 baseline에 과도하게 넘는 삭제
+ * 아니면 검증 스케줄러 돌기전에 직접 호출해 어뷰징 세션 제거 후 검증 로직 동작하게 할 수 있음
  * @author NohDongHui
  */
 @Slf4j

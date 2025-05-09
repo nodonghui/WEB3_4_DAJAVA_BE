@@ -39,6 +39,7 @@ public class AbusingCheckProcessor {
 			baseline.getAverageEventsPerHour(), baseline.getStandardDeviation(), baseline.getSampleSize());
 
 		// baseline 학습 단계
+		// 초기 prior average는 경험적으로 설정하는 방향으로
 		if (baseline.getSampleSize() < BASELINE_MIN_SAMPLE_SIZE) {
 			if (eventCount > EXTREME_SESSION_COUNT) {
 				log.warn("[AbusingCheck] 극단값 무시 - sampleSize: {}, eventCount: {}",

@@ -43,6 +43,6 @@ public class SessionDataDocumentServiceImpl implements SessionDataDocumentServic
 		long from = oneHourAgo.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 		long to = now.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
-		return sessionDataDocumentRepository.findSessionsWithinTimestampRange(from, to);
+		return sessionDataDocumentRepository.findByLastEventTimestampBetween(from, to);
 	}
 }
