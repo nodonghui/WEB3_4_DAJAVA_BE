@@ -25,7 +25,7 @@ public class AbusingCheckProcessor {
 	private final SessionDataDocumentService sessionDataDocumentService;
 
 	private static final int BASELINE_MIN_SAMPLE_SIZE = 11;
-	private static final int EXTREME_SESSION_COUNT = 2000;
+
 
 	@Transactional
 	public void processSession(SessionDataDocument session) {
@@ -43,9 +43,11 @@ public class AbusingCheckProcessor {
 			baseline.getAverageEventsPerHour(), baseline.getStandardDeviation(), baseline.getSampleSize());
 
 		// baseline 학습 단계
-		// 초기 prior average는 경험적으로 설정하는 방향으로
+		// 세션수가 충분히 많으면 학습 샘플수를 늘리고 초기 데이터는 isVerified를 true로 해 검증 로직에서 제외 시키는것 고려
+		// 맨 처음 들어오는 50개 세션을 무시하고 분석해도 시스템에 문제 없는 경우 50개는 학습용으로 사용하고 검증 로직에서 제외
+		// 현재는 10개만 받아 priorAverage과 초기 average, m2 생성
 		if (baseline.getSampleSize() < BASELINE_MIN_SAMPLE_SIZE) {
-			if (eventCountPerHour > EXTREME_SESSION_COUNT) {
+			if (eventCountPerHour > baseline.getAverageEventsPerHour() * 10 ) {
 				log.warn("[AbusingCheck] 극단값 무시 - sampleSize: {}, eventCount: {}",
 					baseline.getSampleSize(), eventCountPerHour);
 				return;
@@ -70,6 +72,8 @@ public class AbusingCheckProcessor {
 
 	private double calculateZScore(long eventCountPerHour, AbusingBaseLine baseline) {
 		double bayesianAvg = baseline.calculateBayesianAverage();
+		// 페이지 성격에 따라 최소 표준편차 다르게 적용하는 거 고려
+		// 뉴스 페이지 경우 최소 표준편차를 더 낮추고 게임 사이트 경우 더 높힐 필요가 있다.
 		return (eventCountPerHour - bayesianAvg) / Math.max(baseline.getStandardDeviation(), 30.0); // 최소 표준편차 보정
 	}
 
