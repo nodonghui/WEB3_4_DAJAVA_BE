@@ -4,16 +4,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+import com.dajava.backend.domain.image.utils.ImageCleanupUtils;
 import com.dajava.backend.domain.register.entity.PageCaptureData;
-import com.dajava.backend.domain.register.entity.Register;
 import com.dajava.backend.domain.register.repository.PageCaptureDataRepository;
 import com.dajava.backend.domain.register.repository.RegisterRepository;
 
@@ -61,17 +59,12 @@ public class LocalFileCleanupService implements FileCleanupService {
 	 */
 	public void deleteNonLinkedFile() {
 		log.info("연관되지 않은 모든 이미지 파일 삭제 시작");
-		// Register 에 있는 모든 URL Set
-		List<Register> registers = registerRepository.findAll();
-		Set<String> registerUrls = registers.stream()
-			.map(Register::getUrl)
-			.collect(Collectors.toSet());
 
-		// PageCaptureData 에 있는 모든 URL Set
-		List<PageCaptureData> pageCaptureData = pageCaptureDataRepository.findAll();
-		Set<String> pageCaptureUrls = pageCaptureData.stream()
-			.map(PageCaptureData::getPageUrl)
-			.collect(Collectors.toSet());
+		// Register에 있는 모든 URL Set
+		Set<String> registerUrls = ImageCleanupUtils.getRegisterUrls();
+
+		// PageCaptureData에 있는 모든 URL Set
+		Set<String> pageCaptureUrls = ImageCleanupUtils.getPageCaptureUrls();
 
 		// 제거 대상인 url 의 정보만 남김
 		pageCaptureUrls.removeAll(registerUrls);
