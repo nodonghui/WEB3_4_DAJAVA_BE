@@ -57,6 +57,6 @@ aws:
     secret-key: ${aws.secret-key}
   s3:
     bucket-name: hyunsanbucket
-    folder: page-captures
+    folder: page-captures/
   cloudfront:
-    domain: https://dxdgv3u13ofcj.cloudfront.net # 현재는 cloudfront 도메인, 추후 수정 예정
+    domain: https://dajava.s3.chsan626.co.kr/ # 현재는 cloudfront 도메인, 추후 수정 예정

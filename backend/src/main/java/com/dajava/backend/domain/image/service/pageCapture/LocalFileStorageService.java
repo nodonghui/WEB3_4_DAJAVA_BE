@@ -25,8 +25,6 @@ import com.dajava.backend.domain.image.exception.ImageException;
 import com.dajava.backend.domain.register.entity.PageCaptureData;
 import com.dajava.backend.global.exception.ErrorCode;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 /**
  * 캡쳐 이미지를 생성하거나, 기존에 있는 이미지에 덮어쓰는 로직입니다.
  * 기존에 있는 이미지에 덮어쓰는 경우, 동일한 파일명으로 REPLACE 됩니다.
@@ -109,31 +107,6 @@ public class LocalFileStorageService implements FileStorageService {
 		} catch (IOException e) {
 			throw new ImageException(ErrorCode.IMAGE_IO_ERROR);
 		}
-	}
-
-	public String determineContentType(Resource resource, HttpServletRequest request) {
-		try {
-			String contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
-			return (contentType != null && !contentType.isEmpty())
-				? contentType
-				: "application/octet-stream";
-		} catch (Exception ex) {
-			// MIME 타입 결정 실패 시 기본 값 반환
-			return "application/octet-stream";
-		}
-	}
-
-	/**
-	 * Base64로 인코딩된 이미지 데이터를 저장하고 파일명을 반환합니다.
-	 * @param base64Image Base64로 인코딩된 이미지 데이터 (data:image/jpeg;base64, 포함 가능)
-	 * @param originalFilename 원본 파일명 (확장자 추출용)
-	 * @return 저장된 파일명
-	 */
-	public ImageSaveResponse storeBase64Image(String base64Image, String originalFilename) {
-		String fileExtension = getExtension(originalFilename);
-		String fileName = UUID.randomUUID().toString() + fileExtension;
-
-		return saveBase64ImageToFile(base64Image, fileName);
 	}
 
 	/**
