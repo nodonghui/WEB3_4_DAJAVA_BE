@@ -11,14 +11,12 @@ import java.util.UUID;
 
 import javax.imageio.ImageIO;
 
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.dajava.backend.domain.image.ImageDimensions;
@@ -48,28 +46,6 @@ public class LocalFileStorageService implements FileStorageService {
 		} catch (IOException ex) {
 			throw new RuntimeException("디렉토리를 생성하지 못했습니다: " + this.fileStorageLocation, ex);
 		}
-	}
-
-	// MultipartFile 에서 UUID 기반 파일명을 생성합니다.
-	private String generateUniqueFileName(MultipartFile file) {
-		return UUID.randomUUID().toString() + getExtension(file.getOriginalFilename());
-	}
-
-	// 파일명에서 확장자를 추출합니다.
-	private String getExtension(String originalFilename) {
-		if (originalFilename == null) {
-			return "";
-		}
-		String ext = FilenameUtils.getExtension(originalFilename);
-		return (ext != null && !ext.isEmpty()) ? "." + ext : "";
-	}
-
-	// 기존 파일 URL 에서 파일명만 추출하는 유틸 메서드
-	private String extractFileName(String existingFileUrl) {
-		if (existingFileUrl == null || existingFileUrl.isEmpty()) {
-			throw new IllegalArgumentException("기존 파일 URL이 유효하지 않습니다.");
-		}
-		return existingFileUrl.substring(existingFileUrl.lastIndexOf("/") + 1);
 	}
 
 	// 컨트롤러에서 사용하기 위해 파일 저장 위치를 노출하는 getter
@@ -176,7 +152,7 @@ public class LocalFileStorageService implements FileStorageService {
 			fileName = UUID.randomUUID().toString() + fileExtension;
 		} else {
 			// 기존 파일명의 확장자 검사 및 조정
-			if (!fileName.endsWith(fileExtension) && !fileExtension.isEmpty()) {
+			if (!fileName.endsWith(fileExtension)) {
 				fileName = fileName.substring(0, fileName.lastIndexOf('.')) + fileExtension;
 			}
 		}
