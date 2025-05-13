@@ -11,6 +11,7 @@ import com.dajava.backend.domain.event.service.ActivityHandleService;
 import com.dajava.backend.global.component.analyzer.BufferSchedulerProperties;
 import com.dajava.backend.global.component.buffer.EventBuffer;
 import com.dajava.backend.global.utils.SessionDataKeyUtils;
+import com.dajava.backend.global.utils.TimeUtils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,7 +52,7 @@ public class EventBufferScheduler {
 			Long lastScrollUpdate = eventBuffer.getScrollBuffer().getLastUpdatedMap().get(key);
 
 			// 가장 최근 업데이트 시간 계산
-			Long latestUpdate = getLatestUpdate(lastClickUpdate, lastMoveUpdate, lastScrollUpdate);
+			Long latestUpdate = TimeUtils.getLatestUpdate(lastClickUpdate, lastMoveUpdate, lastScrollUpdate);
 
 			// 비활성 세션 여부 확인
 			if (latestUpdate == null || (now - latestUpdate) >= properties.getInactiveThresholdMs()) {
@@ -98,20 +99,5 @@ public class EventBufferScheduler {
 		log.info("[BufferScheduler] 모든 활성 세션 정기 처리 완료");
 	}
 
-	/**
-	 * 주어진 업데이트 시간들 중 가장 최근 값을 반환합니다.
-	 * 모든 값이 null인 경우 null을 반환합니다.
-	 */
-	private Long getLatestUpdate(Long... updates) {
-		Long latest = null;
 
-		for (Long update : updates) {
-			if (update != null && (latest == null || update > latest)) {
-				log.trace("업데이트 비교: 기존 = {}, 새로운 = {}", latest, update);
-				latest = update;
-			}
-		}
-
-		return latest;
-	}
 }

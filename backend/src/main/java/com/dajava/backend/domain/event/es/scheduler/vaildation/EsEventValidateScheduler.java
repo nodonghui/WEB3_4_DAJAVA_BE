@@ -62,7 +62,7 @@ public class EsEventValidateScheduler {
 	@SentryMonitored(level = SentryLevel.FATAL, operation = "validate_scheduler")
 	public void runScheduledValidation() {
 
-		log.info("검증 스케줄러 시작");
+		log.info("[ValidateScheduler] 검증 스케줄러 시작");
 
 		int batchSize = bufferSchedulerProperties.getBatchSize();
 		int page = 0;
@@ -70,6 +70,7 @@ public class EsEventValidateScheduler {
 		Page<SessionDataDocument> resultPage;
 
 		do {
+			// private boolean isVerified; 도 조건에 추가해 애초에 조회되지 않게
 			resultPage = sessionDataDocumentService.getEndedSessions(page, batchSize);
 
 			log.info("[ValidateScheduler] Batch {}: SessionData size : {}", page, resultPage.getContent().size());
@@ -111,6 +112,7 @@ public class EsEventValidateScheduler {
 	 */
 	public void processSession(SessionDataDocument sessionDataDocument) {
 
+		//현재 조회도 isVerified false인 값을 조회하지만 혹시 몰라 조건 추가
 		if (sessionDataDocument.isVerified()) {
 			log.info("[ValidateScheduler] 이미 검증된 세션 데이터 입니다 sessionId : {}", sessionDataDocument.getSessionId());
 			return;
