@@ -5,7 +5,7 @@ import java.util.UUID;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.core.io.Resource;
 
-import com.dajava.backend.domain.image.ImageDimensions;
+import com.dajava.backend.domain.image.dto.ImageDimensions;
 import com.dajava.backend.domain.image.dto.ImageSaveResponse;
 import com.dajava.backend.domain.register.entity.PageCaptureData;
 
