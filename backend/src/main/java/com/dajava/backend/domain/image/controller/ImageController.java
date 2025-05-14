@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dajava.backend.domain.image.service.pageCapture.LocalFileStorageService;
+import com.dajava.backend.domain.image.service.pageCapture.FileStorageService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,10 +19,10 @@ import jakarta.servlet.http.HttpServletRequest;
 @RequestMapping("/v1/images")
 public class ImageController {
 
-	private final LocalFileStorageService localFileStorageService;
+	private final FileStorageService fileStorageService;
 
-	public ImageController(LocalFileStorageService localFileStorageService) {
-		this.localFileStorageService = localFileStorageService;
+	public ImageController(FileStorageService fileStorageService) {
+		this.fileStorageService = fileStorageService;
 	}
 
 	/**
@@ -40,9 +40,9 @@ public class ImageController {
 		description = "URL 경로의 파일명으로 파일을 로드합니다")
 	@GetMapping("/{fileName:.+}")
 	public ResponseEntity<Resource> getImage(@PathVariable String fileName, HttpServletRequest request) {
-		Resource resource = localFileStorageService.getImage(fileName);
+		Resource resource = fileStorageService.getImage(fileName);
 
-		String contentType = localFileStorageService.determineContentType(resource, request);
+		String contentType = fileStorageService.determineContentType(resource, request);
 
 		return ResponseEntity.ok()
 			.contentType(MediaType.parseMediaType(contentType))
