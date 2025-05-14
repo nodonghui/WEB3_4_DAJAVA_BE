@@ -33,7 +33,7 @@ import com.dajava.backend.domain.event.es.repository.PointerMoveEventDocumentRep
 import com.dajava.backend.domain.event.es.repository.PointerScrollEventDocumentRepository;
 import com.dajava.backend.domain.event.es.repository.SessionDataDocumentRepository;
 import com.dajava.backend.domain.event.es.repository.SolutionEventDocumentRepository;
-import com.dajava.backend.domain.image.service.pageCapture.FileCleanupService;
+import com.dajava.backend.domain.image.service.pageCapture.LocalFileCleanupService;
 import com.dajava.backend.domain.register.dto.pageCapture.PageCaptureRequest;
 import com.dajava.backend.domain.register.dto.pageCapture.PageCaptureResponse;
 import com.dajava.backend.domain.register.dto.register.RegisterCreateRequest;
@@ -56,7 +56,7 @@ public class InitData {
 	@Value("${init.flag:1}")
 	private int initFlag;
 
-	private final FileCleanupService fileCleanupService;
+	private final LocalFileCleanupService localFileCleanupService;
 	private final PointerClickEventDocumentRepository pointerClickEventDocumentRepository;
 	private final PointerMoveEventDocumentRepository pointerMoveEventDocumentRepository;
 	private final PointerScrollEventDocumentRepository pointerScrollEventDocumentRepository;
@@ -145,7 +145,7 @@ public class InitData {
 	}
 
 	public void cleanUp() {
-		fileCleanupService.deleteNonLinkedFile();
+		localFileCleanupService.deleteNonLinkedFile();
 	}
 
 	@Transactional

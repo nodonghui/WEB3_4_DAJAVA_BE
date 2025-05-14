@@ -50,5 +50,13 @@ logging:
 init:
   flag:1
 
-image:
-  path: /data/page-capture
+aws:
+  region: ap-northeast-2
+  credentials:
+    access-key: ${aws.access-key}
+    secret-key: ${aws.secret-key}
+  s3:
+    bucket-name: hyunsanbucket
+    folder: page-captures/
+  cloudfront:
+    domain: https://dajava.s3.chsan626.co.kr/ # 현재는 cloudfront 도메인, 추후 수정 예정
