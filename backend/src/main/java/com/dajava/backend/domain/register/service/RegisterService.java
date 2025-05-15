@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.dajava.backend.domain.email.EmailService;
 import com.dajava.backend.domain.image.dto.ImageSaveResponse;
+import com.dajava.backend.domain.image.service.pageCapture.FileStorageService;
 import com.dajava.backend.domain.image.service.pageCapture.LocalFileStorageService;
 import com.dajava.backend.domain.register.RegisterInfo;
 import com.dajava.backend.domain.register.converter.RegisterConverter;
@@ -60,7 +61,7 @@ public class RegisterService {
 
 	private final RegisterRepository registerRepository;
 	private final RegisterValidator registerValidator;
-	private final LocalFileStorageService localFileStorageService;
+	private final FileStorageService localFileStorageService;
 	private final RegisterCacheService registerCacheService;
 	private final EmailService emailService;
 
