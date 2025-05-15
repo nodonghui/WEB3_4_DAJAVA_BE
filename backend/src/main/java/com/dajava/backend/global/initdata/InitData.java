@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
@@ -33,7 +32,7 @@ import com.dajava.backend.domain.event.es.repository.PointerMoveEventDocumentRep
 import com.dajava.backend.domain.event.es.repository.PointerScrollEventDocumentRepository;
 import com.dajava.backend.domain.event.es.repository.SessionDataDocumentRepository;
 import com.dajava.backend.domain.event.es.repository.SolutionEventDocumentRepository;
-import com.dajava.backend.domain.image.service.pageCapture.LocalFileCleanupService;
+import com.dajava.backend.domain.image.service.pageCapture.FileCleanupService;
 import com.dajava.backend.domain.register.dto.pageCapture.PageCaptureRequest;
 import com.dajava.backend.domain.register.dto.pageCapture.PageCaptureResponse;
 import com.dajava.backend.domain.register.dto.register.RegisterCreateRequest;
@@ -56,7 +55,7 @@ public class InitData {
 	@Value("${init.flag:1}")
 	private int initFlag;
 
-	private final LocalFileCleanupService localFileCleanupService;
+	private final FileCleanupService fileCleanupService;
 	private final PointerClickEventDocumentRepository pointerClickEventDocumentRepository;
 	private final PointerMoveEventDocumentRepository pointerMoveEventDocumentRepository;
 	private final PointerScrollEventDocumentRepository pointerScrollEventDocumentRepository;
@@ -66,6 +65,7 @@ public class InitData {
 	private final SolutionEventDocumentRepository solutionEventDocumentRepository;
 	private final RegisterCacheService registerCacheService;
 	private static final Random random = new Random();
+
 	@Autowired
 	private SolutionScheduler solutionScheduler;
 
@@ -145,7 +145,7 @@ public class InitData {
 	}
 
 	public void cleanUp() {
-		localFileCleanupService.deleteNonLinkedFile();
+		fileCleanupService.deleteNonLinkedFile();
 	}
 
 	@Transactional

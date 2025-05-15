@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.dajava.backend.domain.image.service.pageCapture.LocalFileCleanupService;
+import com.dajava.backend.domain.image.service.pageCapture.FileCleanupService;
 import com.dajava.backend.domain.register.entity.Register;
 import com.dajava.backend.domain.register.repository.RegisterRepository;
 
@@ -22,11 +22,11 @@ public class RegisterDataCleanupScheduler {
 	private int cleanupDays;
 
 	private final RegisterRepository registerRepository;
-	private final LocalFileCleanupService localFileCleanupService;
+	private final FileCleanupService localFileCleanupService;
 
 	public RegisterDataCleanupScheduler(
 		RegisterRepository registerRepository,
-		LocalFileCleanupService localFileCleanupService
+		FileCleanupService localFileCleanupService
 	) {
 		this.registerRepository = registerRepository;
 		this.localFileCleanupService = localFileCleanupService;
