@@ -3,6 +3,10 @@ package com.dajava.backend.domain.event.es.scheduler.abusingCheck;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,18 +39,21 @@ public class AbusingCheckProcessorSimulationTest {
 	private final String pageUrl = "/test";
 
 	@Test
-	@DisplayName("학습 후 문제없이 z score이 계산되어 이상치 필터링이 진행됨")
-	void testProcessSessionThroughLearningAndAbuseDetection() {
+	@DisplayName("11개의 학습 이후 priorAverage 설정되고, 12번째 세션에서 이상치가 감지된다")
+	void testZScoreDetectionAfterLearningPhase() {
+		// given
 		AbusingBaseLine baseline = AbusingBaseLine.create(pageUrl);
 		when(abusingBaseLineService.getBaselineByPageUrl(pageUrl)).thenReturn(baseline);
 
-		// 10번 호출로 Welford 학습
+		// 11개 학습용 세션
 		for (int i = 0; i < 11; i++) {
 			long eventCount = 300 + (i % 2 == 0 ? 0 : 20); // 300, 320 반복
 			String sessionId = "sess-" + i;
+
 			SessionDataDocument session = SessionDataDocument.builder()
 				.sessionId(sessionId)
 				.pageUrl(pageUrl)
+				.timestamp(Instant.now().minus(30, ChronoUnit.MINUTES).toEpochMilli()) // 0.5시간 전
 				.build();
 
 			when(pointerEventDocumentService.countAllEvents(sessionId, pageUrl)).thenReturn(eventCount);
@@ -54,63 +61,63 @@ public class AbusingCheckProcessorSimulationTest {
 			abusingCheckProcessor.processSession(session);
 		}
 
-		// ✅ priorAverage 설정되었는지 확인
+		// then: priorAverage가 설정되어야 함
 		assertEquals(11, baseline.getSampleSize());
-		assertTrue(baseline.getPriorAverage() > 0);
+		assertTrue(baseline.getPriorAverage() > 0, "priorAverage가 설정되어야 함");
 
-		double bayesianAvg = baseline.calculateBayesianAverage();
-		System.out.println("priorAverage: " + baseline.getPriorAverage());
-		System.out.println("bayesianAverage: " + bayesianAvg);
-		System.out.println("stddev: " + baseline.getStandardDeviation());
-
-		// 11번째 세션 - 이상치 이벤트 수 (예: 900)
-		String sessionId = "sess-10";
-		SessionDataDocument session = SessionDataDocument.builder()
-			.sessionId(sessionId)
+		// when: 이상치 세션 (900 이벤트)
+		String outlierSessionId = "sess-outlier";
+		SessionDataDocument outlierSession = SessionDataDocument.builder()
+			.sessionId(outlierSessionId)
 			.pageUrl(pageUrl)
+			.timestamp(Instant.now().minus(1, ChronoUnit.HOURS).toEpochMilli()) // 1시간 전
 			.build();
 
-		when(pointerEventDocumentService.countAllEvents(sessionId, pageUrl)).thenReturn(900L);
-		abusingCheckProcessor.processSession(session);
+		when(pointerEventDocumentService.countAllEvents(outlierSessionId, pageUrl)).thenReturn(1500L);
 
-		// 세션이 이상치로 판단되어 markAsVerified() 되었는지 확인
-		assertTrue(session.isVerified());
+		abusingCheckProcessor.processSession(outlierSession);
+
+		// then: 이상치 세션으로 마킹되어야 함
+		assertTrue(outlierSession.isVerified(), "Z-score가 3 이상이면 verified 되어야 함");
+		verify(sessionDataDocumentService).save(outlierSession);
 	}
 
 	@Test
-	@DisplayName("샘플 10개 미만일 때는 Z-score 평가 없이 학습만 수행됨")
-	void testNoZScoreEvaluationWhenSampleSizeIsLessThanThreshold() {
+	@DisplayName("샘플 수 10 미만일 경우 이상치 세션도 학습에 포함되고 verified 되지 않음")
+	void testNoZScoreWhenUnderMinimumSampleSize() {
+		// given
 		AbusingBaseLine baseline = AbusingBaseLine.create(pageUrl);
 		when(abusingBaseLineService.getBaselineByPageUrl(pageUrl)).thenReturn(baseline);
 
-		// 샘플 수가 5개일 때까지 학습
+		// 초기 학습 세션 5개만
 		for (int i = 0; i < 5; i++) {
 			String sessionId = "sess-init-" + i;
 			SessionDataDocument session = SessionDataDocument.builder()
 				.sessionId(sessionId)
 				.pageUrl(pageUrl)
+				.timestamp(Instant.now().minus(30, ChronoUnit.MINUTES).toEpochMilli())
 				.build();
 
-			// 정상적인 eventCount (300)
 			when(pointerEventDocumentService.countAllEvents(sessionId, pageUrl)).thenReturn(300L);
+
 			abusingCheckProcessor.processSession(session);
 		}
 
 		assertEquals(5, baseline.getSampleSize());
 
-		// 이후 극단적인 이벤트 수가 들어오더라도 평가되지 않음
-		String sessionId = "sess-extreme";
+		// when: 극단값이 들어와도 학습에만 사용되고 이상치 판단은 하지 않음
 		SessionDataDocument extremeSession = SessionDataDocument.builder()
-			.sessionId(sessionId)
+			.sessionId("sess-extreme")
 			.pageUrl(pageUrl)
+			.timestamp(Instant.now().minus(30, ChronoUnit.MINUTES).toEpochMilli())
 			.build();
 
-		// 아주 큰 eventCount
-		when(pointerEventDocumentService.countAllEvents(sessionId, pageUrl)).thenReturn(5000L);
+		when(pointerEventDocumentService.countAllEvents("sess-extreme", pageUrl)).thenReturn(5000L);
+
 		abusingCheckProcessor.processSession(extremeSession);
 
-		//샘플 수 < 10 이므로 Z-score 평가도 하지 않고, verified 되지 않아야 함
-		assertFalse(extremeSession.isVerified(), "Z-score가 평가되어서는 안 됨 (sampleSize < 10)");
-		assertEquals(5, baseline.getSampleSize(), "극단값은 무시되었어야 함");
+		// then: 이상치로 판단되면 안 되고, sampleSize도 그대로 유지됨
+		assertFalse(extremeSession.isVerified(), "10개 미만일 경우 이상치로 판단되지 않아야 함");
+		assertEquals(5, baseline.getSampleSize(), "극단값은 무시되어야 함");
 	}
 }

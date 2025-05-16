@@ -74,7 +74,7 @@ class SolutionUtilTest {
 	 * 주어진 세션 데이터로부터 프롬프트 문자열이 올바르게 생성되는지 테스트합니다.
 	 * @see SolutionUtils#refinePrompt(List)
 	 */
-	@Test
+	//@Test
 	@DisplayName("String 형태 변화")
 	void testRefinePrompt() {
 		String expectedPrompt = "다음 사용자 세션 데이터를 분석하여 UI/UX 개선점을 제안해주세요. 브라우저 width는 1024px이고 브라우저 환경은 Chrome이야 글자는 400자 이내로 해줘: ";

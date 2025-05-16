@@ -21,7 +21,7 @@ class EventValidationTest {
 		long oldTimestamp = Instant.now().minusMillis(1000L * 60 * 60 * 24 * 366).toEpochMilli(); // 1년 + 1일
 		assertThatThrownBy(() -> EventValidation.validateTimestamp(oldTimestamp))
 			.isInstanceOf(PointerEventException.class)
-			.hasMessageContaining(ErrorCode.INVALID_TIMESTAMP.name());
+			.hasMessageContaining(ErrorCode.INVALID_TIMESTAMP.getDescription());
 	}
 
 	@Test
@@ -30,7 +30,7 @@ class EventValidationTest {
 		long futureTimestamp = Instant.now().plusMillis(1000L * 120).toEpochMilli(); // 2분 뒤
 		assertThatThrownBy(() -> EventValidation.validateTimestamp(futureTimestamp))
 			.isInstanceOf(PointerEventException.class)
-			.hasMessageContaining(ErrorCode.INVALID_TIMESTAMP.name());
+			.hasMessageContaining(ErrorCode.INVALID_TIMESTAMP.getDescription());
 	}
 
 	@Test
@@ -46,7 +46,7 @@ class EventValidationTest {
 	void validateSessionExists_null() {
 		assertThatThrownBy(() -> EventValidation.validateSessionExists(null, "testSession"))
 			.isInstanceOf(PointerEventException.class)
-			.hasMessageContaining(ErrorCode.SESSION_DATA_DOCUMENT_NOT_FOUND.name());
+			.hasMessageContaining(ErrorCode.SESSION_DATA_DOCUMENT_NOT_FOUND.getDescription());
 	}
 
 	@Test
@@ -62,7 +62,7 @@ class EventValidationTest {
 	void validateNonZeroFields_zeroBrowserWidth() {
 		assertThatThrownBy(() -> EventValidation.validateNonZeroFields(0, 500, 1000))
 			.isInstanceOf(PointerEventException.class)
-			.hasMessageContaining(ErrorCode.INVALID_BROWSER_WIDTH.name());
+			.hasMessageContaining(ErrorCode.INVALID_BROWSER_WIDTH.getDescription());
 	}
 
 	@Test
@@ -77,7 +77,7 @@ class EventValidationTest {
 	void validateCoordinateRange_invalidClientX() {
 		assertThatThrownBy(() -> EventValidation.validateCoordinateRange(2000, 100, 1280, 720))
 			.isInstanceOf(PointerEventException.class)
-			.hasMessageContaining(ErrorCode.INVALID_CLIENT_X.name());
+			.hasMessageContaining(ErrorCode.INVALID_CLIENT_X.getDescription());
 	}
 
 	@Test
@@ -85,7 +85,7 @@ class EventValidationTest {
 	void validateCoordinateRange_invalidClientY() {
 		assertThatThrownBy(() -> EventValidation.validateCoordinateRange(100, 800, 1280, 720))
 			.isInstanceOf(PointerEventException.class)
-			.hasMessageContaining(ErrorCode.INVALID_CLIENT_Y.name());
+			.hasMessageContaining(ErrorCode.INVALID_CLIENT_Y.getDescription());
 	}
 
 	@Test
