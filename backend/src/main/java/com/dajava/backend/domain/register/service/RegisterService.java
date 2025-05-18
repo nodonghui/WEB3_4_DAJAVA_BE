@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.dajava.backend.domain.email.EmailService;
 import com.dajava.backend.domain.image.dto.ImageSaveResponse;
 import com.dajava.backend.domain.image.service.pageCapture.FileStorageService;
+import com.dajava.backend.domain.image.service.pageCapture.LocalFileStorageService;
 import com.dajava.backend.domain.register.RegisterInfo;
 import com.dajava.backend.domain.register.converter.RegisterConverter;
 import com.dajava.backend.domain.register.dto.pageCapture.PageCaptureRequest;
@@ -42,7 +43,6 @@ import com.dajava.backend.global.exception.ErrorCode;
 import com.dajava.backend.global.sentry.SentryMonitored;
 import com.dajava.backend.global.utils.PasswordUtils;
 
-import io.sentry.Sentry;
 import io.sentry.SentryLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -61,7 +61,7 @@ public class RegisterService {
 
 	private final RegisterRepository registerRepository;
 	private final RegisterValidator registerValidator;
-	private final FileStorageService fileStorageService;
+	private final FileStorageService localFileStorageService;
 	private final RegisterCacheService registerCacheService;
 	private final EmailService emailService;
 
@@ -205,9 +205,9 @@ public class RegisterService {
 
 			if (optionalData.isPresent()) {
 				PageCaptureData existingData = optionalData.get();
-				response = fileStorageService.updateBase64Image(content, existingData, imageFile.getOriginalFilename());
+				response = localFileStorageService.updateBase64Image(content, existingData, imageFile.getOriginalFilename());
 			} else {
-				response = fileStorageService.storeBase64Image(content, imageFile.getOriginalFilename());
+				response = localFileStorageService.storeBase64Image(content, imageFile.getOriginalFilename());
 				PageCaptureData newData = PageCaptureData.builder()
 					.pageUrl(pageUrl)
 					.captureFileName(response.fileName())

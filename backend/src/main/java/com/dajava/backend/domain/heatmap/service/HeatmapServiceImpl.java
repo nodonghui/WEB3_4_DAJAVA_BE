@@ -25,6 +25,7 @@ import com.dajava.backend.domain.heatmap.dto.HeatmapWidthsResponse;
 import com.dajava.backend.domain.heatmap.exception.HeatmapException;
 import com.dajava.backend.domain.image.ImageDimensions;
 import com.dajava.backend.domain.image.service.pageCapture.FileStorageService;
+import com.dajava.backend.domain.image.service.pageCapture.LocalFileStorageService;
 import com.dajava.backend.domain.register.entity.PageCaptureData;
 import com.dajava.backend.domain.register.entity.Register;
 import com.dajava.backend.domain.register.repository.RegisterRepository;

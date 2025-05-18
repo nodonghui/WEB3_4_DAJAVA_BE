@@ -1,5 +1,6 @@
 package com.dajava.backend.domain.event.es.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -47,4 +48,13 @@ public interface SessionDataDocumentRepository
 	 * @return Page<SessionDataDocument>
 	 */
 	Page<SessionDataDocument> findByIsSessionEndedTrueAndIsVerifiedFalse(Pageable pageable);
+
+	/**
+	 * 현재 시각으로 부터 1시간 이내 세션 데이터 조회
+	 * 마지막 데이터 저장 시간은 lastEventTimestamp 기준으로 함
+	 * @param from
+	 * @param to
+	 * @return
+	 */
+	List<SessionDataDocument> findByLastEventTimestampBetween(Long from, Long to);
 }

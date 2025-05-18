@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.dajava.backend.domain.email.AsyncEmailSender;
 import com.dajava.backend.domain.image.dto.ImageSaveResponse;
-import com.dajava.backend.domain.image.service.pageCapture.FileStorageService;
+import com.dajava.backend.domain.image.service.pageCapture.LocalFileStorageService;
 import com.dajava.backend.domain.register.dto.pageCapture.PageCaptureRequest;
 import com.dajava.backend.domain.register.dto.pageCapture.PageCaptureResponse;
 import com.dajava.backend.domain.register.dto.register.RegisterCreateRequest;
@@ -49,7 +49,7 @@ class RegisterServiceTest {
 	RegisterRepository repository;
 
 	@MockitoBean
-	FileStorageService fileStorageService;
+	LocalFileStorageService localFileStorageService;
 
 	@MockitoBean
 	private AsyncEmailSender asyncEmailSender;
@@ -163,7 +163,7 @@ class RegisterServiceTest {
 			.fileName(dynamicFileName)
 			.widthRange(800)
 			.build();
-		when(fileStorageService.storeBase64Image(anyString(), anyString()))
+		when(localFileStorageService.storeBase64Image(anyString(), anyString()))
 			.thenReturn(storeResponse);
 
 		// When: 페이지 캡쳐 데이터 생성 요청 (내부에서 Base64 문자열 추출 및 디코딩, 너비 계산 등 수행)
@@ -188,7 +188,7 @@ class RegisterServiceTest {
 		Assertions.assertEquals(800, newData.getWidthRange());
 
 		// storeBase64Image()가 한 번 호출되었는지 검증
-		verify(fileStorageService, times(1)).storeBase64Image(anyString(), anyString());
+		verify(localFileStorageService, times(1)).storeBase64Image(anyString(), anyString());
 	}
 
 	@Test
@@ -227,7 +227,7 @@ class RegisterServiceTest {
 			.fileName(existingFileName)
 			.widthRange(800)
 			.build();
-		when(fileStorageService.updateBase64Image(anyString(), any(PageCaptureData.class), anyString()))
+		when(localFileStorageService.updateBase64Image(anyString(), any(PageCaptureData.class), anyString()))
 			.thenReturn(updateResponse);
 
 		// When: 페이지 캡쳐 데이터 업데이트 요청
@@ -251,7 +251,7 @@ class RegisterServiceTest {
 		Assertions.assertEquals(widthRange, data.getWidthRange());
 
 		// fileStorageService의 updateBase64Image()가 한 번 호출되었는지 검증
-		verify(fileStorageService, times(1))
+		verify(localFileStorageService, times(1))
 			.updateBase64Image(anyString(), any(PageCaptureData.class), anyString());
 	}
 }

@@ -27,4 +27,12 @@ public interface PointerClickEventDocumentRepository
 
 	boolean existsBySessionId(String sessionId);
 
+	/**
+	 * 해당 sesssionId와 pageUrl을 가지는 모든 클릭 이벤트의 개수 반환
+	 * @param sessionId
+	 * @param pageUrl
+	 * @return
+	 */
+	long countBySessionIdAndPageUrl(String sessionId, String pageUrl);
+
 }

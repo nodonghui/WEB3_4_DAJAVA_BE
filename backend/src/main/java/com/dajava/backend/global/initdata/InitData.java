@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
@@ -49,7 +48,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Configuration
+//@Configuration
 @RequiredArgsConstructor
 public class InitData {
 
@@ -66,6 +65,7 @@ public class InitData {
 	private final SolutionEventDocumentRepository solutionEventDocumentRepository;
 	private final RegisterCacheService registerCacheService;
 	private static final Random random = new Random();
+
 	@Autowired
 	private SolutionScheduler solutionScheduler;
 
@@ -138,9 +138,9 @@ public class InitData {
 			cleanUp();
 			self.work1();
 			//self.work2();
-			self.work3();
-			self.work4();
-			self.work5();
+			//self.work3();
+			//self.work4();
+			//self.work5();
 		};
 	}
 

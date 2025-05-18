@@ -22,6 +22,8 @@ import com.dajava.backend.domain.event.es.repository.SessionDataDocumentReposito
 import com.dajava.backend.domain.event.exception.PointerEventException;
 import com.dajava.backend.global.component.buffer.EventBuffer;
 import com.dajava.backend.global.exception.ErrorCode;
+import com.dajava.backend.global.utils.SessionDataKeyUtils;
+import com.dajava.backend.global.utils.TimeUtils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,6 +70,21 @@ public class EventBatchService {
 			// 세션 종료 flag 값 true 로 변경
 			sessionDataDocument.endSession();
 		}
+
+
+		String key = SessionDataKeyUtils.toKey(sessionDataKey);
+		// 세션의 마지막 활동 시간 확인
+		Long lastClickUpdate = eventBuffer.getClickBuffer().getLastUpdatedMap().get(key);
+		Long lastMoveUpdate = eventBuffer.getMoveBuffer().getLastUpdatedMap().get(key);
+		Long lastScrollUpdate = eventBuffer.getScrollBuffer().getLastUpdatedMap().get(key);
+
+		// 가장 최근 업데이트 시간 계산
+		Long latestUpdate = TimeUtils.getLatestUpdate(lastClickUpdate, lastMoveUpdate, lastScrollUpdate);
+
+		// 최근 업데이트 시간 갱신 -> 어뷰징 필터링에 사용
+		sessionDataDocument.updateLastEventTimeStamp(latestUpdate);
+
+		//마지막에
 		sessionDataDocumentRepository.save(sessionDataDocument);
 	}
 

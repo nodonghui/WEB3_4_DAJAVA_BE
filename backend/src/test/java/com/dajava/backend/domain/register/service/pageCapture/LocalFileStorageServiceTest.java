@@ -18,12 +18,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.dajava.backend.domain.image.dto.ImageSaveResponse;
-import com.dajava.backend.domain.image.service.pageCapture.FileStorageService;
+import com.dajava.backend.domain.image.service.pageCapture.LocalFileStorageService;
 import com.dajava.backend.domain.register.entity.PageCaptureData;
 import com.dajava.backend.domain.register.repository.PageCaptureDataRepository;
 
 @SpringBootTest
-public class FileStorageServiceTest {
+public class LocalFileStorageServiceTest {
 
 	@Value("${image.path}")
 	String path;
@@ -52,7 +52,7 @@ public class FileStorageServiceTest {
 	@DisplayName("1. 신규 파일 업로드 시 이미지 저장 및 파일 생성 테스트")
 	void t001() throws Exception {
 		// Given
-		FileStorageService fileStorageService = new FileStorageService(path);
+		LocalFileStorageService localFileStorageService = new LocalFileStorageService(path);
 		String originalData = "테스트 이미지 데이터";
 		// Base64 인코딩, data:image/png;base64, 접두어 포함 (포함해도 무방)
 		String base64Encoded = Base64.getEncoder().encodeToString(originalData.getBytes(StandardCharsets.UTF_8));
@@ -60,7 +60,7 @@ public class FileStorageServiceTest {
 		String originalFilename = "test-image.png";
 
 		// When
-		ImageSaveResponse saveResponse = fileStorageService.storeBase64Image(base64Image, originalFilename);
+		ImageSaveResponse saveResponse = localFileStorageService.storeBase64Image(base64Image, originalFilename);
 		String fileName = saveResponse.fileName();
 
 		// Then
@@ -81,7 +81,7 @@ public class FileStorageServiceTest {
 	@DisplayName("2. 기존 파일 덮어쓰기(Override) 이미지 업데이트 테스트")
 	void t002() throws Exception {
 		// Given
-		FileStorageService fileStorageService = new FileStorageService(path);
+		LocalFileStorageService localFileStorageService = new LocalFileStorageService(path);
 
 		// 먼저 신규 업로드로 파일 생성
 		String originalData = "원본 파일 데이터";
@@ -89,7 +89,7 @@ public class FileStorageServiceTest {
 			Base64.getEncoder().encodeToString(originalData.getBytes(StandardCharsets.UTF_8));
 		String originalFilename = "test-image.png";
 
-		ImageSaveResponse initialResponse = fileStorageService.storeBase64Image(base64Original, originalFilename);
+		ImageSaveResponse initialResponse = localFileStorageService.storeBase64Image(base64Original, originalFilename);
 		String initialFileName = initialResponse.fileName();
 		Path filePath = Paths.get(path).resolve(initialFileName);
 
@@ -110,7 +110,7 @@ public class FileStorageServiceTest {
 			Base64.getEncoder().encodeToString(updatedData.getBytes(StandardCharsets.UTF_8));
 		// 원본 파일명과 단순히 확장자 추출을 위한 파일명 전달
 		String newOriginalFilename = "test-image-updated.png";
-		ImageSaveResponse updateResponse = fileStorageService.updateBase64Image(base64Updated, pageData,
+		ImageSaveResponse updateResponse = localFileStorageService.updateBase64Image(base64Updated, pageData,
 			newOriginalFilename);
 		String updatedFileName = updateResponse.fileName();
 

@@ -6,11 +6,10 @@ plugins {
 }
 
 sentry {
-    includeSourceContext = true
-
+    authToken = System.getProperty("SENTRY_AUTH_TOKEN") ?: ""
     org = "dajava"
     projectName = "java-spring-boot"
-    authToken = System.getenv("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")
+    includeSourceContext = true
 }
 
 group = 'com.dajava'
@@ -86,6 +85,10 @@ dependencies {
 
     // Logstash Logback Encoder
     implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
+
+    // S3 (안정 버전으로 적용)
+    implementation platform("software.amazon.awssdk:bom:2.27.21")
+    implementation "software.amazon.awssdk:s3"
 
 }
 

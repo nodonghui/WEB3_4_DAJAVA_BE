@@ -49,6 +49,8 @@ jobs:
       # Gradle 빌드 (테스트 포함)
       - name: Build with Gradle
         working-directory: ./backend
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: ./gradlew clean build -x test
 
   makeTagAndRelease:

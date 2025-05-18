@@ -40,6 +40,8 @@ public class SessionDataDocument {
 
 	private Long timestamp;
 
+	private Long lastEventTimestamp;
+
 	private boolean isSessionEnded;
 
 	private boolean isVerified;
@@ -68,6 +70,7 @@ public class SessionDataDocument {
 			.memberSerialNumber(memberSerialNumber)
 			.pageUrl(pageUrl)
 			.timestamp(timestamp)
+			.lastEventTimestamp(timestamp)
 			.isOutlier(false)
 			.isMissingValue(false)
 			.isSessionEnded(false)
@@ -77,5 +80,16 @@ public class SessionDataDocument {
 
 	public LocalDateTime getTimestamp() {
 		return TimeUtils.toLocalDateTime(this.timestamp);
+	}
+
+	public LocalDateTime getLastEventTimestamp() {
+		return TimeUtils.toLocalDateTime(this.lastEventTimestamp);
+	}
+
+	public void updateLastEventTimeStamp(Long lastEventTimestamp) {
+		if (lastEventTimestamp == null) {
+			return;
+		}
+		this.lastEventTimestamp = lastEventTimestamp;
 	}
 }

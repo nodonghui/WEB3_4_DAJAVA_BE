@@ -22,14 +22,14 @@ public class RegisterDataCleanupScheduler {
 	private int cleanupDays;
 
 	private final RegisterRepository registerRepository;
-	private final FileCleanupService fileCleanupService;
+	private final FileCleanupService localFileCleanupService;
 
 	public RegisterDataCleanupScheduler(
 		RegisterRepository registerRepository,
-		FileCleanupService fileCleanupService
+		FileCleanupService localFileCleanupService
 	) {
 		this.registerRepository = registerRepository;
-		this.fileCleanupService = fileCleanupService;
+		this.localFileCleanupService = localFileCleanupService;
 	}
 
 	/**
@@ -51,7 +51,7 @@ public class RegisterDataCleanupScheduler {
 				register.getCaptureData().forEach(pageCaptureData -> {
 					String fileName = pageCaptureData.getCaptureFileName();
 					try {
-						fileCleanupService.deleteFile(fileName);
+						localFileCleanupService.deleteFile(fileName);
 						register.getCaptureData().clear();
 						log.info("파일 삭제 성공: {}", fileName);
 					} catch (Exception e) {
