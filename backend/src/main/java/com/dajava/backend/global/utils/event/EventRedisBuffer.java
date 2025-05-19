@@ -13,6 +13,10 @@ import com.dajava.backend.global.utils.session.ActiveSessionManager;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 클릭, 무브, 스크롤 이벤트를 Redis에 캐싱하고 조회 및 삭제하는 기능을 제공하는 통합 유틸리티 클래스
+ * @author jhon S, sungkibum
+ */
 @Component
 @RequiredArgsConstructor
 @Getter

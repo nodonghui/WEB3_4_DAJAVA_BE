@@ -28,6 +28,7 @@ import com.dajava.backend.domain.event.es.scheduler.vaildation.EsScrollEventAnal
 import com.dajava.backend.domain.event.es.service.PointerEventDocumentService;
 import com.dajava.backend.domain.event.es.service.SessionDataDocumentService;
 import com.dajava.backend.domain.event.es.service.SolutionEventDocumentService;
+import com.dajava.backend.domain.log.converter.EventConverter;
 import com.dajava.backend.global.component.analyzer.BufferSchedulerProperties;
 
 /*
@@ -83,8 +84,8 @@ class EsEventValidateSchedulerTest {
 
 		List<SolutionEventDocument> solutionDocs = List.of(mock(SolutionEventDocument.class));
 
-		try (MockedStatic<PointerEventConverter> mocked = mockStatic(PointerEventConverter.class)) {
-			mocked.when(() -> PointerEventConverter.toSolutionEventDocuments(clickEvents, moveEvents, scrollEvents))
+		try (MockedStatic<EventConverter> mocked = mockStatic(EventConverter.class)) {
+			mocked.when(() -> EventConverter.toSolutionEventDocuments(clickEvents, moveEvents, scrollEvents))
 				.thenReturn(solutionDocs);
 
 			// when

@@ -11,13 +11,23 @@ import com.dajava.backend.domain.log.dto.identifier.SessionIdentifier;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * SessionKeyCollector 클래스의 collectAllActiveSessionKeys 메서드에서 사용되는 클래스
+ * 활성되어 있는 세션들을 찾는 클래스
+ * @author sungkibum
+ */
+
 @Component
 @RequiredArgsConstructor
 public class ActiveSessionManager {
 	private static final String EVENT_CACHE_PREFIX = "event:";
 	private final StringRedisTemplate redisTemplate;
 
-	// 특정 이벤트 타입에 대한 세션 키 조회
+	/**
+	 * 특정 이벤트 타입에 대한 세션 키 조회 메서드
+	 * @param eventTypeSuffix (click, move, scroll)
+	 * @return Set<SessionIdentifier>
+	 */
 	public Set<SessionIdentifier> getActiveSessionKeysForType(String eventTypeSuffix) {
 		// 예: event:*:scroll 형식으로 Redis 키 조회
 		Set<String> keys = redisTemplate.keys(EVENT_CACHE_PREFIX + "*:" + eventTypeSuffix);
