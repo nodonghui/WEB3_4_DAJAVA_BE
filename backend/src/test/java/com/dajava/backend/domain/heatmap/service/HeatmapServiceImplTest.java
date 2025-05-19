@@ -22,7 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.dajava.backend.domain.event.es.entity.SolutionEventDocument;
 import com.dajava.backend.domain.heatmap.dto.HeatmapResponse;
 import com.dajava.backend.domain.heatmap.exception.HeatmapException;
-import com.dajava.backend.domain.image.ImageDimensions;
+import com.dajava.backend.domain.image.dto.ImageDimensions;
 import com.dajava.backend.domain.image.service.pageCapture.LocalFileStorageService;
 import com.dajava.backend.domain.register.entity.PageCaptureData;
 import com.dajava.backend.domain.register.entity.Register;

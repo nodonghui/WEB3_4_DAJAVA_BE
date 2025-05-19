@@ -25,12 +25,13 @@ public class S3FileCleanupService implements FileCleanupService {
 	private final String bucketName;
 	private final String folderName;
 	private final PageCaptureDataRepository pageCaptureDataRepository;
+	private final ImageCleanupUtils imageCleanupUtils;
 
 	public S3FileCleanupService(
 		@Value("${aws.region}") String region,
 		@Value("${aws.s3.bucket-name}") String bucketName,
 		@Value("${aws.s3.folder}") String folderName,
-		PageCaptureDataRepository pageCaptureDataRepository) {
+		PageCaptureDataRepository pageCaptureDataRepository, ImageCleanupUtils imageCleanupUtils) {
 
 		this.s3Client = S3Client.builder()
 			.region(Region.of(region))
@@ -38,6 +39,7 @@ public class S3FileCleanupService implements FileCleanupService {
 		this.bucketName = bucketName;
 		this.folderName = folderName;
 		this.pageCaptureDataRepository = pageCaptureDataRepository;
+		this.imageCleanupUtils = imageCleanupUtils;
 	}
 
 	// S3 Key 생성
@@ -80,10 +82,10 @@ public class S3FileCleanupService implements FileCleanupService {
 		log.info("연관되지 않은 모든 S3 이미지 파일 삭제 시작");
 
 		// Register에 있는 모든 URL Set
-		Set<String> registerUrls = ImageCleanupUtils.getRegisterUrls();
+		Set<String> registerUrls = imageCleanupUtils.getRegisterUrls();
 
 		// PageCaptureData에 있는 모든 URL Set
-		Set<String> pageCaptureUrls = ImageCleanupUtils.getPageCaptureUrls();
+		Set<String> pageCaptureUrls = imageCleanupUtils.getPageCaptureUrls();
 
 		// 제거 대상인 url의 정보만 남김
 		pageCaptureUrls.removeAll(registerUrls);

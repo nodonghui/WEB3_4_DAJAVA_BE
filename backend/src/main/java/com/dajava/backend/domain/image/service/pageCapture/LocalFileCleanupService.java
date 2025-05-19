@@ -24,19 +24,20 @@ public class LocalFileCleanupService implements FileCleanupService {
 
 	// 파일 저장 경로 (외부 설정에서 주입)
 	private final Path fileStorageLocation;
-	private final RegisterRepository registerRepository;
+	private final ImageCleanupUtils imageCleanupUtils;
 	private final PageCaptureDataRepository pageCaptureDataRepository;
 
 	public LocalFileCleanupService(@Value("${image.path}") String storagePath, RegisterRepository registerRepository,
-		PageCaptureDataRepository pageCaptureDataRepository) {
+		PageCaptureDataRepository pageCaptureDataRepository, ImageCleanupUtils imageCleanupUtils,
+		PageCaptureDataRepository pageCaptureDataRepository1) {
 		this.fileStorageLocation = Paths.get(storagePath).toAbsolutePath().normalize();
+		this.imageCleanupUtils = imageCleanupUtils;
+		this.pageCaptureDataRepository = pageCaptureDataRepository1;
 		try {
 			Files.createDirectories(this.fileStorageLocation);
 		} catch (IOException ex) {
 			throw new RuntimeException("디렉토리를 생성하지 못했습니다: " + this.fileStorageLocation, ex);
 		}
-		this.registerRepository = registerRepository;
-		this.pageCaptureDataRepository = pageCaptureDataRepository;
 	}
 
 	/**
@@ -61,10 +62,10 @@ public class LocalFileCleanupService implements FileCleanupService {
 		log.info("연관되지 않은 모든 이미지 파일 삭제 시작");
 
 		// Register에 있는 모든 URL Set
-		Set<String> registerUrls = ImageCleanupUtils.getRegisterUrls();
+		Set<String> registerUrls = imageCleanupUtils.getRegisterUrls();
 
 		// PageCaptureData에 있는 모든 URL Set
-		Set<String> pageCaptureUrls = ImageCleanupUtils.getPageCaptureUrls();
+		Set<String> pageCaptureUrls = imageCleanupUtils.getPageCaptureUrls();
 
 		// 제거 대상인 url 의 정보만 남김
 		pageCaptureUrls.removeAll(registerUrls);

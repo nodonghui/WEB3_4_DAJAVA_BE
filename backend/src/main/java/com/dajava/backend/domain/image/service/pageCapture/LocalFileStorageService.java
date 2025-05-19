@@ -7,7 +7,6 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.UUID;
 
 import javax.imageio.ImageIO;
 
@@ -19,10 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.dajava.backend.domain.image.ImageDimensions;
+import com.dajava.backend.domain.image.dto.ImageDimensions;
 import com.dajava.backend.domain.image.dto.ImageSaveResponse;
 import com.dajava.backend.domain.image.exception.ImageException;
-import com.dajava.backend.domain.register.entity.PageCaptureData;
 import com.dajava.backend.global.exception.ErrorCode;
 
 /**
@@ -107,30 +105,6 @@ public class LocalFileStorageService implements FileStorageService {
 		} catch (IOException e) {
 			throw new ImageException(ErrorCode.IMAGE_IO_ERROR);
 		}
-	}
-
-	/**
-	 * Base64로 인코딩된 이미지를 기존 PageCaptureData에 업데이트합니다.
-	 * @param base64Image Base64로 인코딩된 이미지 데이터
-	 * @param pageData 기존 파일명을 가져올 PageCaptureData 객체
-	 * @param originalFilename 원본 파일명 (확장자 추출용)
-	 * @return 저장된 파일명
-	 */
-	public ImageSaveResponse updateBase64Image(String base64Image, PageCaptureData pageData, String originalFilename) {
-		String fileExtension = getExtension(originalFilename);
-		String fileName = pageData.getCaptureFileName();
-
-		// 기존 파일명이 없는 경우 새로 생성
-		if (fileName == null || fileName.isEmpty()) {
-			fileName = UUID.randomUUID().toString() + fileExtension;
-		} else {
-			// 기존 파일명의 확장자 검사 및 조정
-			if (!fileName.endsWith(fileExtension)) {
-				fileName = fileName.substring(0, fileName.lastIndexOf('.')) + fileExtension;
-			}
-		}
-
-		return saveBase64ImageToFile(base64Image, fileName);
 	}
 
 	/**

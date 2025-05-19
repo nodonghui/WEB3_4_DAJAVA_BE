@@ -5,7 +5,7 @@ import java.util.UUID;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.core.io.Resource;
 
-import com.dajava.backend.domain.image.ImageDimensions;
+import com.dajava.backend.domain.image.dto.ImageDimensions;
 import com.dajava.backend.domain.image.dto.ImageSaveResponse;
 import com.dajava.backend.domain.register.entity.PageCaptureData;
 
@@ -50,7 +50,7 @@ public interface FileStorageService {
 			fileName = UUID.randomUUID().toString() + fileExtension;
 		} else {
 			// 기존 파일명의 확장자 검사 및 조정
-			if (!fileName.endsWith(fileExtension) && !fileExtension.isEmpty()) {
+			if (!fileName.endsWith(fileExtension)) {
 				fileName = fileName.substring(0, fileName.lastIndexOf('.')) + fileExtension;
 			}
 		}
