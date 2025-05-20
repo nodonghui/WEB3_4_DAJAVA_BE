@@ -6,10 +6,11 @@ plugins {
 }
 
 sentry {
-    authToken = System.getProperty("SENTRY_AUTH_TOKEN") ?: ""
+    includeSourceContext = true
+
     org = "dajava"
     projectName = "java-spring-boot"
-    includeSourceContext = true
+    authToken = System.getenv("SENTRY_AUTH_TOKEN")
 }
 
 group = 'com.dajava'
@@ -32,7 +33,6 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework:spring-test'

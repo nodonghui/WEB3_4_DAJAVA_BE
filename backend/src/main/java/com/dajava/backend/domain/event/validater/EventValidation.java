@@ -26,8 +26,8 @@ public class EventValidation {
 	private static final long MAX_FUTURE_ALLOW_MILLIS = 1000L * 60; // 1분
 
 	public static void validateTimestamp(Long timestamp) {
+		// 메인모드 타임 클럭 값이 현재 시간과 차이가 있는 경우 문제 발생할수있음
 		long now = Instant.now().toEpochMilli();
-
 		if (timestamp < now - MAX_PAST_ALLOW_MILLIS) {
 			log.warn("[EventValidator] Timestamp too old: timestamp={}, now={}", timestamp, now);
 			throw new PointerEventException(ErrorCode.INVALID_TIMESTAMP);
@@ -104,12 +104,24 @@ public class EventValidation {
 				throw new PointerEventException(ErrorCode.INVALID_ELEMENT_HTML);
 			}
 
+			validateNoMalformedNodes(root);
+
 			// 추가로 필요한 검증이 있다면 여기에 삽입
 			// 예를 들어, 필수 속성이나 태그 체크 등
+			// 현재 잘못된 데이터가 들어온 경우 파싱 예외 반환 작동 x 파서 수정 필요
 
-		} catch (Exception e) {
+		} catch (PointerEventException e) {
 			log.warn("[EventValidator] elementHtml 파싱 실패: {}", e.getMessage());
 			throw new PointerEventException(ErrorCode.INVALID_ELEMENT_HTML);
+		}
+	}
+
+	private static void validateNoMalformedNodes(HtmlNode node) {
+		if (node.malformed) {
+			throw new PointerEventException(ErrorCode.INVALID_ELEMENT_HTML);
+		}
+		for (HtmlNode child : node.children) {
+			validateNoMalformedNodes(child);
 		}
 	}
 }

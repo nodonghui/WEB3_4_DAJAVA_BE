@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dajava.backend.domain.event.es.scheduler.vaildation.EsAbusingCheckScheduler;
 import com.dajava.backend.domain.event.es.scheduler.vaildation.EsEventCleanUpScheduler;
 import com.dajava.backend.domain.event.es.scheduler.vaildation.EsEventValidateScheduler;
 
@@ -19,6 +20,7 @@ public class EventLogTestController {
 
 	private final EsEventValidateScheduler esEventValidateScheduler;
 	private final EsEventCleanUpScheduler esEventCleanUpScheduler;
+	private final EsAbusingCheckScheduler esAbusingCheckScheduler;
 
 	@Operation(summary = "검증 스케줄러 강제 푸쉬", description = "검증 스케줄러를 강제로 푸쉬합니다.")
 	@GetMapping("/test/push/validateScheduler")
@@ -34,5 +36,12 @@ public class EventLogTestController {
 	public String removeLog() {
 		esEventCleanUpScheduler.deleteOldEventDocuments();
 		return "click, move, scroll 로그 이벤트 삭제 완료";
+	}
+
+	@GetMapping("/test/abusing")
+	@ResponseStatus(HttpStatus.OK)
+	public String abusingLog() {
+		esAbusingCheckScheduler.runScheduledAbusingCheck();
+		return "어뷰징 스케줄러 실행 완료";
 	}
 }
