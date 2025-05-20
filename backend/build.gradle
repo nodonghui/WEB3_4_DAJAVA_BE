@@ -6,11 +6,10 @@ plugins {
 }
 
 sentry {
-    includeSourceContext = true
-
+    authToken = System.getProperty("SENTRY_AUTH_TOKEN") ?: ""
     org = "dajava"
     projectName = "java-spring-boot"
-    authToken = System.getenv("SENTRY_AUTH_TOKEN")
+    includeSourceContext = true
 }
 
 group = 'com.dajava'
