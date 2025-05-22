@@ -9,6 +9,7 @@ public class TagOpenState implements ParserState {
 		context.match("<");
 		String tagName = context.readUntil(' ', '>', '/');
 
+
 		HtmlNode node = new HtmlNode();
 
 		// ✅ 현재 부모 노드에 자식으로 추가

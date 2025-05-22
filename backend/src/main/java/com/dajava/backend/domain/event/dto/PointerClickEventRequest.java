@@ -3,6 +3,7 @@ package com.dajava.backend.domain.event.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -31,34 +32,34 @@ public class PointerClickEventRequest {
 	@Schema(description = "행동 솔루션 신청시 생성된 UUID 식별자", example = "a07cb1fc-e5db-4578-89a6-34d7a31f9389", requiredMode = Schema.RequiredMode.REQUIRED)
 	private String memberSerialNumber;
 
-	@NotBlank
+	@NotNull
 	@Schema(description = "로그 데이터의 생성 시각", example = "1711963200000", requiredMode = Schema.RequiredMode.REQUIRED)
 	private Long timestamp;
 
 	@Min(1)
-	@NotBlank
+	@NotNull
 	@Schema(description = "현재 브라우저 창의 가로 길이", example = "1280", requiredMode = Schema.RequiredMode.REQUIRED)
 	private Integer browserWidth;
 
-	@NotBlank
+	@NotNull
 	@Schema(description = "클릭시 X 좌표값", example = "100", requiredMode = Schema.RequiredMode.REQUIRED)
 	private Integer clientX;
 
-	@NotBlank
+	@NotNull
 	@Schema(description = "클릭시 Y 좌표값", example = "500", requiredMode = Schema.RequiredMode.REQUIRED)
 	private Integer clientY;
 
-	@NotBlank
+	@NotNull
 	@Schema(description = "현재 화면의 스크롤 상단 Y 좌표", example = "100", requiredMode = Schema.RequiredMode.REQUIRED)
 	private Integer scrollY;
 
 	@Min(1)
-	@NotBlank
+	@NotNull
 	@Schema(description = "전체 페이지의 세로 길이", example = "1500", requiredMode = Schema.RequiredMode.REQUIRED)
 	private Integer scrollHeight;
 
 	@Min(1)
-	@NotBlank
+	@NotNull
 	@Schema(description = "현재 브라우저 창의 세로 길이", example = "500", requiredMode = Schema.RequiredMode.REQUIRED)
 	private Integer viewportHeight;
 

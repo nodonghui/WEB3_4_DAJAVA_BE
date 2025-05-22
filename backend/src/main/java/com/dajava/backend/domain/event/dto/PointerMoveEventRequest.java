@@ -37,29 +37,29 @@ public class PointerMoveEventRequest {
 	private Long timestamp;
 
 	@Min(1)
-	@NotBlank
+	@NotNull
 	@Schema(description = "현재 브라우저 창의 가로 길이", example = "1280", requiredMode = Schema.RequiredMode.REQUIRED)
 	private Integer browserWidth;
 
-	@NotBlank
+	@NotNull
 	@Schema(description = "이동시 X 좌표값", example = "100", requiredMode = Schema.RequiredMode.REQUIRED)
 	private Integer clientX;
 
-	@NotBlank
+	@NotNull
 	@Schema(description = "이동시 Y 좌표값", example = "500", requiredMode = Schema.RequiredMode.REQUIRED)
 	private Integer clientY;
 
-	@NotBlank
+	@NotNull
 	@Schema(description = "현재 화면의 스크롤 상단 Y 좌표", example = "100", requiredMode = Schema.RequiredMode.REQUIRED)
 	private Integer scrollY;
 
 	@Min(1)
-	@NotBlank
+	@NotNull
 	@Schema(description = "전체 페이지의 세로 길이", example = "1500", requiredMode = Schema.RequiredMode.REQUIRED)
 	private Integer scrollHeight;
 
 	@Min(1)
-	@NotBlank
+	@NotNull
 	@Schema(description = "현재 브라우저 창의 세로 길이", example = "500", requiredMode = Schema.RequiredMode.REQUIRED)
 	private Integer viewportHeight;
 

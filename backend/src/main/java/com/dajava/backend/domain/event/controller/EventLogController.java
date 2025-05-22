@@ -16,6 +16,7 @@ import com.dajava.backend.domain.event.validater.EventValidation;
 import com.dajava.backend.domain.event.validater.EventValidator;
 import com.dajava.backend.global.log.Loggable;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
