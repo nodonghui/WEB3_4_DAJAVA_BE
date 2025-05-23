@@ -114,24 +114,3 @@ jobs:
           tags: |
             ghcr.io/${{ env.OWNER_LC }}/${{ env.DOCKER_IMAGE_NAME }}:${{ needs.makeTagAndRelease.outputs.tag_name }},
             ghcr.io/${{ env.OWNER_LC }}/${{ env.DOCKER_IMAGE_NAME }}:latest
-
-  # deploy:
-  # runs-on: ubuntu-latest
-  # needs: [ buildImageAndPush ]
-  # steps:
-  #   - name: AWS SSM Send-Command
-  #     uses: peterkimzz/aws-ssm-send-command@master
-  #     id: ssm
-  #     with:
-  #       aws-region: ${{ secrets.AWS_REGION }}
-  #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #       instance-ids: "i-0c0026b04463751ec"
-  #       working-directory: /
-  #       comment: Deploy
-  #       command: |
-  #         docker pull ghcr.io/prgrms-web-devcourse-final-project/dajava:latest
-  #         docker stop dajava 2>/dev/null
-  #         docker rm dajava 2>/dev/null
-  #         docker run -d --name dajava -p 8080:8080 --network common ghcr.io/prgrms-web-devcourse-final-project/dajava:latest
-  #         docker rmi $(docker images -f "dangling=true" -q)
