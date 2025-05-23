@@ -9,7 +9,11 @@ on:
       - "backend/build.gradle"
       - "backend/build.gradle.kts"
       - ".github/**"
-
+      
+permissions:
+  contents: write
+  packages: write
+  
 jobs:
   build:
     runs-on: ubuntu-latest
