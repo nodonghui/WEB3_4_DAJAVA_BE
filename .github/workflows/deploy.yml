@@ -51,7 +51,7 @@ jobs:
         working-directory: ./backend
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-        run: ./gradlew clean build -x test
+        run: ./gradlew clean build -x test -x sentryBundleSourcesJava
 
   makeTagAndRelease:
     needs: build
