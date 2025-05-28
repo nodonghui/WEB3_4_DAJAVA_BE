@@ -6,10 +6,10 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import com.dajava.backend.domain.event.dto.PointerClickEventRequest;
-import com.dajava.backend.domain.event.dto.PointerMoveEventRequest;
-import com.dajava.backend.domain.event.dto.PointerScrollEventRequest;
-import com.dajava.backend.domain.event.dto.SessionDataKey;
+import com.dajava.backend.domain.mouseeventsave.infra.memory.dto.PointerClickEventRequest;
+import com.dajava.backend.domain.mouseeventsave.infra.memory.dto.PointerMoveEventRequest;
+import com.dajava.backend.domain.mouseeventsave.infra.memory.dto.PointerScrollEventRequest;
+import com.dajava.backend.domain.mouseeventsave.infra.memory.dto.SessionDataKey;
 
 import lombok.Getter;
 

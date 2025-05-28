@@ -12,8 +12,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.dajava.backend.domain.event.entity.SolutionData;
-import com.dajava.backend.domain.event.repository.SolutionDataRepository;
 import com.dajava.backend.domain.register.entity.Register;
 import com.dajava.backend.domain.register.repository.RegisterRepository;
 import com.dajava.backend.domain.solution.dto.SolutionInfoResponse;
@@ -21,12 +19,9 @@ import com.dajava.backend.domain.solution.entity.Solution;
 import com.dajava.backend.domain.solution.exception.SolutionException;
 import com.dajava.backend.domain.solution.repository.SolutionRepository;
 import com.dajava.backend.global.exception.ErrorCode;
-import com.dajava.backend.global.utils.PasswordUtils;
+import com.dajava.backend.utils.PasswordUtils;
 
 class SolutionServiceImplTest {
-
-	@Mock
-	private SolutionDataRepository solutionDataRepository;
 
 	@Mock
 	private RegisterRepository registerRepository;
@@ -37,7 +32,7 @@ class SolutionServiceImplTest {
 	@InjectMocks
 	private SolutionServiceImpl solutionService;
 
-	private SolutionData solutionData;
+
 	private Register register;
 	private Solution solution;
 
@@ -52,7 +47,7 @@ class SolutionServiceImplTest {
 		serialNumber = "11db0706-4879-463a-a4d7-f7c347668cc6";
 		correctPassword = "correctPassword";
 		inCorrectPassword = "inCorrectPassword";
-		solutionData = SolutionData.create(serialNumber);
+
 		register = Register.builder()
 			.serialNumber(serialNumber)
 			.email("test@example.com")
@@ -103,30 +98,4 @@ class SolutionServiceImplTest {
 		assertEquals(ErrorCode.SOLUTION_PASSWORD_INVALID, exception.errorCode);
 	}
 
-	@Test
-	void getSolutionData_success() {
-		//given
-		when(solutionDataRepository.findBySerialNumber(serialNumber)).thenReturn(Optional.ofNullable(solutionData));
-
-		// when
-		SolutionData result = solutionService.getSolutionData(serialNumber);
-
-		// then
-		assertNotNull(result);
-		assertEquals(serialNumber, result.getSerialNumber());
-		verify(solutionDataRepository, times(1)).findBySerialNumber(serialNumber);
-	}
-
-	@Test
-	void getSolutionData_fail() {
-		//given
-		String wrongSerialNumber = "aaaa";
-		when(solutionDataRepository.findBySerialNumber(wrongSerialNumber)).thenReturn(null);
-
-		// when & then
-		assertThrows(Exception.class,
-			() -> solutionService.getSolutionData(wrongSerialNumber));
-
-		verify(solutionDataRepository, times(1)).findBySerialNumber(wrongSerialNumber);
-	}
 }

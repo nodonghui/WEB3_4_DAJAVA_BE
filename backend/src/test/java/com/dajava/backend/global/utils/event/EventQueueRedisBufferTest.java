@@ -1,11 +1,11 @@
 package com.dajava.backend.global.utils.event;
 
-import com.dajava.backend.domain.log.dto.ClickEventRequest;
-import com.dajava.backend.domain.log.dto.identifier.SessionIdentifier;
+import com.dajava.backend.domain.mouseeventsave.infra.redis.dto.ClickEventRequest;
+import com.dajava.backend.domain.mouseeventsave.infra.redis.dto.identifier.SessionIdentifier;
+import com.dajava.backend.utils.event.EventQueueRedisBuffer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 

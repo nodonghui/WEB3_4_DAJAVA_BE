@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.dajava.backend.domain.register.exception.AdminException;
 import com.dajava.backend.global.exception.ErrorCode;
-import com.dajava.backend.global.utils.PasswordUtils;
+import com.dajava.backend.utils.PasswordUtils;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

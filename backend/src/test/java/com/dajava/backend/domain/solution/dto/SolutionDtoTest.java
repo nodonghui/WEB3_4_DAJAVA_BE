@@ -10,7 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com.dajava.backend.domain.event.es.entity.SolutionEventDocument;
+import com.dajava.backend.domain.mouseeventvalidation.entity.SolutionEventDocument;
 
 /**
  * SolutionData 객체 SolutionRequestDto 변환 여부 테스트

@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.dajava.backend.domain.event.es.entity.SolutionEventDocument;
-import com.dajava.backend.domain.event.es.repository.SolutionEventDocumentRepository;
+import com.dajava.backend.domain.mouseeventvalidation.entity.SolutionEventDocument;
+import com.dajava.backend.domain.mouseeventvalidation.repository.SolutionEventDocumentRepository;
 import com.dajava.backend.domain.register.entity.Register;
 import com.dajava.backend.domain.register.repository.RegisterRepository;
 import com.dajava.backend.domain.solution.controller.SolutionController;

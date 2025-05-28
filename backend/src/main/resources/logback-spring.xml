@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="30 seconds">
 
+    <!-- 콘솔 로그 Appender -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
+    <!-- dev 프로파일에서만 사용되는 LOGSTASH Appender -->
     <springProfile name="dev">
         <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
             <destination>localhost:5000</destination>
@@ -18,20 +20,19 @@
         </appender>
     </springProfile>
 
-    <springProfile name="prod">
-        <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-            <destination>dajava.db.chsan626.co.kr:5000</destination>
-            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-                <log_type>${log_type}</log_type>
-                <method_name>${methodName}</method_name>
-                <args>${args}</args>
-            </encoder>
-        </appender>
-    </springProfile>
+    <!-- prod용 LOGSTASH는 필요 시 별도로 추가 -->
 
+    <!-- 기본 root logger (모든 프로파일에서 동작) -->
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="LOGSTASH"/>
     </root>
+
+    <!-- dev 프로파일이 활성화된 경우에만 적용 -->
+    <springProfile name="dev">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="LOGSTASH"/>
+        </root>
+    </springProfile>
 
 </configuration>

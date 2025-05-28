@@ -7,11 +7,11 @@ import java.lang.annotation.Target;
 
 import io.sentry.SentryLevel;
 
-// 커스텀 어노테이션
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface SentryMonitored {
-
-	SentryLevel level() default SentryLevel.ERROR;
-	String operation() default "";
-}
+// // 커스텀 어노테이션
+// @Retention(RetentionPolicy.RUNTIME)
+// @Target(ElementType.METHOD)
+// public @interface SentryMonitored {
+//
+// 	SentryLevel level() default SentryLevel.ERROR;
+// 	String operation() default "";
+// }

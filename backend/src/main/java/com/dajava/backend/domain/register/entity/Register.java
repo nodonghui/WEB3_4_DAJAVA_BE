@@ -12,8 +12,8 @@ import com.dajava.backend.domain.register.dto.register.RegisterCreateRequest;
 import com.dajava.backend.domain.register.exception.RegisterException;
 import com.dajava.backend.domain.solution.entity.Solution;
 import com.dajava.backend.global.common.BaseTimeEntity;
-import com.dajava.backend.global.utils.PasswordUtils;
-import com.dajava.backend.global.utils.TimeUtils;
+import com.dajava.backend.utils.PasswordUtils;
+import com.dajava.backend.utils.TimeUtils;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

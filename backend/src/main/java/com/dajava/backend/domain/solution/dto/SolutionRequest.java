@@ -2,11 +2,8 @@ package com.dajava.backend.domain.solution.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import com.dajava.backend.domain.event.entity.SolutionData;
-import com.dajava.backend.domain.event.entity.SolutionEvent;
-import com.dajava.backend.domain.event.es.entity.SolutionEventDocument;
+import com.dajava.backend.domain.mouseeventvalidation.entity.SolutionEventDocument;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -34,24 +31,6 @@ public record SolutionRequest(
 		@NotBlank(message = "페이지 URL은 필수입니다.") String pageUrl,
 		Integer browserWidth
 	) {
-		/**
-		 * <p>{@code SolutionEvent} 엔티티를 {@code EventDataDto}로 변환하는 정적 메서드입니다.</p>
-		 * @param event 변환할 {@code SolutionEvent} 객체
-		 * @return 변환된 {@code EventDataDto} 객체
-		 */
-		public static EventDataDto from(SolutionEvent event) {
-			return new EventDataDto(
-				event.getSessionId(),
-				event.getTimestamp(),
-				event.getType(),
-				event.getScrollY(),
-				event.getClientX(),
-				event.getClientY(),
-				event.getElement(),
-				event.getPageUrl(),
-				event.getBrowserWidth()
-			);
-		}
 
 		public static EventDataDto from(SolutionEventDocument event) {
 			return new EventDataDto(
@@ -68,19 +47,6 @@ public record SolutionRequest(
 		}
 	}
 
-	/**
-	 * <p>{@code SolutionData} 엔티티를 {@code SolutionRequest} DTO로 변환하는 정적 메서드입니다.</p>
-	 * @param solutionData 변환할 {@code SolutionData} 객체
-	 * @return 변환된 {@code SolutionRequest} 객체
-	 */
-	public static SolutionRequest from(SolutionData solutionData) {
-		List<EventDataDto> eventDataDtos = solutionData.getSolutionEvents()
-			.stream()
-			.map(EventDataDto::from)
-			.collect(Collectors.toList());
-
-		return new SolutionRequest(solutionData.getSerialNumber(), eventDataDtos);
-	}
 
 	/**
 	 * <p>{@code SolutionEventDocument} 리스트를 {@code SolutionRequest} DTO로 변환하는 정적 메서드입니다.</p>

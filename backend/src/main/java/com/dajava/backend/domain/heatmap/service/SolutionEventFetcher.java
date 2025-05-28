@@ -7,8 +7,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.dajava.backend.domain.event.es.entity.SolutionEventDocument;
-import com.dajava.backend.domain.event.es.repository.SolutionEventDocumentRepository;
+import com.dajava.backend.domain.mouseeventvalidation.entity.SolutionEventDocument;
+import com.dajava.backend.domain.mouseeventvalidation.repository.SolutionEventDocumentRepository;
 import com.dajava.backend.domain.heatmap.exception.HeatmapException;
 import com.dajava.backend.global.exception.ErrorCode;
 

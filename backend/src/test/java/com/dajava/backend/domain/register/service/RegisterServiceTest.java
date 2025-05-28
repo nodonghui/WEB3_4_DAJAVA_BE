@@ -24,9 +24,9 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.dajava.backend.domain.email.AsyncEmailSender;
-import com.dajava.backend.domain.image.dto.ImageSaveResponse;
-import com.dajava.backend.domain.image.service.pageCapture.LocalFileStorageService;
+import com.dajava.backend.domain.register.email.AsyncEmailSender;
+import com.dajava.backend.domain.heatmap.image.dto.ImageSaveResponse;
+import com.dajava.backend.domain.heatmap.image.service.pageCapture.LocalFileStorageService;
 import com.dajava.backend.domain.register.dto.pageCapture.PageCaptureRequest;
 import com.dajava.backend.domain.register.dto.pageCapture.PageCaptureResponse;
 import com.dajava.backend.domain.register.dto.register.RegisterCreateRequest;

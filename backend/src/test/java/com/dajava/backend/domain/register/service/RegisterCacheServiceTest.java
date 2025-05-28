@@ -16,8 +16,8 @@ import com.dajava.backend.domain.register.dto.register.RegisterCreateRequest;
 import com.dajava.backend.domain.register.dto.register.RegisterCreateResponse;
 import com.dajava.backend.domain.register.entity.Register;
 import com.dajava.backend.domain.register.repository.RegisterRepository;
-import com.dajava.backend.global.utils.PasswordUtils;
-import com.dajava.backend.global.utils.TimeUtils;
+import com.dajava.backend.utils.PasswordUtils;
+import com.dajava.backend.utils.TimeUtils;
 
 @ActiveProfiles("test")
 @SpringBootTest

@@ -7,8 +7,8 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.dajava.backend.domain.event.dto.PointerClickEventRequest;
-import com.dajava.backend.domain.event.dto.SessionDataKey;
+import com.dajava.backend.domain.mouseeventsave.infra.memory.dto.PointerClickEventRequest;
+import com.dajava.backend.domain.mouseeventsave.infra.memory.dto.SessionDataKey;
 /*
  * 이벤트 버퍼 내부 제네릭 해시맵 구조를 테스트 합니다
  *

@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.dajava.backend.domain.image.service.pageCapture.FileCleanupService;
+import com.dajava.backend.domain.heatmap.image.service.pageCapture.FileCleanupService;
 import com.dajava.backend.domain.register.entity.Register;
 import com.dajava.backend.domain.register.repository.RegisterRepository;
 
