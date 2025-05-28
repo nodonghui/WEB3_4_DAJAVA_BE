@@ -39,15 +39,11 @@ DAJAVA는 웹 사이트를 대상으로 사용자들의 행동 패턴을 대상�
 
 ![image](https://github.com/user-attachments/assets/18e02c5d-fffb-4da4-8159-eb1bd20cca53)
 
-## 🌫️ 플로우 차트
-처음 프로젝트 계획시 목표했던 플로우 차트 <br/>
-![5](https://github.com/user-attachments/assets/474bd1dc-dd05-4529-b21a-627fe45f8c66)
-
 ## 패키지 설명
 register : DAJAVA 홈페이지에서 솔루션을 신청,완료된 솔루션을 조회하는 로직이 있는 패키지 입니다.
 
 mouseeventsave : 솔루션 신청 웹사이트의 사용자로 부터 전송 받은 마우스 이벤트 데이터를 DB에 저장하는 로직이 있는 패키지 입니다. 컨트롤러 코드 부터 데이터 흐름이 시작됩니다.
-└── infra : 임시버퍼가 java memory 또는 redis인 버전으로 나뉘어 있습니다. 현재 redis 부분은 리팩토링이 덜 된 부분이 있습니다. 
+임시버퍼가 java memory 또는 redis인 버전으로 나뉘어 있습니다. 현재 redis 부분은 리팩토링이 덜 된 부분이 있습니다. 
 
 mouseeventvalidation : DB에 저장된 이벤트 데이터 중 UI 문제를 겪고 있는 마우스 이벤트를 자체 알고리즘으로 판별하는 로직이 있는 패키지 입니다. 스케줄러 코드 부터 데이터 흐름이 시작됩니다.
 
