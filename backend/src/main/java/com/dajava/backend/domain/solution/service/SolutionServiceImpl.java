@@ -9,9 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.dajava.backend.domain.email.EmailService;
-import com.dajava.backend.domain.event.entity.SolutionData;
-import com.dajava.backend.domain.event.repository.SolutionDataRepository;
+import com.dajava.backend.domain.register.email.EmailService;
 import com.dajava.backend.domain.register.entity.Register;
 import com.dajava.backend.domain.register.repository.RegisterRepository;
 import com.dajava.backend.domain.solution.dto.SolutionInfoResponse;
@@ -20,7 +18,7 @@ import com.dajava.backend.domain.solution.entity.Solution;
 import com.dajava.backend.domain.solution.exception.SolutionException;
 import com.dajava.backend.domain.solution.repository.SolutionRepository;
 import com.dajava.backend.global.config.GeminiApiConfig;
-import com.dajava.backend.global.utils.PasswordUtils;
+import com.dajava.backend.utils.PasswordUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -42,8 +40,6 @@ public class SolutionServiceImpl implements SolutionService {
 	private final SolutionRepository solutionRepository;
 
 	private final RegisterRepository registerRepository;
-
-	private final SolutionDataRepository solutionDataRepository;
 
 	private final GeminiApiConfig geminiApiConfig;
 
@@ -124,14 +120,4 @@ public class SolutionServiceImpl implements SolutionService {
 
 	}
 
-	/**
-	 * 이상치 데이터라고 판단된 데이터(SolutionData)들을 조회하는 메서드
-	 * @param serialNumber
-	 * @return SolutionData
-	 */
-	@Override
-	public SolutionData getSolutionData(String serialNumber) {
-		return solutionDataRepository.findBySerialNumber(serialNumber)
-			.orElseThrow(() -> new SolutionException(SOLUTION_DATA_NOT_FOUND));
-	}
 }

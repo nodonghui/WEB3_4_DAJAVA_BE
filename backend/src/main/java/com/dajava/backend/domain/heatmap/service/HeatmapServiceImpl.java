@@ -17,19 +17,19 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.dajava.backend.domain.event.es.entity.SolutionEventDocument;
+import com.dajava.backend.domain.mouseeventvalidation.entity.SolutionEventDocument;
 import com.dajava.backend.domain.heatmap.dto.GridCell;
 import com.dajava.backend.domain.heatmap.dto.HeatmapMetadata;
 import com.dajava.backend.domain.heatmap.dto.HeatmapResponse;
 import com.dajava.backend.domain.heatmap.dto.HeatmapWidthsResponse;
 import com.dajava.backend.domain.heatmap.exception.HeatmapException;
-import com.dajava.backend.domain.image.dto.ImageDimensions;
-import com.dajava.backend.domain.image.service.pageCapture.FileStorageService;
+import com.dajava.backend.domain.heatmap.image.dto.ImageDimensions;
+import com.dajava.backend.domain.heatmap.image.service.pageCapture.FileStorageService;
 import com.dajava.backend.domain.register.entity.PageCaptureData;
 import com.dajava.backend.domain.register.entity.Register;
 import com.dajava.backend.domain.register.repository.RegisterRepository;
 import com.dajava.backend.domain.solution.exception.SolutionException;
-import com.dajava.backend.global.utils.PasswordUtils;
+import com.dajava.backend.utils.PasswordUtils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

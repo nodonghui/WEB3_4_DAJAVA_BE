@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 
-import com.dajava.backend.domain.event.es.entity.SolutionEventDocument;
+import com.dajava.backend.domain.mouseeventvalidation.entity.SolutionEventDocument;
 import com.dajava.backend.domain.heatmap.validation.ScreenWidthValidator;
 import com.dajava.backend.domain.heatmap.validation.UrlEqualityValidator;
 

@@ -5,12 +5,12 @@ plugins {
     id "io.sentry.jvm.gradle" version "5.4.0"
 }
 
-sentry {
-    authToken = System.getProperty("SENTRY_AUTH_TOKEN") ?: ""
-    org = "dajava"
-    projectName = "java-spring-boot"
-    includeSourceContext = true
-}
+//sentry {
+//    authToken = System.getProperty("SENTRY_AUTH_TOKEN") ?: ""
+//    org = "dajava"
+//    projectName = "java-spring-boot"
+//    includeSourceContext = true
+//}
 
 group = 'com.dajava'
 version = '0.0.1-SNAPSHOT'

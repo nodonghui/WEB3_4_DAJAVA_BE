@@ -1,6 +1,5 @@
 package com.dajava.backend.domain.solution.service;
 
-import com.dajava.backend.domain.event.entity.SolutionData;
 import com.dajava.backend.domain.register.exception.RegisterException;
 import com.dajava.backend.domain.solution.dto.SolutionInfoResponse;
 import com.dajava.backend.domain.solution.dto.SolutionResponse;
@@ -25,5 +24,4 @@ public interface SolutionService {
 	 */
 	SolutionInfoResponse getSolutionInfo(String serialNumber, String password);
 
-	SolutionData getSolutionData(String serialNumber);
 }

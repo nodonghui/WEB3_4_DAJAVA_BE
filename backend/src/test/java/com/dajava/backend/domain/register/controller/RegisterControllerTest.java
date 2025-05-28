@@ -32,15 +32,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.dajava.backend.domain.image.service.pageCapture.LocalFileStorageService;
+import com.dajava.backend.domain.heatmap.image.service.pageCapture.LocalFileStorageService;
 import com.dajava.backend.domain.register.dto.register.RegisterCreateRequest;
 import com.dajava.backend.domain.register.dto.register.RegisterModifyRequest;
 import com.dajava.backend.domain.register.entity.Register;
 import com.dajava.backend.domain.register.repository.RegisterRepository;
 import com.dajava.backend.domain.register.service.RegisterCacheService;
 import com.dajava.backend.domain.register.service.RegisterService;
-import com.dajava.backend.global.utils.PasswordUtils;
-import com.dajava.backend.global.utils.TimeUtils;
+import com.dajava.backend.utils.PasswordUtils;
+import com.dajava.backend.utils.TimeUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.Cookie;

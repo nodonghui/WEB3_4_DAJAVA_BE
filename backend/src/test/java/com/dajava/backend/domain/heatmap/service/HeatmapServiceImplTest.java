@@ -19,16 +19,16 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.dajava.backend.domain.event.es.entity.SolutionEventDocument;
+import com.dajava.backend.domain.mouseeventvalidation.entity.SolutionEventDocument;
 import com.dajava.backend.domain.heatmap.dto.HeatmapResponse;
 import com.dajava.backend.domain.heatmap.exception.HeatmapException;
-import com.dajava.backend.domain.image.dto.ImageDimensions;
-import com.dajava.backend.domain.image.service.pageCapture.LocalFileStorageService;
+import com.dajava.backend.domain.heatmap.image.dto.ImageDimensions;
+import com.dajava.backend.domain.heatmap.image.service.pageCapture.LocalFileStorageService;
 import com.dajava.backend.domain.register.entity.PageCaptureData;
 import com.dajava.backend.domain.register.entity.Register;
 import com.dajava.backend.domain.register.repository.RegisterRepository;
 import com.dajava.backend.global.exception.ErrorCode;
-import com.dajava.backend.global.utils.PasswordUtils;
+import com.dajava.backend.utils.PasswordUtils;
 
 @ExtendWith(MockitoExtension.class)
 class HeatmapServiceImplTest {

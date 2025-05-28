@@ -17,10 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.dajava.backend.domain.email.EmailService;
-import com.dajava.backend.domain.image.dto.ImageSaveResponse;
-import com.dajava.backend.domain.image.service.pageCapture.FileStorageService;
-import com.dajava.backend.domain.image.service.pageCapture.LocalFileStorageService;
+import com.dajava.backend.domain.register.email.EmailService;
+import com.dajava.backend.domain.heatmap.image.dto.ImageSaveResponse;
+import com.dajava.backend.domain.heatmap.image.service.pageCapture.FileStorageService;
 import com.dajava.backend.domain.register.RegisterInfo;
 import com.dajava.backend.domain.register.converter.RegisterConverter;
 import com.dajava.backend.domain.register.dto.pageCapture.PageCaptureRequest;
@@ -40,10 +39,8 @@ import com.dajava.backend.domain.register.exception.RegisterException;
 import com.dajava.backend.domain.register.implement.RegisterValidator;
 import com.dajava.backend.domain.register.repository.RegisterRepository;
 import com.dajava.backend.global.exception.ErrorCode;
-import com.dajava.backend.global.sentry.SentryMonitored;
-import com.dajava.backend.global.utils.PasswordUtils;
+import com.dajava.backend.utils.PasswordUtils;
 
-import io.sentry.SentryLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -77,7 +74,7 @@ public class RegisterService {
 		return processCreateRegister(validatedRequest);
 	}
 
-	@SentryMonitored(level = SentryLevel.FATAL, operation = "create_register")
+	//@SentryMonitored(level = SentryLevel.FATAL, operation = "create_register")
 	private RegisterCreateResponse processCreateRegister(RegisterCreateRequest validatedRequest) {
 		Register newRegister = registerRepository.save(Register.create(validatedRequest));
 		log.info("[RegisterService] Register 엔티티를 생성하였습니다. : {} ", newRegister);
@@ -107,7 +104,7 @@ public class RegisterService {
 		return processModifyRegister(targetSolution, request, solutionId);
 	}
 
-	@SentryMonitored(level = SentryLevel.FATAL, operation = "modify_register")
+	//@SentryMonitored(level = SentryLevel.FATAL, operation = "modify_register")
 	private RegisterModifyResponse processModifyRegister(Register targetSolution, RegisterModifyRequest request, Long solutionId) {
 		targetSolution.updateEndDate(request.solutionCompleteDate());
 

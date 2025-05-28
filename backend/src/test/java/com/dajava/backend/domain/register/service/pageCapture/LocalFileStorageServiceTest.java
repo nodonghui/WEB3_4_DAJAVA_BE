@@ -17,8 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.dajava.backend.domain.image.dto.ImageSaveResponse;
-import com.dajava.backend.domain.image.service.pageCapture.LocalFileStorageService;
+import com.dajava.backend.domain.heatmap.image.dto.ImageSaveResponse;
+import com.dajava.backend.domain.heatmap.image.service.pageCapture.LocalFileStorageService;
 import com.dajava.backend.domain.register.entity.PageCaptureData;
 import com.dajava.backend.domain.register.repository.PageCaptureDataRepository;
 

@@ -1,6 +1,6 @@
 package com.dajava.backend.global.component.buffer;
 
-import static com.dajava.backend.global.utils.SessionDataKeyUtils.*;
+import static com.dajava.backend.utils.SessionDataKeyUtils.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,8 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
-import com.dajava.backend.domain.event.dto.SessionDataKey;
-import com.dajava.backend.global.utils.SessionDataKeyUtils;
+import com.dajava.backend.domain.mouseeventsave.infra.memory.dto.SessionDataKey;
+import com.dajava.backend.utils.SessionDataKeyUtils;
 
 import lombok.Getter;
 
