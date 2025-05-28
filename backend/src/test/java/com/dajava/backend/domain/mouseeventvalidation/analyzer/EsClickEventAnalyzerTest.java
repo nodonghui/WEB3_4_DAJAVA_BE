@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import com.dajava.backend.domain.mouseeventsave.infra.memory.entity.PointerClickEventDocument;
 import com.dajava.backend.domain.mouseeventsave.infra.memory.entity.PointerMoveEventDocument;
-import com.dajava.backend.domain.mouseeventvalidation.scheduler.analyzer.EsClickEventAnalyzer;
+import com.dajava.backend.domain.mouseeventvalidation.scheduler.analyzer.ClickEventAnalyzer;
 import com.dajava.backend.global.component.analyzer.ClickAnalyzerProperties;
 
 /*
@@ -25,7 +25,7 @@ import com.dajava.backend.global.component.analyzer.ClickAnalyzerProperties;
 @DisplayName("EsClickEventAnalyzer 테스트")
 class EsClickEventAnalyzerTest {
 
-	private EsClickEventAnalyzer analyzer;
+	private ClickEventAnalyzer analyzer;
 
 
 	@BeforeEach
@@ -35,7 +35,7 @@ class EsClickEventAnalyzerTest {
 		props.setPositionThresholdPx(10);
 		props.setMinClickCount(3);
 
-		analyzer = new EsClickEventAnalyzer(props);
+		analyzer = new ClickEventAnalyzer(props);
 	}
 
 	private PointerClickEventDocument createEvent(Long time, int clientX, int clientY, String tag) {

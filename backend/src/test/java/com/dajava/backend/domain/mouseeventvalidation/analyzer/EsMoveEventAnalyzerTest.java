@@ -11,7 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.dajava.backend.domain.mouseeventsave.infra.memory.entity.PointerMoveEventDocument;
-import com.dajava.backend.domain.mouseeventvalidation.scheduler.analyzer.EsMoveEventAnalyzer;
+import com.dajava.backend.domain.mouseeventvalidation.scheduler.analyzer.MoveEventAnalyzer;
 import com.dajava.backend.global.component.analyzer.MoveAnalyzerProperties;
 
 /*
@@ -23,7 +23,7 @@ import com.dajava.backend.global.component.analyzer.MoveAnalyzerProperties;
 @DisplayName("EsMoveEventAnalyzer 테스트")
 class EsMoveEventAnalyzerTest {
 
-	private EsMoveEventAnalyzer analyzer;
+	private MoveEventAnalyzer analyzer;
 
 	@BeforeEach
 	void setUp() {
@@ -32,7 +32,7 @@ class EsMoveEventAnalyzerTest {
 		props.setTurnThreshold(4);    // 꺾임 4번 이상
 		props.setAngleThresholdDegrees(90.0); // 90도 이상 꺾임 감지
 
-		analyzer = new EsMoveEventAnalyzer(props);
+		analyzer = new MoveEventAnalyzer(props);
 	}
 
 	private PointerMoveEventDocument createMoveEvent(Long timestamp, int clientX, int clientY) {

@@ -25,14 +25,14 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Component
-public class EsClickEventAnalyzer implements EsAnalyzer<PointerClickEventDocument> {
+public class ClickEventAnalyzer implements Analyzer<PointerClickEventDocument> {
 
 	//5초 내 클릭 한지 감지
 	private final int timeThresholdMs;
 	private final int positionThresholdPx;
 	private final int minClickCount;
 
-	public EsClickEventAnalyzer(ClickAnalyzerProperties props) {
+	public ClickEventAnalyzer(ClickAnalyzerProperties props) {
 		this.timeThresholdMs = props.getTimeThresholdMs();
 		this.positionThresholdPx = props.getPositionThresholdPx();
 		this.minClickCount = props.getMinClickCount();
