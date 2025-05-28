@@ -16,9 +16,9 @@ import com.dajava.backend.domain.mouseeventvalidation.service.PointerEventDocume
 import com.dajava.backend.domain.mouseeventvalidation.service.SessionDataDocumentService;
 import com.dajava.backend.domain.mouseeventvalidation.service.SolutionEventDocumentService;
 import com.dajava.backend.domain.mouseeventsave.infra.redis.converter.EventConverter;
-import com.dajava.backend.domain.mouseeventvalidation.scheduler.analyzer.EsClickEventAnalyzer;
-import com.dajava.backend.domain.mouseeventvalidation.scheduler.analyzer.EsMoveEventAnalyzer;
-import com.dajava.backend.domain.mouseeventvalidation.scheduler.analyzer.EsScrollEventAnalyzer;
+import com.dajava.backend.domain.mouseeventvalidation.scheduler.analyzer.ClickEventAnalyzer;
+import com.dajava.backend.domain.mouseeventvalidation.scheduler.analyzer.MoveEventAnalyzer;
+import com.dajava.backend.domain.mouseeventvalidation.scheduler.analyzer.ScrollEventAnalyzer;
 import com.dajava.backend.global.component.analyzer.BufferSchedulerProperties;
 import com.dajava.backend.utils.EventsUtils;
 
@@ -35,15 +35,15 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class EsEventValidateScheduler {
+public class EventValidateScheduler {
 
 	private final SessionDataDocumentService sessionDataDocumentService;
 	private final SolutionEventDocumentService solutionEventDocumentService;
 	private final PointerEventDocumentService pointerEventDocumentService;
 
-	private final EsClickEventAnalyzer esClickEventAnalyzer;
-	private final EsMoveEventAnalyzer esMoveEventAnalyzer;
-	private final EsScrollEventAnalyzer esScrollEventAnalyzer;
+	private final ClickEventAnalyzer ClickEventAnalyzer;
+	private final MoveEventAnalyzer MoveEventAnalyzer;
+	private final ScrollEventAnalyzer ScrollEventAnalyzer;
 
 	private final BufferSchedulerProperties bufferSchedulerProperties;
 
@@ -154,9 +154,9 @@ public class EsEventValidateScheduler {
 		List<PointerMoveEventDocument> moveEvents,
 		List<PointerScrollEventDocument> scrollEvents
 	) {
-		esClickEventAnalyzer.analyze(clickEvents);
-		esMoveEventAnalyzer.analyze(moveEvents);
-		esScrollEventAnalyzer.analyze(scrollEvents);
+		ClickEventAnalyzer.analyze(clickEvents);
+		MoveEventAnalyzer.analyze(moveEvents);
+		ScrollEventAnalyzer.analyze(scrollEvents);
 	}
 
 	private void saveResults(

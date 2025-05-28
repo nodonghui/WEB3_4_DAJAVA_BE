@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Component
-public class EsMoveEventAnalyzer implements EsAnalyzer<PointerMoveEventDocument> {
+public class MoveEventAnalyzer implements Analyzer<PointerMoveEventDocument> {
 
 	private final long timeWindowMs;
 	private final int turnThreshold;
@@ -30,7 +30,7 @@ public class EsMoveEventAnalyzer implements EsAnalyzer<PointerMoveEventDocument>
 	private static final int MAXWINDOWSIZE = 50;
 
 
-	public EsMoveEventAnalyzer(MoveAnalyzerProperties props) {
+	public MoveEventAnalyzer(MoveAnalyzerProperties props) {
 		this.timeWindowMs = props.getTimeWindowMs();
 		this.turnThreshold = props.getTurnThreshold();
 		this.angleThresholdDegrees = props.getAngleThresholdDegrees();

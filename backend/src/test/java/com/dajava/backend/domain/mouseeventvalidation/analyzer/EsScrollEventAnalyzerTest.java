@@ -11,7 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.dajava.backend.domain.mouseeventsave.infra.memory.entity.PointerScrollEventDocument;
-import com.dajava.backend.domain.mouseeventvalidation.scheduler.analyzer.EsScrollEventAnalyzer;
+import com.dajava.backend.domain.mouseeventvalidation.scheduler.analyzer.ScrollEventAnalyzer;
 import com.dajava.backend.global.component.analyzer.ScrollAnalyzerProperties;
 
 /*
@@ -23,7 +23,7 @@ import com.dajava.backend.global.component.analyzer.ScrollAnalyzerProperties;
 @DisplayName("EsScrollEventAnalyzer 테스트")
 class EsScrollEventAnalyzerTest {
 
-	private EsScrollEventAnalyzer analyzer;
+	private ScrollEventAnalyzer analyzer;
 
 	@BeforeEach
 	void setUp() {
@@ -35,7 +35,7 @@ class EsScrollEventAnalyzerTest {
 		props.setMinDirectionChanges(3);
 		props.setContentConsumedThreshold(0.5); // 50% 이하로만 본 경우 outlier
 
-		analyzer = new EsScrollEventAnalyzer(props);
+		analyzer = new ScrollEventAnalyzer(props);
 	}
 
 	private PointerScrollEventDocument createScrollEvent(Long time, int scrollY, int scrollHeight, int viewportHeight) {

@@ -20,9 +20,9 @@ import com.dajava.backend.domain.mouseeventsave.infra.memory.entity.PointerMoveE
 import com.dajava.backend.domain.mouseeventsave.infra.memory.entity.PointerScrollEventDocument;
 import com.dajava.backend.domain.mouseeventsave.infra.memory.entity.SessionDataDocument;
 import com.dajava.backend.domain.mouseeventvalidation.entity.SolutionEventDocument;
-import com.dajava.backend.domain.mouseeventvalidation.scheduler.analyzer.EsClickEventAnalyzer;
-import com.dajava.backend.domain.mouseeventvalidation.scheduler.analyzer.EsMoveEventAnalyzer;
-import com.dajava.backend.domain.mouseeventvalidation.scheduler.analyzer.EsScrollEventAnalyzer;
+import com.dajava.backend.domain.mouseeventvalidation.scheduler.analyzer.ClickEventAnalyzer;
+import com.dajava.backend.domain.mouseeventvalidation.scheduler.analyzer.MoveEventAnalyzer;
+import com.dajava.backend.domain.mouseeventvalidation.scheduler.analyzer.ScrollEventAnalyzer;
 import com.dajava.backend.domain.mouseeventvalidation.service.PointerEventDocumentService;
 import com.dajava.backend.domain.mouseeventvalidation.service.SessionDataDocumentService;
 import com.dajava.backend.domain.mouseeventvalidation.service.SolutionEventDocumentService;
@@ -36,20 +36,20 @@ import com.dajava.backend.global.component.analyzer.BufferSchedulerProperties;
  * @since 2025-04-04
  */
 @ExtendWith(MockitoExtension.class)
-class EsEventValidateSchedulerTest {
+class EventValidateSchedulerTest {
 
 	@Mock private SessionDataDocumentService sessionDataDocumentService;
 	@Mock private SolutionEventDocumentService solutionEventDocumentService;
 	@Mock private PointerEventDocumentService pointerEventDocumentService;
 
-	@Mock private EsClickEventAnalyzer esClickEventAnalyzer;
-	@Mock private EsMoveEventAnalyzer esMoveEventAnalyzer;
-	@Mock private EsScrollEventAnalyzer esScrollEventAnalyzer;
+	@Mock private ClickEventAnalyzer esClickEventAnalyzer;
+	@Mock private MoveEventAnalyzer esMoveEventAnalyzer;
+	@Mock private ScrollEventAnalyzer esScrollEventAnalyzer;
 
 	@Mock private BufferSchedulerProperties bufferSchedulerProperties;
 
 	@InjectMocks
-	private EsEventValidateScheduler scheduler;
+	private EventValidateScheduler scheduler;
 
 	@BeforeEach
 	void setup() {

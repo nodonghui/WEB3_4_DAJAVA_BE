@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class EsEventCleanUpScheduler {
+public class EventCleanUpScheduler {
 
 	private final ElasticsearchOperations elasticsearchOperations;
 

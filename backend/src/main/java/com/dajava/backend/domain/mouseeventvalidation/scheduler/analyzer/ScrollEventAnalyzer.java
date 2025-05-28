@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Component
-public class EsScrollEventAnalyzer implements EsAnalyzer<PointerScrollEventDocument> {
+public class ScrollEventAnalyzer implements Analyzer<PointerScrollEventDocument> {
 
 
 
@@ -32,7 +32,7 @@ public class EsScrollEventAnalyzer implements EsAnalyzer<PointerScrollEventDocum
 	private final int minDirectionChanges;
 	private final double contentConsumedThreshold;
 
-	public EsScrollEventAnalyzer(ScrollAnalyzerProperties props) {
+	public ScrollEventAnalyzer(ScrollAnalyzerProperties props) {
 		this.timeWindowMs = props.getTimeWindowMs();
 		this.minScrollDelta = props.getMinScrollDelta();
 		this.minEventCount = props.getMinEventCount();
