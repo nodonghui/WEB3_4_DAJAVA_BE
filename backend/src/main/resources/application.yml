@@ -40,5 +40,34 @@ spring:
       port: 6379
       password: 1234
 
+  kafka:
+    bootstrap-servers: localhost:9092
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+    consumer:
+      group-id: mouseLogEvent
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      max-poll-records: 200
+      fetch-max-wait: 500
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: 'com.dajava.backend.domain.event.dto'  # 패키지만 지정하면 하위 모든 클래스 허용
+
+    listener:
+      type: batch
+      concurrency: 3
+      ack-mode: batch
+
 image:
   path: backend/images/page-capture
+
+
+
+

@@ -43,8 +43,8 @@ public class EventLogController {
 	 * Click(Touch) 이벤트 로깅
 	 * type 이 "click" 인 이벤트를 로깅합니다.
 	 */
-	//@Operation(summary = "클릭 이벤트 로깅", description = "마우스 이벤트 클릭(터치) 타입의 이벤트를 로깅합니다.")
-	//@PostMapping("/click")
+	@Operation(summary = "클릭 이벤트 로깅", description = "마우스 이벤트 클릭(터치) 타입의 이벤트를 로깅합니다.")
+	@PostMapping("/click")
 	@ResponseStatus(HttpStatus.OK)
 	public String logClick(
 		@Valid @RequestBody PointerClickEventRequest clickEventRequest
@@ -62,8 +62,8 @@ public class EventLogController {
 	 * mousemove 이벤트 로깅
 	 * type 이 "mousemove"인 이벤트를 로깅합니다.
 	 */
-	//@Operation(summary = "이동 이벤트 로깅", description = "마우스 이벤트 이동 타입의 이벤트를 로깅합니다.")
-	//@PostMapping("/movement")
+	@Operation(summary = "이동 이벤트 로깅", description = "마우스 이벤트 이동 타입의 이벤트를 로깅합니다.")
+	@PostMapping("/movement")
 	@ResponseStatus(HttpStatus.OK)
 	public String logMovement(
 		@Valid @RequestBody PointerMoveEventRequest moveEventRequest
@@ -81,8 +81,8 @@ public class EventLogController {
 	 * scroll 이벤트 로깅
 	 * type 이 "scroll"인 이벤트를 로깅합니다.
 	 */
-	//@Operation(summary = "스크롤 이벤트 로깅", description = "마우스 이벤트 스크롤 타입의 이벤트를 로깅합니다.")
-	//@PostMapping("/scroll")
+	@Operation(summary = "스크롤 이벤트 로깅", description = "마우스 이벤트 스크롤 타입의 이벤트를 로깅합니다.")
+	@PostMapping("/scroll")
 	@ResponseStatus(HttpStatus.OK)
 	public String logScroll(
 		@Valid @RequestBody PointerScrollEventRequest scrollEventRequest
@@ -97,7 +97,7 @@ public class EventLogController {
 	}
 
 	//@Operation(summary = "세션 종료 요청", description = "세션 종료 요청이 들어오면 해당 세션을 종료합니다.")
-	//@PostMapping("/end/{sessionId}")
+	@PostMapping("/end/{sessionId}")
 	@ResponseStatus(HttpStatus.OK)
 	public void logEnd(
 		@PathVariable String sessionId

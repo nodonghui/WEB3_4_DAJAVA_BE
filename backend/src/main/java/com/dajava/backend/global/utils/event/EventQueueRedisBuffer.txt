@@ -36,7 +36,7 @@ public class EventQueueRedisBuffer<T> {
 		this.metadataManager = new MetadataManager(redisTemplate);
 	}
 
-	/**
+	/*
 	 * Redis에 이벤트를 저장하는 메서드
 	 *
 	 * @param sessionIdentifier 세션 식별자
@@ -57,7 +57,7 @@ public class EventQueueRedisBuffer<T> {
 		}
 	}
 
-	/**
+	/*
 	 * Redis로부터 이벤트 리스트를 조회하는 메서드
 	 *
 	 * @param sessionIdentifier 세션 식별자
@@ -76,7 +76,7 @@ public class EventQueueRedisBuffer<T> {
 			.collect(Collectors.toList());
 	}
 
-	/**
+	/*
 	 * 이벤트를 조회한 뒤, Redis에서 삭제하고 반환하는 메서드
 	 *
 	 * @param sessionIdentifier 세션 식별자
@@ -93,7 +93,7 @@ public class EventQueueRedisBuffer<T> {
 		return events;
 	}
 
-	/**
+	/*
 	 * 특정 키에 대한 마지막 업데이트 시간을 조회하는 메서드
 	 *
 	 * @param key Redis 키
@@ -104,11 +104,12 @@ public class EventQueueRedisBuffer<T> {
 		return metadataManager.getLastUpdated(updatedKey);
 	}
 
-	/**
+	/*
 	 * Redis에서 event 및 lastUpdated로 시작하는 모든 키를 제거하는 메서드
 	 */
 	public void clearAll() {
 		metadataManager.clearKeysByPattern("event:*");
 		metadataManager.clearKeysByPattern("lastUpdated:*");
 	}
+
 }

@@ -33,6 +33,7 @@ public class EventLogValidationFilter implements Filter {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 
+
 		String path = httpRequest.getRequestURI();
 		if (!(path.endsWith("/click") || path.endsWith("/movement") || path.endsWith("/scroll"))) {
 			chain.doFilter(request, response);

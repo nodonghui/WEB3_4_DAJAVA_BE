@@ -17,7 +17,11 @@ public class CorsConfig implements WebMvcConfigurer {
 	public CorsFilter corsFilter() {
 		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowCredentials(true);
-		config.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+		config.setAllowedOrigins(Arrays.asList(
+				"http://localhost:3000",
+				"http://127.0.0.1:3000",
+				"null"  // file:// 프로토콜용 (개발 환경에서만!)
+		));
 		config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		config.setAllowedHeaders(Arrays.asList("*"));
 		config.setMaxAge(3600L); // 1시간

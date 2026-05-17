@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+
 /**
  * Click(Touch) 관련 요청 DTO 입니다.
  * @author Metronon

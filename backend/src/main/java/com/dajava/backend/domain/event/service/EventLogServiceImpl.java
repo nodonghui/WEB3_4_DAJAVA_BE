@@ -1,5 +1,6 @@
 package com.dajava.backend.domain.event.service;
 
+import com.dajava.backend.domain.event.kafka.service.LogProducerService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,8 @@ public class EventLogServiceImpl implements EventLogService {
 	private final ActivityHandleService activityHandleService;
 	private final SessionDataDocumentRepository sessionDataDocumentRepository;
 
+	private final LogProducerService logProducerService;
+
 	/**
 	 * 클릭 이벤트 DTO 를 통해 sessionDataKey 를 발급하고, 버퍼에 담습니다.
 	 */
@@ -48,7 +51,7 @@ public class EventLogServiceImpl implements EventLogService {
 		sessionDataService.createOrFindSessionDataDocument(sessionDataKey);
 
 		// 클릭 이벤트 버퍼링
-		eventBuffer.addClickEvent(request, sessionDataKey);
+		logProducerService.sendClickEvent(request);
 	}
 
 	/**
@@ -66,7 +69,8 @@ public class EventLogServiceImpl implements EventLogService {
 		sessionDataService.createOrFindSessionDataDocument(sessionDataKey);
 
 		// 이동 이벤트 버퍼링
-		eventBuffer.addMoveEvent(request, sessionDataKey);
+		//eventBuffer.addMoveEvent(request, sessionDataKey);
+		logProducerService.sendMoveEvent(request);
 	}
 
 	/**
@@ -84,7 +88,8 @@ public class EventLogServiceImpl implements EventLogService {
 		sessionDataService.createOrFindSessionDataDocument(sessionDataKey);
 
 		// 스크롤 이벤트 버퍼링
-		eventBuffer.addScrollEvent(request, sessionDataKey);
+		//eventBuffer.addScrollEvent(request, sessionDataKey);
+		logProducerService.sendScrollEvent(request);
 	}
 
 	@Override
